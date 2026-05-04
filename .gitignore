@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!apps/**/.env.example
+
+# Build output
+dist/
+build/
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local tools
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.tools/
+gh_*.msi
+gh_*.zip
+gh-install.log
+
+# Database and backups
+*.dump
+*.sql
+backups/
