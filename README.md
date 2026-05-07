@@ -351,7 +351,13 @@ board-club-booking/
 corepack enable
 pnpm install
 cp .env.example .env
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
+cp apps/bot/.env.example apps/bot/.env
 ```
+
+Use placeholder values only in committed `.env.example` files. Put real local secrets, such as
+Telegram bot tokens, only in ignored `.env` files.
 
 Start local infrastructure:
 
@@ -385,7 +391,16 @@ Bot:      local polling mode
 
 ## Environment variables
 
-The repository must provide `.env.example` files without secrets.
+The repository provides environment examples for the root workspace and each app:
+
+```text
+.env.example
+apps/api/.env.example
+apps/web/.env.example
+apps/bot/.env.example
+```
+
+These files must contain placeholders only, never real secrets.
 
 Expected core variables:
 
