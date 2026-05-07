@@ -333,6 +333,7 @@ board-club-booking/
 ## Local development
 
 > These commands describe the intended local workflow. Exact scripts should be implemented during repository foundation tasks.
+> The pnpm workspace is configured, but application code is not scaffolded yet. Current root scripts are foundation commands and will start real app/test/build workflows as later tasks add `apps/web`, `apps/api`, `apps/bot`, and shared packages.
 
 ### Prerequisites
 
