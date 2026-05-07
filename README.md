@@ -335,6 +335,7 @@ board-club-booking/
 > These commands describe the intended local workflow. Exact scripts should be implemented during repository foundation tasks.
 > The pnpm workspace is configured, but application code is not scaffolded yet. Current root scripts are foundation commands and will start real app/test/build workflows as later tasks add `apps/web`, `apps/api`, `apps/bot`, and shared packages.
 > Shared strict TypeScript settings live in `packages/config/tsconfig/base.json`; workspace projects extend this config through their local `tsconfig.json` files.
+> ESLint and Prettier are configured at the repository root. `pnpm lint` checks the repository, while `pnpm format` checks root config files plus `apps/*` and `packages/*` sources.
 
 ### Prerequisites
 

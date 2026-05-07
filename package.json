@@ -5,18 +5,23 @@
   "description": "AI-assisted fullstack booking system for a board game and wargame club.",
   "license": "UNLICENSED",
   "packageManager": "pnpm@11.0.8",
+  "type": "module",
   "engines": {
     "node": ">=22.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "9.39.1",
+    "eslint": "9.39.1",
+    "prettier": "3.7.4",
+    "typescript-eslint": "8.49.0",
     "typescript": "5.9.3"
   },
   "scripts": {
     "dev": "pnpm --recursive --if-present --parallel run dev",
     "build": "pnpm --recursive --if-present run build",
-    "lint": "pnpm --recursive --if-present run lint",
+    "lint": "eslint .",
     "typecheck": "pnpm --recursive --if-present run typecheck",
     "test": "pnpm --recursive --if-present run test",
-    "format": "pnpm --recursive --if-present run format"
+    "format": "prettier \"*.{js,json,yml,yaml}\" \"apps/**/*.{js,jsx,ts,tsx,json,css,md,yml,yaml}\" \"packages/**/*.{js,jsx,ts,tsx,json,css,md,yml,yaml}\" --check"
   }
 }
