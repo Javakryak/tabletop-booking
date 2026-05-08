@@ -384,7 +384,7 @@ Expected local services:
 ```text
 Web:      http://localhost:3000
 API:      http://localhost:3001/api/v1
-Swagger:  http://localhost:3001/docs
+Swagger:  http://localhost:3001/api/docs
 Bot:      local polling mode
 ```
 
@@ -415,6 +415,7 @@ CORS_ORIGIN=
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_WEBHOOK_SECRET=
 TELEGRAM_WEBHOOK_URL=
+API_DOCS_ENABLED=
 ```
 
 Rules:
