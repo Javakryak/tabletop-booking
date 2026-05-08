@@ -6,5 +6,5 @@
     "rootDir": ".",
     "tsBuildInfoFile": "../../node_modules/.cache/tsbuildinfo/api.tsbuildinfo"
   },
-  "files": []
+  "include": ["src/**/*.ts"]
 }
