@@ -10,6 +10,7 @@
     "@nestjs/platform-express": "^11.1.19",
     "@nestjs/swagger": "^11.2.0",
     "@tabletop-booking/database": "workspace:*",
+    "@tabletop-booking/shared": "workspace:*",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "reflect-metadata": "^0.2.2",
@@ -19,9 +20,11 @@
     "build": "tsc -p tsconfig.build.json",
     "dev": "pnpm run build && node dist/main.js",
     "start": "pnpm run build && node dist/main.js",
+    "test": "node --import tsx --test \"test/**/*.test.ts\"",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "devDependencies": {
-    "@types/node": "^24.10.0"
+    "@types/node": "^24.10.0",
+    "tsx": "^4.20.6"
   }
 }
