@@ -368,6 +368,7 @@ docker compose -f docker-compose.dev.yml up -d postgres redis
 Run migrations and seed demo data:
 
 ```bash
+pnpm db:generate
 pnpm db:migrate
 pnpm db:seed
 ```
