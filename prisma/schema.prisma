@@ -6,3 +6,279 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum UserStatus {
+  active
+  blocked
+  deleted
+}
+
+enum UserRole {
+  user
+  admin
+  owner
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  cancelled_by_user
+  cancelled_by_admin
+  completed
+  expired
+}
+
+enum LegalDocumentType {
+  privacy_policy
+  user_agreement
+  personal_data_consent
+  club_rules
+}
+
+model User {
+  id               String      @id @default(uuid()) @db.Uuid
+  telegramId       String?     @unique @map("telegram_id")
+  telegramUsername String?     @map("telegram_username")
+  email            String?     @unique
+  emailVerifiedAt  DateTime?   @map("email_verified_at")
+  status           UserStatus  @default(active)
+  blockedAt        DateTime?   @map("blocked_at")
+  blockedReason    String?     @map("blocked_reason")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+  deletedAt        DateTime?   @map("deleted_at")
+
+  profile                     UserProfile?
+  roles                       UserRoleAssignment[]
+  bookings                    Booking[]              @relation("BookingUser")
+  confirmedBookings           Booking[]              @relation("BookingConfirmedByUser")
+  cancelledBookings           Booking[]              @relation("BookingCancelledByUser")
+  createdScheduleExceptions   ScheduleException[]    @relation("ScheduleExceptionCreatedByUser")
+  bookingStatusHistoryChanges BookingStatusHistory[] @relation("BookingStatusHistoryChangedByUser")
+  auditLogs                   AuditLog[]             @relation("AuditLogActorUser")
+  consents                    Consent[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model UserProfile {
+  id                               String   @id @default(uuid()) @db.Uuid
+  userId                           String   @unique @map("user_id") @db.Uuid
+  displayName                      String   @map("display_name")
+  phone                            String?
+  phoneVisibleToAdmin              Boolean  @default(false) @map("phone_visible_to_admin")
+  showTelegramToMeetupParticipants Boolean  @default(true) @map("show_telegram_to_meetup_participants")
+  showPhoneToMeetupParticipants    Boolean  @default(false) @map("show_phone_to_meetup_participants")
+  avatarUrl                        String?  @map("avatar_url")
+  bio                              String?
+  createdAt                        DateTime @default(now()) @map("created_at")
+  updatedAt                        DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([displayName])
+  @@map("user_profiles")
+}
+
+model UserRoleAssignment {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  role      UserRole
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role])
+  @@map("user_roles")
+}
+
+model Room {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  sortOrder   Int      @default(0) @map("sort_order")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tables ClubTable[]
+
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("rooms")
+}
+
+model ClubTable {
+  id        String   @id @default(uuid()) @db.Uuid
+  roomId    String   @map("room_id") @db.Uuid
+  number    String
+  capacity  Int
+  isActive  Boolean  @default(true) @map("is_active")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  room     Room      @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  bookings Booking[]
+
+  @@unique([roomId, number])
+  @@index([roomId])
+  @@index([isActive])
+  @@index([capacity])
+  @@map("tables")
+}
+
+model ClubWorkingHour {
+  id        String    @id @default(uuid()) @db.Uuid
+  dayOfWeek Int       @unique @map("day_of_week")
+  opensAt   DateTime? @db.Time(0) @map("opens_at")
+  closesAt  DateTime? @db.Time(0) @map("closes_at")
+  isClosed  Boolean   @default(false) @map("is_closed")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("club_working_hours")
+}
+
+model ScheduleException {
+  id              String    @id @default(uuid()) @db.Uuid
+  date            DateTime  @unique @db.Date
+  opensAt         DateTime? @db.Time(0) @map("opens_at")
+  closesAt        DateTime? @db.Time(0) @map("closes_at")
+  isClosed        Boolean   @default(false) @map("is_closed")
+  reason          String?
+  createdByUserId String?   @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  createdByUser User? @relation("ScheduleExceptionCreatedByUser", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@map("schedule_exceptions")
+}
+
+model BookingRule {
+  id                        String   @id @default(uuid()) @db.Uuid
+  slotStepMinutes           Int      @default(30) @map("slot_step_minutes")
+  minBookingDurationMinutes Int      @default(30) @map("min_booking_duration_minutes")
+  maxBookingDurationMinutes Int?     @map("max_booking_duration_minutes")
+  allowFullDayBooking       Boolean  @default(true) @map("allow_full_day_booking")
+  minCancelBeforeMinutes    Int      @default(120) @map("min_cancel_before_minutes")
+  maxActiveBookingsPerUser  Int      @default(3) @map("max_active_bookings_per_user")
+  requiresAdminConfirmation Boolean  @default(true) @map("requires_admin_confirmation")
+  isActive                  Boolean  @default(true) @map("is_active")
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+
+  @@map("booking_rules")
+}
+
+model Booking {
+  id                 String         @id @default(uuid()) @db.Uuid
+  userId             String         @map("user_id") @db.Uuid
+  tableId            String         @map("table_id") @db.Uuid
+  meetupId           String?        @map("meetup_id") @db.Uuid
+  startAt            DateTime       @map("start_at")
+  endAt              DateTime       @map("end_at")
+  status             BookingStatus  @default(pending)
+  guestCount         Int?           @map("guest_count")
+  comment            String?
+  adminComment       String?        @map("admin_comment")
+  confirmedByUserId  String?        @map("confirmed_by_user_id") @db.Uuid
+  confirmedAt        DateTime?      @map("confirmed_at")
+  cancelledByUserId  String?        @map("cancelled_by_user_id") @db.Uuid
+  cancelledAt        DateTime?      @map("cancelled_at")
+  cancellationReason String?        @map("cancellation_reason")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+
+  user             User                   @relation("BookingUser", fields: [userId], references: [id], onDelete: Restrict)
+  table            ClubTable              @relation(fields: [tableId], references: [id], onDelete: Restrict)
+  confirmedByUser  User?                  @relation("BookingConfirmedByUser", fields: [confirmedByUserId], references: [id], onDelete: SetNull)
+  cancelledByUser  User?                  @relation("BookingCancelledByUser", fields: [cancelledByUserId], references: [id], onDelete: SetNull)
+  statusHistory    BookingStatusHistory[]
+
+  @@index([userId])
+  @@index([tableId])
+  @@index([meetupId])
+  @@index([status])
+  @@index([startAt])
+  @@index([endAt])
+  @@index([tableId, startAt, endAt])
+  @@map("bookings")
+}
+
+model BookingStatusHistory {
+  id              String         @id @default(uuid()) @db.Uuid
+  bookingId       String         @map("booking_id") @db.Uuid
+  fromStatus      BookingStatus? @map("from_status")
+  toStatus        BookingStatus  @map("to_status")
+  changedByUserId String?        @map("changed_by_user_id") @db.Uuid
+  reason          String?
+  createdAt       DateTime       @default(now()) @map("created_at")
+
+  booking       Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  changedByUser User?   @relation("BookingStatusHistoryChangedByUser", fields: [changedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([bookingId])
+  @@index([createdAt])
+  @@map("booking_status_history")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    String?  @map("entity_id")
+  metadata    Json?
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  actorUser User? @relation("AuditLogActorUser", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([actorUserId])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model LegalDocument {
+  id          String            @id @default(uuid()) @db.Uuid
+  type        LegalDocumentType
+  version     String
+  title       String
+  contentMd   String            @map("content_md")
+  publishedAt DateTime?         @map("published_at")
+  isActive    Boolean           @default(false) @map("is_active")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  consents Consent[]
+
+  @@unique([type, version])
+  @@map("legal_documents")
+}
+
+model Consent {
+  id              String            @id @default(uuid()) @db.Uuid
+  userId          String            @map("user_id") @db.Uuid
+  legalDocumentId String            @map("legal_document_id") @db.Uuid
+  documentType    LegalDocumentType @map("document_type")
+  documentVersion String            @map("document_version")
+  acceptedAt      DateTime          @map("accepted_at")
+  ipAddress       String?           @map("ip_address")
+  userAgent       String?           @map("user_agent")
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  legalDocument LegalDocument @relation(fields: [legalDocumentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, legalDocumentId])
+  @@index([userId])
+  @@index([documentType])
+  @@index([acceptedAt])
+  @@map("consents")
+}
