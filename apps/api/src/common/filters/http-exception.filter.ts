@@ -3,11 +3,13 @@ import {
   Catch,
   type ExceptionFilter,
   HttpException,
-  HttpStatus,
-  Logger
+  HttpStatus
 } from "@nestjs/common";
 
+import { logStructured } from "../logging/structured-log.js";
+
 type HttpRequestShape = {
+  correlationId?: string;
   method?: string;
   originalUrl?: string;
   requestId?: string;
@@ -21,8 +23,6 @@ type HttpResponseShape = {
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(HttpExceptionFilter.name);
-
   catch(exception: unknown, host: ArgumentsHost) {
     const context = host.switchToHttp();
     const request = context.getRequest<HttpRequestShape>();
@@ -50,24 +50,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
       error,
       message,
       path: request.originalUrl ?? request.url ?? "",
-      requestId: request.requestId ?? null,
+      requestId: request.requestId ?? request.correlationId ?? null,
       statusCode,
       timestamp: new Date().toISOString()
     };
 
-    const errorLog = {
+    logStructured("error", "http.request.failed", {
       error,
+      exceptionName: exception instanceof Error ? exception.name : null,
       message,
       method: request.method ?? "",
       path: payload.path,
       requestId: payload.requestId,
+      stack: exception instanceof Error ? exception.stack : undefined,
       statusCode
-    };
-
-    this.logger.error(
-      JSON.stringify(errorLog),
-      exception instanceof Error ? exception.stack : undefined
-    );
+    });
 
     response.status(statusCode).json(payload);
   }
