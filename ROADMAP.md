@@ -191,9 +191,9 @@
 
 ### Tasks
 
-- [ ] Инициализировать monorepo.
-- [ ] Настроить `pnpm workspaces` или Turborepo.
-- [ ] Создать базовую структуру:
+- [x] Инициализировать monorepo.
+- [x] Настроить `pnpm workspaces` или Turborepo.
+- [x] Создать базовую структуру:
 
 ```text
 apps/
@@ -215,16 +215,16 @@ docker/
 - [ ] Создать Next.js приложение `apps/web`.
 - [ ] Создать NestJS приложение `apps/api`.
 - [ ] Создать Telegram bot приложение `apps/bot`.
-- [ ] Настроить TypeScript config.
-- [ ] Настроить ESLint.
-- [ ] Настроить Prettier.
-- [ ] Настроить `.env.example`.
+- [x] Настроить TypeScript config.
+- [x] Настроить ESLint.
+- [x] Настроить Prettier.
+- [x] Настроить `.env.example`.
 - [ ] Добавить Docker Compose для PostgreSQL и Redis.
 - [ ] Добавить базовый CI: lint, typecheck, test.
 
 ### Deliverables
 
-- [ ] Рабочий monorepo.
+- [x] Рабочий monorepo.
 - [ ] Локально поднимаются PostgreSQL и Redis.
 - [ ] Все приложения стартуют в dev-режиме.
 - [ ] CI проходит на пустом проекте.
@@ -1052,7 +1052,6 @@ Every PR should answer:
 
 # 11. Current Status
 
-Project status: **Planning / Pre-implementation**.
+Project status: **Repository foundation in progress**.
 
-Next recommended artifact: `AGENTS.md`.
-
+Next recommended task: `TASK-0101 — Add Docker Compose for PostgreSQL and Redis`.
