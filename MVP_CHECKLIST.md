@@ -695,15 +695,15 @@ MVP считается готовым не тогда, когда реализо
 
 ## 21.1. Required docs
 
-- [ ] `README.md` готов.
-- [ ] `ROADMAP.md` готов.
-- [ ] `AGENTS.md` готов.
-- [ ] `ARCHITECTURE.md` готов.
-- [ ] `DATABASE.md` готов.
-- [ ] `API_SPEC.md` готов.
-- [ ] `TASKS.md` готов.
-- [ ] `MVP_CHECKLIST.md` готов.
-- [ ] `.env.example` готов.
+- [x] `README.md` готов.
+- [x] `ROADMAP.md` готов.
+- [x] `AGENTS.md` готов.
+- [x] `ARCHITECTURE.md` готов.
+- [x] `DATABASE.md` готов.
+- [x] `API_SPEC.md` готов.
+- [x] `TASKS.md` готов.
+- [x] `MVP_CHECKLIST.md` готов.
+- [x] `.env.example` готов.
 - [ ] Инструкция локального запуска готова.
 - [ ] Инструкция деплоя готова.
 - [ ] Инструкция восстановления из backup готова.
@@ -736,7 +736,7 @@ MVP считается готовым не тогда, когда реализо
 - [ ] README показывает стек.
 - [ ] README показывает ключевые функции.
 - [ ] README показывает архитектуру.
-- [ ] README содержит команды локального запуска.
+- [x] README содержит команды локального запуска.
 - [ ] README содержит ссылки на Swagger/demo/docs.
 - [ ] README объясняет AI-assisted development approach.
 
@@ -763,8 +763,8 @@ MVP считается готовым не тогда, когда реализо
 # 23. Security Checklist
 
 - [ ] Все secrets находятся в env variables.
-- [ ] `.env` не попадает в git.
-- [ ] `.env.example` не содержит реальных секретов.
+- [x] `.env` не попадает в git.
+- [x] `.env.example` не содержит реальных секретов.
 - [ ] JWT secret достаточно длинный.
 - [ ] Telegram bot token не логируется.
 - [ ] Telegram webhook secret используется, если реализован.
@@ -842,4 +842,3 @@ MVP считается готовым, если выполнены все пун
 - [ ] Production smoke test.
 - [ ] README/demo review.
 - [ ] Decision: MVP can be launched.
-
