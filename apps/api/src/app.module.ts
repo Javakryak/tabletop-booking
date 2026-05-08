@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 
 import { AppController } from "./app.controller.js";
 import { AppService } from "./app.service.js";
+import { RolesGuard } from "./auth/roles.guard.js";
 
 @Module({
   imports: [
@@ -13,6 +14,6 @@ import { AppService } from "./app.service.js";
     })
   ],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [AppService, RolesGuard]
 })
 export class AppModule {}
