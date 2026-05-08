@@ -1,13 +1,27 @@
 import "reflect-metadata";
 
-import { Logger, ValidationPipe } from "@nestjs/common";
+import { ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { randomUUID } from "node:crypto";
 
 import { AppModule } from "./app.module.js";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter.js";
 import { RequestLoggingInterceptor } from "./common/interceptors/request-logging.interceptor.js";
+import { logStructured } from "./common/logging/structured-log.js";
+
+type HttpRequestWithTrace = {
+  correlationId?: string;
+  headers?: Record<string, string | string[] | undefined>;
+  requestId?: string;
+};
+
+type HttpResponseWithTrace = {
+  setHeader: (name: string, value: string) => void;
+};
+
+type NextCallback = () => void;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -21,6 +35,14 @@ async function bootstrap() {
   const docsEnabled = !["0", "false", "no", "off"].includes(docsEnabledRaw.toLowerCase());
 
   app.setGlobalPrefix("api/v1");
+  app.use((request: HttpRequestWithTrace, response: HttpResponseWithTrace, next: NextCallback) => {
+    const traceId = resolveTraceId(request.headers);
+    request.requestId = traceId;
+    request.correlationId = traceId;
+    response.setHeader("x-request-id", traceId);
+    response.setHeader("x-correlation-id", traceId);
+    next();
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       forbidNonWhitelisted: true,
@@ -64,11 +86,49 @@ async function bootstrap() {
 
   await app.listen(port, host);
 
-  const logger = new Logger("Bootstrap");
-  logger.log(`API listening on http://${host}:${port}/api/v1`);
+  logStructured("info", "bootstrap.startup", {
+    host,
+    message: "API listening",
+    port,
+    requestId: null,
+    url: `http://${host}:${port}/api/v1`
+  });
   if (docsEnabled) {
-    logger.log(`Swagger docs available at http://${host}:${port}/api/docs`);
+    logStructured("info", "bootstrap.startup", {
+      host,
+      message: "Swagger docs available",
+      port,
+      requestId: null,
+      url: `http://${host}:${port}/api/docs`
+    });
   }
+}
+
+function resolveTraceId(headers: Record<string, string | string[] | undefined> | undefined): string {
+  const fromCorrelationHeader = pickHeader(headers, "x-correlation-id");
+  const fromRequestHeader = pickHeader(headers, "x-request-id");
+  const candidate = fromCorrelationHeader ?? fromRequestHeader;
+
+  if (!candidate) {
+    return randomUUID();
+  }
+
+  return candidate.slice(0, 128);
+}
+
+function pickHeader(
+  headers: Record<string, string | string[] | undefined> | undefined,
+  name: string
+): string | null {
+  const value = headers?.[name];
+  const pickedValue = Array.isArray(value) ? value[0] : value;
+
+  if (typeof pickedValue !== "string") {
+    return null;
+  }
+
+  const trimmed = pickedValue.trim();
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 void bootstrap();

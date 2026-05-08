@@ -389,6 +389,9 @@ Swagger:  http://localhost:3001/api/docs
 Bot:      local polling mode
 ```
 
+API logs are emitted as single-line JSON records with `timestamp`, `level`, and `requestId`.
+Sensitive fields such as tokens, cookies, phone numbers, and emails are redacted.
+
 ---
 
 ## Environment variables
