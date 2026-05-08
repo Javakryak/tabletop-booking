@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Inject, Post } from "@nestjs/common";
+import { Body, Controller, Get, HttpStatus, Inject, Post, Res } from "@nestjs/common";
 import {
   ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiProperty,
+  ApiServiceUnavailableResponse,
   ApiTags
 } from "@nestjs/swagger";
 
@@ -32,6 +33,43 @@ class EchoResponseDto {
   repeat!: number;
 }
 
+class HealthCheckDto {
+  @ApiProperty({ enum: ["ok", "error"] })
+  status!: "ok" | "error";
+
+  @ApiProperty({ required: false })
+  message?: string;
+}
+
+class HealthChecksDto {
+  @ApiProperty({ type: HealthCheckDto })
+  api!: HealthCheckDto;
+
+  @ApiProperty({ type: HealthCheckDto })
+  database!: HealthCheckDto;
+
+  @ApiProperty({ type: HealthCheckDto })
+  redis!: HealthCheckDto;
+}
+
+class HealthPayloadDto {
+  @ApiProperty({ type: HealthChecksDto })
+  checks!: HealthChecksDto;
+
+  @ApiProperty({ enum: ["ok", "degraded"] })
+  status!: "ok" | "degraded";
+
+  @ApiProperty()
+  timestamp!: string;
+
+  @ApiProperty()
+  version!: string;
+}
+
+type HttpResponseShape = {
+  status: (code: number) => void;
+};
+
 @ApiTags("system")
 @Controller()
 export class AppController {
@@ -50,5 +88,18 @@ export class AppController {
   @ApiOkResponse({ type: EchoResponseDto })
   echo(@Body() body: EchoDto) {
     return this.appService.echo(body);
+  }
+
+  @Get("health")
+  @ApiOperation({ summary: "Healthcheck for API, database, and Redis connectivity" })
+  @ApiOkResponse({ type: HealthPayloadDto })
+  @ApiServiceUnavailableResponse({ type: HealthPayloadDto })
+  async getHealth(@Res({ passthrough: true }) response: HttpResponseShape) {
+    const payload = await this.appService.getHealthPayload();
+    if (payload.status !== "ok") {
+      response.status(HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    return payload;
   }
 }
