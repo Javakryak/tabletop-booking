@@ -384,6 +384,7 @@ Expected local services:
 ```text
 Web:      http://localhost:3000
 API:      http://localhost:3001/api/v1
+Health:   http://localhost:3001/api/v1/health
 Swagger:  http://localhost:3001/api/docs
 Bot:      local polling mode
 ```
