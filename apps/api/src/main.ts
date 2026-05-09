@@ -78,6 +78,7 @@ async function bootstrap() {
       .addTag("me", "Authenticated user profile and privacy endpoints")
       .addTag("owner", "Owner/admin operational endpoints")
       .addTag("rooms", "Rooms visibility and owner room management endpoints")
+      .addTag("tables", "Table visibility and owner table management endpoints")
       .addTag("system", "System and bootstrap endpoints")
       .build();
 
