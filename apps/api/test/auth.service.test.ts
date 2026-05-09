@@ -21,7 +21,12 @@ type StoredUser = {
 
 test("authenticateTelegramWeb creates user and reuses it on repeated login", async () => {
   const repository = createInMemoryRepository();
-  const authService = new AuthService(createConfigService() as never, repository as never);
+  const legalService = createLegalService(false);
+  const authService = new AuthService(
+    createConfigService() as never,
+    repository as never,
+    legalService as never
+  );
   const now = Math.floor(Date.now() / 1000);
 
   const firstPayload = signTelegramLoginPayload(
@@ -50,11 +55,13 @@ test("authenticateTelegramWeb creates user and reuses it on repeated login", asy
     },
     BOT_TOKEN
   );
+  legalService.hasAcceptedRequiredConsents = async () => true;
   const secondResult = await authService.authenticateTelegramWeb(secondPayload as never);
 
   assert.equal(repository.createCalls, 1);
   assert.equal(repository.updateCalls, 1);
   assert.equal(secondResult.data.user.id, "user-1");
+  assert.equal(secondResult.data.user.consentRequired, false);
 
   const decoded = jwt.verify(secondResult.data.accessToken, JWT_SECRET) as {
     roles: string[];
@@ -68,7 +75,11 @@ test("authenticateTelegramWeb creates user and reuses it on repeated login", asy
 
 test("authenticateTelegramWeb rejects invalid signature", async () => {
   const repository = createInMemoryRepository();
-  const authService = new AuthService(createConfigService() as never, repository as never);
+  const authService = new AuthService(
+    createConfigService() as never,
+    repository as never,
+    createLegalService(false) as never
+  );
   const now = Math.floor(Date.now() / 1000);
 
   const payload = signTelegramLoginPayload(
@@ -155,6 +166,14 @@ function createInMemoryRepository() {
           telegramUsername
         };
       }
+    }
+  };
+}
+
+function createLegalService(hasRequiredConsents: boolean) {
+  return {
+    async hasAcceptedRequiredConsents() {
+      return hasRequiredConsents;
     }
   };
 }

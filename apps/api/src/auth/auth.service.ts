@@ -9,6 +9,7 @@ import type {
   TelegramMiniAppLoginRequestDto
 } from "./dto/telegram-auth.dto.js";
 import { AuthRepository } from "./auth.repository.js";
+import { LegalService } from "../legal/legal.service.js";
 import {
   verifyTelegramLoginData,
   verifyTelegramMiniAppInitData,
@@ -32,7 +33,8 @@ type AuthResponse = {
 export class AuthService {
   constructor(
     private readonly configService: ConfigService,
-    private readonly authRepository: AuthRepository
+    private readonly authRepository: AuthRepository,
+    private readonly legalService: LegalService
   ) {}
 
   async authenticateTelegramWeb(telegramAuthData: TelegramAuthDataDto): Promise<AuthResponse> {
@@ -77,16 +79,17 @@ export class AuthService {
     }
 
     const roles = mapDatabaseRolesToAppRoles(user.roles);
+    const hasRequiredConsents = await this.legalService.hasAcceptedRequiredConsents(user.id);
     const accessToken = this.issueAccessToken(user.id, roles, identity.telegramId);
 
     return {
       data: {
         accessToken,
         user: {
-          consentRequired: user.consentsCount === 0,
+          consentRequired: !hasRequiredConsents,
           displayName: user.userProfileDisplayName,
           id: user.id,
-          profileCompleted: Boolean(user.phone),
+          profileCompleted: Boolean(user.phone) && hasRequiredConsents,
           roles
         }
       }
