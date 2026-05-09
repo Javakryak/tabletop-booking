@@ -19,9 +19,13 @@ import { OwnerController } from "./owner/owner.controller.js";
 import { OwnerRepository } from "./owner/owner.repository.js";
 import { OwnerService } from "./owner/owner.service.js";
 import { OwnerRoomsController } from "./rooms/owner-rooms.controller.js";
+import { OwnerTablesController } from "./rooms/owner-tables.controller.js";
 import { RoomsController } from "./rooms/rooms.controller.js";
 import { RoomsRepository } from "./rooms/rooms.repository.js";
 import { RoomsService } from "./rooms/rooms.service.js";
+import { TablesController } from "./rooms/tables.controller.js";
+import { TablesRepository } from "./rooms/tables.repository.js";
+import { TablesService } from "./rooms/tables.service.js";
 
 @Module({
   imports: [
@@ -37,7 +41,9 @@ import { RoomsService } from "./rooms/rooms.service.js";
     LegalController,
     OwnerController,
     RoomsController,
-    OwnerRoomsController
+    OwnerRoomsController,
+    TablesController,
+    OwnerTablesController
   ],
   providers: [
     AppService,
@@ -52,7 +58,9 @@ import { RoomsService } from "./rooms/rooms.service.js";
     OwnerRepository,
     OwnerService,
     RoomsRepository,
-    RoomsService
+    RoomsService,
+    TablesRepository,
+    TablesService
   ]
 })
 export class AppModule {}

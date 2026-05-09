@@ -605,7 +605,7 @@ Access: public or user/admin/owner.
 
 #### `GET /rooms/:roomId/tables`
 
-Returns tables in a room.
+Returns active tables in a room.
 
 Access: user/admin/owner.
 
