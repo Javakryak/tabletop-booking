@@ -66,14 +66,26 @@ export class TablesRepository {
   }
 
   async createTable(input: CreateTableInput): Promise<TableRecord> {
+    const data: {
+      capacity: number;
+      isActive?: boolean;
+      number: string;
+      roomId: string;
+      sortOrder?: number;
+    } = {
+      capacity: input.capacity,
+      number: input.number,
+      roomId: input.roomId
+    };
+    if (input.isActive !== undefined) {
+      data.isActive = input.isActive;
+    }
+    if (input.sortOrder !== undefined) {
+      data.sortOrder = input.sortOrder;
+    }
+
     return await databaseClient.clubTable.create({
-      data: {
-        capacity: input.capacity,
-        isActive: input.isActive,
-        number: input.number,
-        roomId: input.roomId,
-        sortOrder: input.sortOrder
-      },
+      data,
       select: tableSelect
     });
   }

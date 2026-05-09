@@ -45,13 +45,26 @@ export class RoomsRepository {
   }
 
   async createRoom(input: CreateRoomInput): Promise<RoomRecord> {
+    const data: {
+      description?: string | null;
+      isActive?: boolean;
+      name: string;
+      sortOrder?: number;
+    } = {
+      name: input.name
+    };
+    if (input.description !== undefined) {
+      data.description = input.description;
+    }
+    if (input.isActive !== undefined) {
+      data.isActive = input.isActive;
+    }
+    if (input.sortOrder !== undefined) {
+      data.sortOrder = input.sortOrder;
+    }
+
     return await databaseClient.room.create({
-      data: {
-        description: input.description,
-        isActive: input.isActive,
-        name: input.name,
-        sortOrder: input.sortOrder
-      },
+      data,
       select: roomSelect
     });
   }
