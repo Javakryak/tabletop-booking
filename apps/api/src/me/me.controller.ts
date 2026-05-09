@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiBody,
@@ -10,7 +10,13 @@ import {
 import { JwtAuthGuard } from "../auth/jwt-auth.guard.js";
 import { Roles } from "../auth/roles.decorator.js";
 import { RolesGuard } from "../auth/roles.guard.js";
-import { MeEnvelopeDto, UpdateMePrivacyDto, UpdateMeProfileDto } from "./dto/me.dto.js";
+import {
+  AccountDeletionRequestDto,
+  AccountDeletionRequestEnvelopeDto,
+  MeEnvelopeDto,
+  UpdateMePrivacyDto,
+  UpdateMeProfileDto
+} from "./dto/me.dto.js";
 import { MeService } from "./me.service.js";
 
 type AuthenticatedRequest = {
@@ -54,5 +60,16 @@ export class MeController {
     @Body() body: UpdateMePrivacyDto
   ) {
     return await this.meService.updatePrivacy(request.user.id, body);
+  }
+
+  @Post("delete-request")
+  @ApiOperation({ summary: "Request deferred account deletion" })
+  @ApiBody({ type: AccountDeletionRequestDto })
+  @ApiOkResponse({ type: AccountDeletionRequestEnvelopeDto })
+  async requestDeletion(
+    @Req() request: AuthenticatedRequest,
+    @Body() body: AccountDeletionRequestDto
+  ) {
+    return await this.meService.requestAccountDeletion(request.user.id, body.reason);
   }
 }

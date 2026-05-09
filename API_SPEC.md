@@ -562,7 +562,7 @@ Validation rules:
 
 ### 8.4. Request account deletion
 
-#### `POST /users/me/delete-request`
+#### `POST /me/delete-request`
 
 Access: user/admin/owner.
 
@@ -587,6 +587,7 @@ Response:
 Implementation notes:
 
 - MVP should create a deletion request instead of immediate hard deletion;
+- request should persist pending-deletion state without deleting account immediately;
 - owner/admin processing rules must be documented;
 - personal data should be anonymized when deletion is completed.
 
@@ -1449,8 +1450,36 @@ Access: owner.
 
 ---
 
+### 18.6. Pending deletion requests
 
-## 18.6. Emergency contact access
+#### `GET /owner/users/deletion-requests`
+
+Access: admin/owner.
+
+Response:
+
+```json
+{
+  "data": [
+    {
+      "userId": "user_id",
+      "displayName": "Ivan",
+      "telegramUsername": "ivan_boardgames",
+      "requestedAt": "2026-05-09T10:00:00.000Z",
+      "reason": "I no longer use the club"
+    }
+  ]
+}
+```
+
+Rules:
+
+- include only accounts with pending deletion request state;
+- do not expose unnecessary personal fields.
+
+---
+
+## 18.7. Emergency contact access
 
 #### `POST /admin/users/:userId/emergency-contact-access`
 

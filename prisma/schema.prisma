@@ -45,6 +45,8 @@ model User {
   status           UserStatus  @default(active)
   blockedAt        DateTime?   @map("blocked_at")
   blockedReason    String?     @map("blocked_reason")
+  deletionRequestedAt DateTime? @map("deletion_requested_at")
+  deletionRequestReason String? @map("deletion_request_reason")
   createdAt        DateTime    @default(now()) @map("created_at")
   updatedAt        DateTime    @updatedAt @map("updated_at")
   deletedAt        DateTime?   @map("deleted_at")
@@ -61,6 +63,7 @@ model User {
 
   @@index([status])
   @@index([createdAt])
+  @@index([deletionRequestedAt])
   @@map("users")
 }
 

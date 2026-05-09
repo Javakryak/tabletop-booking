@@ -76,6 +76,7 @@ async function bootstrap() {
       .addTag("auth", "Authentication and session endpoints")
       .addTag("legal", "Legal documents and consent endpoints")
       .addTag("me", "Authenticated user profile and privacy endpoints")
+      .addTag("owner", "Owner/admin operational endpoints")
       .addTag("system", "System and bootstrap endpoints")
       .build();
 

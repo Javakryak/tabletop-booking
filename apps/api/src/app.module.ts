@@ -15,6 +15,9 @@ import { LegalService } from "./legal/legal.service.js";
 import { MeController } from "./me/me.controller.js";
 import { MeRepository } from "./me/me.repository.js";
 import { MeService } from "./me/me.service.js";
+import { OwnerController } from "./owner/owner.controller.js";
+import { OwnerRepository } from "./owner/owner.repository.js";
+import { OwnerService } from "./owner/owner.service.js";
 
 @Module({
   imports: [
@@ -23,7 +26,7 @@ import { MeService } from "./me/me.service.js";
       envFilePath: [resolve(process.cwd(), ".env"), resolve(process.cwd(), "../../.env")]
     })
   ],
-  controllers: [AppController, AuthController, MeController, LegalController],
+  controllers: [AppController, AuthController, MeController, LegalController, OwnerController],
   providers: [
     AppService,
     RolesGuard,
@@ -33,7 +36,9 @@ import { MeService } from "./me/me.service.js";
     MeRepository,
     MeService,
     LegalRepository,
-    LegalService
+    LegalService,
+    OwnerRepository,
+    OwnerService
   ]
 })
 export class AppModule {}

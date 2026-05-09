@@ -107,3 +107,22 @@ export class UpdateMePrivacyDto {
   @IsBoolean()
   showPhoneToAdmins?: boolean;
 }
+
+export class AccountDeletionRequestDto {
+  @ApiPropertyOptional({ maxLength: 500 })
+  @IsOptional()
+  @Transform(({ value }) => trimString(value))
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
+}
+
+export class AccountDeletionRequestResponseDto {
+  @ApiProperty({ enum: ["received"] })
+  status!: "received";
+}
+
+export class AccountDeletionRequestEnvelopeDto {
+  @ApiProperty({ type: AccountDeletionRequestResponseDto })
+  data!: AccountDeletionRequestResponseDto;
+}
