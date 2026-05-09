@@ -231,6 +231,8 @@ Recommended fields:
 | `status` | UserStatus | yes | active, blocked, deleted |
 | `blocked_at` | DateTime | no | Set when blocked |
 | `blocked_reason` | String | no | Owner/admin note |
+| `deletion_requested_at` | DateTime | no | Deferred deletion request timestamp |
+| `deletion_request_reason` | String | no | User-provided deletion request reason |
 | `created_at` | DateTime | yes | Auto |
 | `updated_at` | DateTime | yes | Auto |
 | `deleted_at` | DateTime | no | Soft delete |
@@ -242,6 +244,7 @@ unique users.telegram_id where telegram_id is not null
 unique users.email where email is not null
 index users.status
 index users.created_at
+index users.deletion_requested_at
 ```
 
 Notes:
@@ -1245,6 +1248,8 @@ model User {
   status           UserStatus  @default(active)
   blockedAt        DateTime?   @map("blocked_at")
   blockedReason    String?     @map("blocked_reason")
+  deletionRequestedAt DateTime? @map("deletion_requested_at")
+  deletionRequestReason String? @map("deletion_request_reason")
   createdAt        DateTime    @default(now()) @map("created_at")
   updatedAt        DateTime    @updatedAt @map("updated_at")
   deletedAt        DateTime?   @map("deleted_at")
@@ -1398,6 +1403,13 @@ When a user requests deletion:
    - Telegram ID → null or hashed/anonymized if legally acceptable;
 4. preserve non-personal booking history;
 5. write audit event.
+
+For deferred deletion flow in MVP:
+
+1. keep account active initially;
+2. store `deletion_requested_at` and optional `deletion_request_reason`;
+3. expose pending requests to owner/admin endpoints;
+4. complete soft-delete/anonymization in follow-up processing step.
 
 Because `phone` is nullable in the schema, anonymization should remove the value by setting it to `null`. The business rule that requires phone before real booking creation must live in the booking/profile validation layer, not as a non-null database constraint.
 

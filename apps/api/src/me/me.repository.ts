@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { databaseClient } from "../database.js";
 
 export type MeProfileRecord = {
+  deletionRequestedAt: Date | null;
   displayName: string;
   email: string | null;
   id: string;
@@ -33,6 +34,7 @@ export class MeRepository {
         id: userId
       },
       select: {
+        deletionRequestedAt: true,
         email: true,
         id: true,
         profile: {
@@ -54,6 +56,7 @@ export class MeRepository {
 
     return {
       displayName: user.profile.displayName,
+      deletionRequestedAt: user.deletionRequestedAt,
       email: user.email,
       id: user.id,
       phone: user.profile.phone,
@@ -103,6 +106,18 @@ export class MeRepository {
     }
 
     return await this.findProfileByUserId(userId);
+  }
+
+  async requestDeletion(userId: string, reason: string | null, requestedAt: Date): Promise<void> {
+    await databaseClient.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        deletionRequestReason: reason,
+        deletionRequestedAt: requestedAt
+      }
+    });
   }
 }
 

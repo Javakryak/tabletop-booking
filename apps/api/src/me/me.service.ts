@@ -23,6 +23,12 @@ type MeResponse = {
   };
 };
 
+type AccountDeletionRequestResponse = {
+  data: {
+    status: "received";
+  };
+};
+
 @Injectable()
 export class MeService {
   constructor(private readonly meRepository: MeRepository) {}
@@ -69,6 +75,24 @@ export class MeService {
     this.ensureActiveProfile(updated);
 
     return mapToMeResponse(updated);
+  }
+
+  async requestAccountDeletion(
+    userId: string,
+    reason: string | undefined
+  ): Promise<AccountDeletionRequestResponse> {
+    const current = await this.meRepository.findProfileByUserId(userId);
+    this.ensureActiveProfile(current);
+
+    if (!current.deletionRequestedAt) {
+      await this.meRepository.requestDeletion(userId, reason ?? null, new Date());
+    }
+
+    return {
+      data: {
+        status: "received"
+      }
+    };
   }
 
   private ensureActiveProfile(

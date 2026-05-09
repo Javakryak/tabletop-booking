@@ -5,6 +5,7 @@ import { test } from "node:test";
 import { MeService } from "../src/me/me.service.js";
 
 type MeRecord = {
+  deletionRequestedAt: Date | null;
   displayName: string;
   email: string | null;
   id: string;
@@ -115,6 +116,41 @@ test("getMe rejects missing users", async () => {
   await assert.rejects(() => service.getMe("user-404"), NotFoundException);
 });
 
+test("requestAccountDeletion marks account as pending deletion", async () => {
+  const repository = createInMemoryRepository();
+  const service = new MeService(repository as never);
+
+  const result = await service.requestAccountDeletion("user-1", "Need account removal");
+
+  assert.equal(result.data.status, "received");
+  const stored = await repository.findProfileByUserId("user-1");
+  assert.ok(stored?.deletionRequestedAt);
+});
+
+test("requestAccountDeletion is idempotent for existing request", async () => {
+  const repository = createInMemoryRepository();
+  const service = new MeService(repository as never);
+
+  await service.requestAccountDeletion("user-1", "first");
+  const first = await repository.findProfileByUserId("user-1");
+  const firstTimestamp = first?.deletionRequestedAt?.toISOString();
+
+  await service.requestAccountDeletion("user-1", "second");
+  const second = await repository.findProfileByUserId("user-1");
+
+  assert.equal(second?.deletionRequestedAt?.toISOString(), firstTimestamp);
+});
+
+test("requestAccountDeletion rejects blocked users", async () => {
+  const repository = createInMemoryRepository("blocked");
+  const service = new MeService(repository as never);
+
+  await assert.rejects(
+    () => service.requestAccountDeletion("user-1", "remove me"),
+    ForbiddenException
+  );
+});
+
 function createInMemoryRepository(
   status: "active" | "blocked" | "deleted" = "active",
   forceMissing = false
@@ -122,6 +158,7 @@ function createInMemoryRepository(
   let stored: MeRecord | null = forceMissing
     ? null
     : {
+        deletionRequestedAt: null,
         displayName: "Ivan",
         email: "ivan@example.com",
         id: "user-1",
@@ -181,6 +218,21 @@ function createInMemoryRepository(
           stored.showTelegramUsernameToMeetupParticipants
       };
       return { ...stored };
+    },
+
+    async requestDeletion(
+      userId: string,
+      _reason: string | null,
+      requestedAt: Date
+    ): Promise<void> {
+      if (!stored || stored.id !== userId) {
+        return;
+      }
+
+      stored = {
+        ...stored,
+        deletionRequestedAt: requestedAt
+      };
     }
   };
 }
