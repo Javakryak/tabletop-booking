@@ -18,6 +18,10 @@ import { MeService } from "./me/me.service.js";
 import { OwnerController } from "./owner/owner.controller.js";
 import { OwnerRepository } from "./owner/owner.repository.js";
 import { OwnerService } from "./owner/owner.service.js";
+import { OwnerRoomsController } from "./rooms/owner-rooms.controller.js";
+import { RoomsController } from "./rooms/rooms.controller.js";
+import { RoomsRepository } from "./rooms/rooms.repository.js";
+import { RoomsService } from "./rooms/rooms.service.js";
 
 @Module({
   imports: [
@@ -26,7 +30,15 @@ import { OwnerService } from "./owner/owner.service.js";
       envFilePath: [resolve(process.cwd(), ".env"), resolve(process.cwd(), "../../.env")]
     })
   ],
-  controllers: [AppController, AuthController, MeController, LegalController, OwnerController],
+  controllers: [
+    AppController,
+    AuthController,
+    MeController,
+    LegalController,
+    OwnerController,
+    RoomsController,
+    OwnerRoomsController
+  ],
   providers: [
     AppService,
     RolesGuard,
@@ -38,7 +50,9 @@ import { OwnerService } from "./owner/owner.service.js";
     LegalRepository,
     LegalService,
     OwnerRepository,
-    OwnerService
+    OwnerService,
+    RoomsRepository,
+    RoomsService
   ]
 })
 export class AppModule {}
