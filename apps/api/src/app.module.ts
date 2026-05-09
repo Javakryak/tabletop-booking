@@ -24,7 +24,11 @@ import { RoomsController } from "./rooms/rooms.controller.js";
 import { RoomsRepository } from "./rooms/rooms.repository.js";
 import { RoomsService } from "./rooms/rooms.service.js";
 import { OwnerScheduleController } from "./schedule/owner-schedule.controller.js";
+import { OwnerScheduleExceptionsController } from "./schedule/owner-schedule-exceptions.controller.js";
 import { ScheduleController } from "./schedule/schedule.controller.js";
+import { ScheduleExceptionsController } from "./schedule/schedule-exceptions.controller.js";
+import { ScheduleExceptionsRepository } from "./schedule/schedule-exceptions.repository.js";
+import { ScheduleExceptionsService } from "./schedule/schedule-exceptions.service.js";
 import { ScheduleRepository } from "./schedule/schedule.repository.js";
 import { ScheduleService } from "./schedule/schedule.service.js";
 import { TablesController } from "./rooms/tables.controller.js";
@@ -49,7 +53,9 @@ import { TablesService } from "./rooms/tables.service.js";
     TablesController,
     OwnerTablesController,
     ScheduleController,
-    OwnerScheduleController
+    OwnerScheduleController,
+    ScheduleExceptionsController,
+    OwnerScheduleExceptionsController
   ],
   providers: [
     AppService,
@@ -68,7 +74,9 @@ import { TablesService } from "./rooms/tables.service.js";
     TablesRepository,
     TablesService,
     ScheduleRepository,
-    ScheduleService
+    ScheduleService,
+    ScheduleExceptionsRepository,
+    ScheduleExceptionsService
   ]
 })
 export class AppModule {}
