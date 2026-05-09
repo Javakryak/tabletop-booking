@@ -19,8 +19,12 @@ import { OwnerController } from "./owner/owner.controller.js";
 import { OwnerRepository } from "./owner/owner.repository.js";
 import { OwnerService } from "./owner/owner.service.js";
 import { OwnerRoomsController } from "./rooms/owner-rooms.controller.js";
+import { OwnerRoomClosuresController } from "./rooms/owner-room-closures.controller.js";
+import { OwnerTableClosuresController } from "./rooms/owner-table-closures.controller.js";
 import { OwnerTablesController } from "./rooms/owner-tables.controller.js";
 import { RoomsController } from "./rooms/rooms.controller.js";
+import { ClosuresRepository } from "./rooms/closures.repository.js";
+import { ClosuresService } from "./rooms/closures.service.js";
 import { RoomsRepository } from "./rooms/rooms.repository.js";
 import { RoomsService } from "./rooms/rooms.service.js";
 import { OwnerScheduleController } from "./schedule/owner-schedule.controller.js";
@@ -50,8 +54,10 @@ import { TablesService } from "./rooms/tables.service.js";
     OwnerController,
     RoomsController,
     OwnerRoomsController,
+    OwnerRoomClosuresController,
     TablesController,
     OwnerTablesController,
+    OwnerTableClosuresController,
     ScheduleController,
     OwnerScheduleController,
     ScheduleExceptionsController,
@@ -69,6 +75,8 @@ import { TablesService } from "./rooms/tables.service.js";
     LegalService,
     OwnerRepository,
     OwnerService,
+    ClosuresRepository,
+    ClosuresService,
     RoomsRepository,
     RoomsService,
     TablesRepository,

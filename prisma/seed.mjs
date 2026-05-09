@@ -88,6 +88,8 @@ async function resetData() {
   await prisma.$transaction([
     prisma.bookingStatusHistory.deleteMany(),
     prisma.booking.deleteMany(),
+    prisma.tableClosure.deleteMany(),
+    prisma.roomClosure.deleteMany(),
     prisma.bookingRule.deleteMany(),
     prisma.scheduleException.deleteMany(),
     prisma.clubWorkingHour.deleteMany(),

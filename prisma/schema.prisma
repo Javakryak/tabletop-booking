@@ -57,6 +57,8 @@ model User {
   confirmedBookings           Booking[]              @relation("BookingConfirmedByUser")
   cancelledBookings           Booking[]              @relation("BookingCancelledByUser")
   createdScheduleExceptions   ScheduleException[]    @relation("ScheduleExceptionCreatedByUser")
+  createdRoomClosures        RoomClosure[]          @relation("RoomClosureCreatedByUser")
+  createdTableClosures       TableClosure[]         @relation("TableClosureCreatedByUser")
   bookingStatusHistoryChanges BookingStatusHistory[] @relation("BookingStatusHistoryChangedByUser")
   auditLogs                   AuditLog[]             @relation("AuditLogActorUser")
   consents                    Consent[]
@@ -108,6 +110,7 @@ model Room {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   tables ClubTable[]
+  closures RoomClosure[]
 
   @@index([isActive])
   @@index([sortOrder])
@@ -126,6 +129,7 @@ model ClubTable {
 
   room     Room      @relation(fields: [roomId], references: [id], onDelete: Restrict)
   bookings Booking[]
+  closures TableClosure[]
 
   @@unique([roomId, number])
   @@index([roomId])
@@ -160,6 +164,44 @@ model ScheduleException {
   createdByUser User? @relation("ScheduleExceptionCreatedByUser", fields: [createdByUserId], references: [id], onDelete: SetNull)
 
   @@map("schedule_exceptions")
+}
+
+model RoomClosure {
+  id              String   @id @default(uuid()) @db.Uuid
+  roomId          String   @map("room_id") @db.Uuid
+  startAt         DateTime @map("start_at")
+  endAt           DateTime @map("end_at")
+  reason          String?
+  createdByUserId String?  @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  room          Room  @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  createdByUser User? @relation("RoomClosureCreatedByUser", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([roomId])
+  @@index([startAt])
+  @@index([endAt])
+  @@map("room_closures")
+}
+
+model TableClosure {
+  id              String   @id @default(uuid()) @db.Uuid
+  tableId         String   @map("table_id") @db.Uuid
+  startAt         DateTime @map("start_at")
+  endAt           DateTime @map("end_at")
+  reason          String?
+  createdByUserId String?  @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  table         ClubTable @relation(fields: [tableId], references: [id], onDelete: Restrict)
+  createdByUser User?     @relation("TableClosureCreatedByUser", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([tableId])
+  @@index([startAt])
+  @@index([endAt])
+  @@map("table_closures")
 }
 
 model BookingRule {
