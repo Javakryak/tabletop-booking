@@ -1595,7 +1595,8 @@ Response:
       "type": "privacy_policy",
       "version": "1.0.0",
       "title": "Privacy Policy",
-      "contentUrl": "/legal/privacy-policy-v1.md"
+      "contentMd": "# Privacy policy markdown ...",
+      "publishedAt": "2026-01-10T00:00:00.000Z"
     }
   ]
 }
@@ -1617,7 +1618,7 @@ Request:
       "version": "1.0.0"
     },
     {
-      "type": "personal_data_processing_consent",
+      "type": "personal_data_consent",
       "version": "1.0.0"
     }
   ]
@@ -1629,7 +1630,8 @@ Response:
 ```json
 {
   "data": {
-    "accepted": true
+    "accepted": true,
+    "consentRequired": false
   }
 }
 ```
