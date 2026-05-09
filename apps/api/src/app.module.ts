@@ -23,6 +23,10 @@ import { OwnerTablesController } from "./rooms/owner-tables.controller.js";
 import { RoomsController } from "./rooms/rooms.controller.js";
 import { RoomsRepository } from "./rooms/rooms.repository.js";
 import { RoomsService } from "./rooms/rooms.service.js";
+import { OwnerScheduleController } from "./schedule/owner-schedule.controller.js";
+import { ScheduleController } from "./schedule/schedule.controller.js";
+import { ScheduleRepository } from "./schedule/schedule.repository.js";
+import { ScheduleService } from "./schedule/schedule.service.js";
 import { TablesController } from "./rooms/tables.controller.js";
 import { TablesRepository } from "./rooms/tables.repository.js";
 import { TablesService } from "./rooms/tables.service.js";
@@ -43,7 +47,9 @@ import { TablesService } from "./rooms/tables.service.js";
     RoomsController,
     OwnerRoomsController,
     TablesController,
-    OwnerTablesController
+    OwnerTablesController,
+    ScheduleController,
+    OwnerScheduleController
   ],
   providers: [
     AppService,
@@ -60,7 +66,9 @@ import { TablesService } from "./rooms/tables.service.js";
     RoomsRepository,
     RoomsService,
     TablesRepository,
-    TablesService
+    TablesService,
+    ScheduleRepository,
+    ScheduleService
   ]
 })
 export class AppModule {}
