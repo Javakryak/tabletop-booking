@@ -599,9 +599,9 @@ Implementation notes:
 
 #### `GET /rooms`
 
-Returns rooms visible to authenticated users.
+Returns active rooms visible to guests and authenticated users.
 
-Access: user/admin/owner.
+Access: public or user/admin/owner.
 
 #### `GET /rooms/:roomId/tables`
 
