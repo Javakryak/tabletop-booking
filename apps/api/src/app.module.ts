@@ -7,7 +7,11 @@ import { AppService } from "./app.service.js";
 import { AuthController } from "./auth/auth.controller.js";
 import { AuthRepository } from "./auth/auth.repository.js";
 import { AuthService } from "./auth/auth.service.js";
+import { JwtAuthGuard } from "./auth/jwt-auth.guard.js";
 import { RolesGuard } from "./auth/roles.guard.js";
+import { MeController } from "./me/me.controller.js";
+import { MeRepository } from "./me/me.repository.js";
+import { MeService } from "./me/me.service.js";
 
 @Module({
   imports: [
@@ -16,7 +20,7 @@ import { RolesGuard } from "./auth/roles.guard.js";
       envFilePath: [resolve(process.cwd(), ".env"), resolve(process.cwd(), "../../.env")]
     })
   ],
-  controllers: [AppController, AuthController],
-  providers: [AppService, RolesGuard, AuthRepository, AuthService]
+  controllers: [AppController, AuthController, MeController],
+  providers: [AppService, RolesGuard, JwtAuthGuard, AuthRepository, AuthService, MeRepository, MeService]
 })
 export class AppModule {}

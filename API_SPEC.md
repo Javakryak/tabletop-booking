@@ -487,7 +487,7 @@ Response: `204 No Content`.
 
 ### 8.1. Get my profile
 
-#### `GET /users/me/profile`
+#### `GET /me`
 
 Access: user/admin/owner.
 
@@ -511,7 +511,7 @@ Response:
 
 ### 8.2. Update my profile
 
-#### `PATCH /users/me/profile`
+#### `PATCH /me/profile`
 
 Access: user/admin/owner.
 
@@ -523,7 +523,8 @@ Request:
   "phone": "+79990000000",
   "email": "ivan@example.com",
   "privacy": {
-    "showTelegramUsernameToMeetupParticipants": true
+    "showTelegramUsernameToMeetupParticipants": true,
+    "showPhoneToAdmins": false
   }
 }
 ```
@@ -537,7 +538,29 @@ Validation rules:
 - `email` is optional;
 - phone and email must not be logged in plain text.
 
-### 8.3. Request account deletion
+### 8.3. Update my privacy settings
+
+#### `PATCH /me/privacy`
+
+Access: user/admin/owner.
+
+Request:
+
+```json
+{
+  "showTelegramUsernameToMeetupParticipants": true,
+  "showPhoneToAdmins": false
+}
+```
+
+Response: updated profile.
+
+Validation rules:
+
+- at least one privacy field must be provided;
+- values must be booleans.
+
+### 8.4. Request account deletion
 
 #### `POST /users/me/delete-request`
 
@@ -1893,7 +1916,7 @@ Non-breaking changes:
 1. `GET /health`
 2. `POST /auth/telegram`
 3. `GET /auth/me`
-4. `GET/PATCH /users/me/profile`
+4. `GET /me`, `PATCH /me/profile`, `PATCH /me/privacy`
 5. owner rooms CRUD
 6. owner tables CRUD
 7. schedule working hours
@@ -1929,4 +1952,3 @@ An endpoint is done only when:
 - audit log added for privileged mutations;
 - errors use standard error format;
 - README/API docs updated if needed.
-
