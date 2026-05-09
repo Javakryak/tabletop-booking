@@ -4,6 +4,9 @@ import { resolve } from "node:path";
 
 import { AppController } from "./app.controller.js";
 import { AppService } from "./app.service.js";
+import { AuthController } from "./auth/auth.controller.js";
+import { AuthRepository } from "./auth/auth.repository.js";
+import { AuthService } from "./auth/auth.service.js";
 import { RolesGuard } from "./auth/roles.guard.js";
 
 @Module({
@@ -13,7 +16,7 @@ import { RolesGuard } from "./auth/roles.guard.js";
       envFilePath: [resolve(process.cwd(), ".env"), resolve(process.cwd(), "../../.env")]
     })
   ],
-  controllers: [AppController],
-  providers: [AppService, RolesGuard]
+  controllers: [AppController, AuthController],
+  providers: [AppService, RolesGuard, AuthRepository, AuthService]
 })
 export class AppModule {}

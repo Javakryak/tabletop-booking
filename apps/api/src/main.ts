@@ -73,6 +73,7 @@ async function bootstrap() {
         },
         "bearer"
       )
+      .addTag("auth", "Authentication and session endpoints")
       .addTag("system", "System and bootstrap endpoints")
       .build();
 
