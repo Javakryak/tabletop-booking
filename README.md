@@ -389,6 +389,16 @@ Swagger:  http://localhost:3001/api/docs
 Bot:      local polling mode
 ```
 
+Current public web routes:
+
+```text
+/
+/schedule
+/games
+/rules
+/contacts
+```
+
 API logs are emitted as single-line JSON records with `timestamp`, `level`, and `requestId`.
 Sensitive fields such as tokens, cookies, phone numbers, and emails are redacted.
 
