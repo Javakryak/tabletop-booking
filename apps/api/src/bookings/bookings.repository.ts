@@ -67,12 +67,26 @@ export type CreatedBookingRecord = {
   tableId: string;
 };
 
+export type BookingStatusRecord = {
+  id: string;
+  status: BookingStatus;
+};
+
 export type CreatePendingBookingInput = {
   actorUserId: string;
   comment: string | null;
   endAt: Date;
   startAt: Date;
   tableId: string;
+};
+
+export type TransitionBookingStatusInput = {
+  actorRole: "admin" | "owner" | "system" | "user";
+  actorUserId: string | null;
+  bookingId: string;
+  fromStatus: BookingStatus;
+  reason: string | null;
+  toStatus: BookingStatus;
 };
 
 const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [BookingStatus.pending, BookingStatus.confirmed];
@@ -429,4 +443,123 @@ export class BookingsRepository {
       return booking;
     });
   }
+
+  async findBookingStatusById(bookingId: string): Promise<BookingStatusRecord | null> {
+    return await databaseClient.booking.findUnique({
+      where: {
+        id: bookingId
+      },
+      select: {
+        id: true,
+        status: true
+      }
+    });
+  }
+
+  async transitionBookingStatus(
+    input: TransitionBookingStatusInput
+  ): Promise<BookingStatusRecord | null> {
+    return await databaseClient.$transaction(async (tx: Prisma.TransactionClient) => {
+      const updateResult = await tx.booking.updateMany({
+        where: {
+          id: input.bookingId,
+          status: input.fromStatus
+        },
+        data: buildBookingStatusUpdateData(input)
+      });
+      if (updateResult.count === 0) {
+        return null;
+      }
+
+      const updated = await tx.booking.findUnique({
+        where: {
+          id: input.bookingId
+        },
+        select: {
+          id: true,
+          status: true
+        }
+      });
+      if (!updated) {
+        return null;
+      }
+
+      await tx.bookingStatusHistory.create({
+        data: {
+          bookingId: updated.id,
+          changedByUserId: input.actorUserId,
+          fromStatus: input.fromStatus,
+          reason: input.reason,
+          toStatus: input.toStatus
+        }
+      });
+
+      if (input.actorRole === "admin" || input.actorRole === "owner") {
+        await tx.auditLog.create({
+          data: {
+            action: mapTransitionAction(input.toStatus),
+            actorUserId: input.actorUserId,
+            entityId: updated.id,
+            entityType: "booking",
+            metadata: {
+              fromStatus: input.fromStatus,
+              toStatus: input.toStatus
+            }
+          }
+        });
+      }
+
+      return updated;
+    });
+  }
+}
+
+function buildBookingStatusUpdateData(
+  input: TransitionBookingStatusInput
+): Prisma.BookingUncheckedUpdateManyInput {
+  const now = new Date();
+
+  if (input.toStatus === BookingStatus.confirmed) {
+    return {
+      confirmedAt: now,
+      confirmedByUserId: input.actorUserId,
+      status: input.toStatus
+    };
+  }
+
+  if (
+    input.toStatus === BookingStatus.cancelled_by_user ||
+    input.toStatus === BookingStatus.cancelled_by_admin
+  ) {
+    return {
+      cancellationReason: input.reason,
+      cancelledAt: now,
+      cancelledByUserId: input.actorUserId,
+      status: input.toStatus
+    };
+  }
+
+  return {
+    status: input.toStatus
+  };
+}
+
+function mapTransitionAction(status: BookingStatus): string {
+  if (status === BookingStatus.confirmed) {
+    return "booking.confirmed";
+  }
+
+  if (status === BookingStatus.cancelled_by_user || status === BookingStatus.cancelled_by_admin) {
+    return "booking.cancelled";
+  }
+
+  if (status === BookingStatus.completed) {
+    return "booking.completed";
+  }
+
+  if (status === BookingStatus.expired) {
+    return "booking.expired";
+  }
+
+  return "booking.status_updated";
 }

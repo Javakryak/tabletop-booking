@@ -6,6 +6,7 @@ import {
   NotFoundException
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { BookingStatus } from "@prisma/client";
 
 import { LegalService } from "../legal/legal.service.js";
 import type { CreateBookingRequestDto } from "./dto/create-booking.dto.js";
@@ -47,6 +48,15 @@ type BookingRequestResponse = {
     tableId: string;
   };
 };
+
+type BookingStatusTransitionResponse = {
+  data: {
+    bookingId: string;
+    status: BookingStatus;
+  };
+};
+
+type TransitionActorRole = "admin" | "owner" | "system" | "user";
 
 @Injectable()
 export class BookingsService {
@@ -274,6 +284,44 @@ export class BookingsService {
         startAt: created.startAt.toISOString(),
         status: "pending",
         tableId: created.tableId
+      }
+    };
+  }
+
+  async transitionBookingStatus(input: {
+    actorRole: TransitionActorRole;
+    actorUserId: string | null;
+    bookingId: string;
+    reason?: string | null;
+    toStatus: BookingStatus;
+  }): Promise<BookingStatusTransitionResponse> {
+    const existing = await this.bookingsRepository.findBookingStatusById(input.bookingId);
+    if (!existing) {
+      throw new NotFoundException("Booking was not found");
+    }
+
+    if (!isTransitionAllowed(existing.status, input.toStatus)) {
+      throw new ConflictException(
+        `Invalid booking status transition: ${existing.status} -> ${input.toStatus}`
+      );
+    }
+
+    const updated = await this.bookingsRepository.transitionBookingStatus({
+      actorRole: input.actorRole,
+      actorUserId: input.actorUserId,
+      bookingId: input.bookingId,
+      fromStatus: existing.status,
+      reason: input.reason ?? null,
+      toStatus: input.toStatus
+    });
+    if (!updated) {
+      throw new ConflictException("Booking status changed concurrently. Retry the action.");
+    }
+
+    return {
+      data: {
+        bookingId: updated.id,
+        status: updated.status
       }
     };
   }
@@ -530,4 +578,25 @@ function getOffsetMinutes(date: Date, timezone: string): number {
 
 function rangesOverlap(startA: number, endA: number, startB: number, endB: number): boolean {
   return startA < endB && endA > startB;
+}
+
+function isTransitionAllowed(fromStatus: BookingStatus, toStatus: BookingStatus): boolean {
+  if (fromStatus === BookingStatus.pending) {
+    return (
+      toStatus === BookingStatus.confirmed ||
+      toStatus === BookingStatus.cancelled_by_user ||
+      toStatus === BookingStatus.cancelled_by_admin ||
+      toStatus === BookingStatus.expired
+    );
+  }
+
+  if (fromStatus === BookingStatus.confirmed) {
+    return (
+      toStatus === BookingStatus.cancelled_by_user ||
+      toStatus === BookingStatus.cancelled_by_admin ||
+      toStatus === BookingStatus.completed
+    );
+  }
+
+  return false;
 }
