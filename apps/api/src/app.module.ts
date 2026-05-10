@@ -8,9 +8,11 @@ import { AuthController } from "./auth/auth.controller.js";
 import { AuthRepository } from "./auth/auth.repository.js";
 import { AuthService } from "./auth/auth.service.js";
 import { AdminBookingsController } from "./bookings/admin-bookings.controller.js";
+import { BookingRulesController } from "./bookings/booking-rules.controller.js";
 import { BookingsController } from "./bookings/bookings.controller.js";
 import { BookingsRepository } from "./bookings/bookings.repository.js";
 import { BookingsService } from "./bookings/bookings.service.js";
+import { OwnerBookingRulesController } from "./bookings/owner-booking-rules.controller.js";
 import { JwtAuthGuard } from "./auth/jwt-auth.guard.js";
 import { RolesGuard } from "./auth/roles.guard.js";
 import { LegalController } from "./legal/legal.controller.js";
@@ -54,7 +56,9 @@ import { TablesService } from "./rooms/tables.service.js";
     AppController,
     AuthController,
     AdminBookingsController,
+    BookingRulesController,
     BookingsController,
+    OwnerBookingRulesController,
     MeController,
     LegalController,
     OwnerController,
