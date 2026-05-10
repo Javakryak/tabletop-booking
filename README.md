@@ -453,6 +453,8 @@ Critical scenario:
 
 > Two users attempt to book the same table for overlapping time intervals at the same time. The system must allow only one valid booking.
 
+Reference coverage: `apps/api/test/bookings.service.test.ts` (`concurrent overlapping requests keep only one valid booking`).
+
 Suggested commands after implementation:
 
 ```bash

@@ -268,6 +268,49 @@ test("createBookingRequest stores pending booking when all checks pass", async (
   assert.equal(result.data.comment, "Warhammer");
 });
 
+test("concurrent overlapping requests keep only one valid booking", async () => {
+  const repository = createConcurrentBookingRepository();
+  const service = new BookingsService(
+    createConfigService() as never,
+    repository as never,
+    createLegalService(true) as never
+  );
+
+  const payload = {
+    endAt: "2026-05-12T13:00:00+03:00",
+    startAt: "2026-05-12T12:00:00+03:00",
+    tableId: "table-1"
+  };
+
+  const results = await Promise.allSettled([
+    service.createBookingRequest("user-1", payload),
+    service.createBookingRequest("user-2", payload)
+  ]);
+
+  const fulfilled = results.filter((result) => result.status === "fulfilled");
+  const rejected = results.filter((result) => result.status === "rejected");
+
+  assert.equal(fulfilled.length, 1);
+  assert.equal(rejected.length, 1);
+
+  const success = fulfilled[0];
+  if (!success || success.status !== "fulfilled") {
+    throw new Error("Expected one successful booking result");
+  }
+
+  assert.equal(success.value.data.status, "pending");
+  assert.equal(success.value.data.tableId, "table-1");
+
+  const failure = rejected[0];
+  if (!failure || failure.status !== "rejected") {
+    throw new Error("Expected one rejected booking result");
+  }
+
+  assert.ok(failure.reason instanceof ConflictException);
+  assert.equal(failure.reason.message, "The selected table is not available for this time range");
+  assert.equal(repository.getCreatedBookingsCount(), 1);
+});
+
 test("createBookingRequest rejects when phone is missing", async () => {
   const repository = createRepository({
     activeTableById: {
@@ -698,6 +741,188 @@ function createRepository(state: {
         status: "pending",
         tableId: input.tableId
       };
+    }
+  };
+}
+
+function createConcurrentBookingRepository() {
+  const users: Record<string, { phone: string; status: "active" | "blocked" | "deleted" }> = {
+    "user-1": {
+      phone: "+70000000001",
+      status: "active"
+    },
+    "user-2": {
+      phone: "+70000000002",
+      status: "active"
+    }
+  };
+
+  const bookings: Array<{
+    comment: string | null;
+    endAt: Date;
+    id: string;
+    startAt: Date;
+    status: "pending";
+    tableId: string;
+    userId: string;
+  }> = [];
+  let nextBookingId = 1;
+  let waitingCreateCalls = 0;
+
+  let releaseCreateGate: (() => void) | null = null;
+  const createGate = new Promise<void>((resolve) => {
+    releaseCreateGate = resolve;
+  });
+
+  let transactionQueue = Promise.resolve();
+
+  async function withTransactionLock<T>(work: () => Promise<T>): Promise<T> {
+    const previous = transactionQueue;
+    let release!: () => void;
+    transactionQueue = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    await previous;
+    try {
+      return await work();
+    } finally {
+      release();
+    }
+  }
+
+  function overlaps(
+    firstStartAt: Date,
+    firstEndAt: Date,
+    secondStartAt: Date,
+    secondEndAt: Date
+  ): boolean {
+    return firstStartAt < secondEndAt && firstEndAt > secondStartAt;
+  }
+
+  return {
+    async findActiveBookingRule(): Promise<{
+      maxActiveBookingsPerUser: number;
+      slotStepMinutes: number;
+    }> {
+      return {
+        maxActiveBookingsPerUser: 3,
+        slotStepMinutes: 30
+      };
+    },
+
+    async findScheduleExceptionByDate(): Promise<null> {
+      return null;
+    },
+
+    async findWeeklyWorkingHour(): Promise<ScheduleRecord> {
+      return {
+        closesAt: time("22:00"),
+        isClosed: false,
+        opensAt: time("12:00")
+      };
+    },
+
+    async listActiveBookingsOverlapping(
+      tableIds: string[],
+      startAt: Date,
+      endAt: Date
+    ): Promise<Array<TimeRangeRecord & { tableId: string }>> {
+      return bookings
+        .filter(
+          (booking) =>
+            tableIds.includes(booking.tableId) &&
+            overlaps(booking.startAt, booking.endAt, startAt, endAt)
+        )
+        .map((booking) => ({
+          endAt: booking.endAt,
+          startAt: booking.startAt,
+          tableId: booking.tableId
+        }));
+    },
+
+    async findBookingUserById(userId: string): Promise<{
+      phone: string | null;
+      status: "active" | "blocked" | "deleted";
+    } | null> {
+      return users[userId] ?? null;
+    },
+
+    async findActiveTableById(): Promise<{ capacity: number; id: string; roomId: string }> {
+      return {
+        capacity: 4,
+        id: "table-1",
+        roomId: "room-1"
+      };
+    },
+
+    async countActiveBookingsByUser(userId: string): Promise<number> {
+      return bookings.filter((booking) => booking.userId === userId).length;
+    },
+
+    async hasOverlappingRoomClosure(): Promise<boolean> {
+      return false;
+    },
+
+    async hasOverlappingTableClosure(): Promise<boolean> {
+      return false;
+    },
+
+    async createPendingBooking(input: {
+      actorUserId: string;
+      comment: string | null;
+      endAt: Date;
+      startAt: Date;
+      tableId: string;
+    }): Promise<{
+      comment: string | null;
+      endAt: Date;
+      id: string;
+      startAt: Date;
+      status: "pending";
+      tableId: string;
+    } | null> {
+      waitingCreateCalls += 1;
+      if (waitingCreateCalls === 2) {
+        releaseCreateGate?.();
+      }
+      await createGate;
+
+      return await withTransactionLock(async () => {
+        const hasOverlap = bookings.some(
+          (booking) =>
+            booking.tableId === input.tableId &&
+            overlaps(booking.startAt, booking.endAt, input.startAt, input.endAt)
+        );
+        if (hasOverlap) {
+          return null;
+        }
+
+        const created = {
+          comment: input.comment,
+          endAt: input.endAt,
+          id: `booking-${nextBookingId}`,
+          startAt: input.startAt,
+          status: "pending" as const,
+          tableId: input.tableId,
+          userId: input.actorUserId
+        };
+        nextBookingId += 1;
+        bookings.push(created);
+
+        return {
+          comment: created.comment,
+          endAt: created.endAt,
+          id: created.id,
+          startAt: created.startAt,
+          status: created.status,
+          tableId: created.tableId
+        };
+      });
+    },
+
+    getCreatedBookingsCount(): number {
+      return bookings.length;
     }
   };
 }
