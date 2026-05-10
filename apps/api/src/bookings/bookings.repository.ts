@@ -42,12 +42,45 @@ export type ActiveBookingRangeRecord = {
   tableId: string;
 };
 
+export type BookingRuleRecord = {
+  maxActiveBookingsPerUser: number;
+  slotStepMinutes: number;
+};
+
+export type BookingUserRecord = {
+  phone: string | null;
+  status: "active" | "blocked" | "deleted";
+};
+
+export type ActiveTableRecord = {
+  capacity: number;
+  id: string;
+  roomId: string;
+};
+
+export type CreatedBookingRecord = {
+  comment: string | null;
+  endAt: Date;
+  id: string;
+  startAt: Date;
+  status: BookingStatus;
+  tableId: string;
+};
+
+export type CreatePendingBookingInput = {
+  actorUserId: string;
+  comment: string | null;
+  endAt: Date;
+  startAt: Date;
+  tableId: string;
+};
+
 const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [BookingStatus.pending, BookingStatus.confirmed];
 
 @Injectable()
 export class BookingsRepository {
-  async findSlotStepMinutes(): Promise<number | null> {
-    const activeRule = await databaseClient.bookingRule.findFirst({
+  async findActiveBookingRule(): Promise<BookingRuleRecord | null> {
+    return await databaseClient.bookingRule.findFirst({
       where: {
         isActive: true
       },
@@ -55,10 +88,14 @@ export class BookingsRepository {
         updatedAt: "desc"
       },
       select: {
+        maxActiveBookingsPerUser: true,
         slotStepMinutes: true
       }
     });
+  }
 
+  async findSlotStepMinutes(): Promise<number | null> {
+    const activeRule = await this.findActiveBookingRule();
     return activeRule?.slotStepMinutes ?? null;
   }
 
@@ -228,6 +265,168 @@ export class BookingsRepository {
         startAt: true,
         tableId: true
       }
+    });
+  }
+
+  async findBookingUserById(userId: string): Promise<BookingUserRecord | null> {
+    const user = await databaseClient.user.findUnique({
+      where: {
+        id: userId
+      },
+      select: {
+        profile: {
+          select: {
+            phone: true
+          }
+        },
+        status: true
+      }
+    });
+    if (!user) {
+      return null;
+    }
+
+    return {
+      phone: user.profile?.phone ?? null,
+      status: user.status
+    };
+  }
+
+  async findActiveTableById(tableId: string): Promise<ActiveTableRecord | null> {
+    const table = await databaseClient.clubTable.findFirst({
+      where: {
+        id: tableId,
+        isActive: true,
+        room: {
+          isActive: true
+        }
+      },
+      select: {
+        capacity: true,
+        id: true,
+        roomId: true
+      }
+    });
+
+    return table;
+  }
+
+  async countActiveBookingsByUser(userId: string): Promise<number> {
+    return await databaseClient.booking.count({
+      where: {
+        userId,
+        status: {
+          in: ACTIVE_BOOKING_STATUSES
+        }
+      }
+    });
+  }
+
+  async hasOverlappingRoomClosure(roomId: string, startAt: Date, endAt: Date): Promise<boolean> {
+    const closure = await databaseClient.roomClosure.findFirst({
+      where: {
+        roomId,
+        startAt: {
+          lt: endAt
+        },
+        endAt: {
+          gt: startAt
+        }
+      },
+      select: {
+        id: true
+      }
+    });
+
+    return Boolean(closure);
+  }
+
+  async hasOverlappingTableClosure(tableId: string, startAt: Date, endAt: Date): Promise<boolean> {
+    const closure = await databaseClient.tableClosure.findFirst({
+      where: {
+        tableId,
+        startAt: {
+          lt: endAt
+        },
+        endAt: {
+          gt: startAt
+        }
+      },
+      select: {
+        id: true
+      }
+    });
+
+    return Boolean(closure);
+  }
+
+  async createPendingBooking(input: CreatePendingBookingInput): Promise<CreatedBookingRecord | null> {
+    return await databaseClient.$transaction(async (tx: Prisma.TransactionClient) => {
+      const overlapping = await tx.booking.findFirst({
+        where: {
+          tableId: input.tableId,
+          status: {
+            in: ACTIVE_BOOKING_STATUSES
+          },
+          startAt: {
+            lt: input.endAt
+          },
+          endAt: {
+            gt: input.startAt
+          }
+        },
+        select: {
+          id: true
+        }
+      });
+      if (overlapping) {
+        return null;
+      }
+
+      const booking = await tx.booking.create({
+        data: {
+          comment: input.comment,
+          endAt: input.endAt,
+          startAt: input.startAt,
+          status: BookingStatus.pending,
+          tableId: input.tableId,
+          userId: input.actorUserId
+        },
+        select: {
+          comment: true,
+          endAt: true,
+          id: true,
+          startAt: true,
+          status: true,
+          tableId: true
+        }
+      });
+
+      await tx.bookingStatusHistory.create({
+        data: {
+          bookingId: booking.id,
+          changedByUserId: input.actorUserId,
+          fromStatus: null,
+          reason: "booking request created",
+          toStatus: BookingStatus.pending
+        }
+      });
+
+      await tx.auditLog.create({
+        data: {
+          action: "booking.request_created",
+          actorUserId: input.actorUserId,
+          entityId: booking.id,
+          entityType: "booking",
+          metadata: {
+            signal: "admin_booking_follow_up",
+            status: booking.status,
+            tableId: booking.tableId
+          }
+        }
+      });
+
+      return booking;
     });
   }
 }
