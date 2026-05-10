@@ -408,6 +408,15 @@ Current auth UI routes:
 /dashboard
 ```
 
+Dashboard currently includes:
+
+```text
+my bookings
+my meetups
+profile update
+privacy settings update
+```
+
 API logs are emitted as single-line JSON records with `timestamp`, `level`, and `requestId`.
 Sensitive fields such as tokens, cookies, phone numbers, and emails are redacted.
 
