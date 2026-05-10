@@ -2,10 +2,10 @@ import Link from "next/link";
 
 const navItems = [
   { label: "Главная", href: "/" },
-  { label: "Расписание", href: "/#schedule" },
-  { label: "Игры", href: "/#games" },
-  { label: "Правила", href: "/#rules" },
-  { label: "Контакты", href: "/#contacts" }
+  { label: "Расписание", href: "/schedule" },
+  { label: "Игры", href: "/games" },
+  { label: "Правила", href: "/rules" },
+  { label: "Контакты", href: "/contacts" }
 ];
 
 export function SiteHeader() {
