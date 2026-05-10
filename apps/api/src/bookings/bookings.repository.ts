@@ -72,6 +72,15 @@ export type BookingStatusRecord = {
   status: BookingStatus;
 };
 
+export type BookingForAdminActionRecord = {
+  endAt: Date;
+  id: string;
+  startAt: Date;
+  status: BookingStatus;
+  tableId: string;
+  userId: string;
+};
+
 export type CreatePendingBookingInput = {
   actorUserId: string;
   comment: string | null;
@@ -87,6 +96,13 @@ export type TransitionBookingStatusInput = {
   fromStatus: BookingStatus;
   reason: string | null;
   toStatus: BookingStatus;
+};
+
+export type BookingNotificationSignalInput = {
+  actorUserId: string;
+  bookingId: string;
+  signal: "booking_cancelled_user_follow_up" | "booking_confirmed_user_follow_up";
+  targetUserId: string;
 };
 
 const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [BookingStatus.pending, BookingStatus.confirmed];
@@ -456,6 +472,52 @@ export class BookingsRepository {
     });
   }
 
+  async findBookingForAdminAction(bookingId: string): Promise<BookingForAdminActionRecord | null> {
+    return await databaseClient.booking.findUnique({
+      where: {
+        id: bookingId
+      },
+      select: {
+        endAt: true,
+        id: true,
+        startAt: true,
+        status: true,
+        tableId: true,
+        userId: true
+      }
+    });
+  }
+
+  async hasOverlappingConfirmedBooking(
+    input: {
+      endAt: Date;
+      excludeBookingId: string;
+      startAt: Date;
+      tableId: string;
+    }
+  ): Promise<boolean> {
+    const overlapping = await databaseClient.booking.findFirst({
+      where: {
+        id: {
+          not: input.excludeBookingId
+        },
+        tableId: input.tableId,
+        status: BookingStatus.confirmed,
+        startAt: {
+          lt: input.endAt
+        },
+        endAt: {
+          gt: input.startAt
+        }
+      },
+      select: {
+        id: true
+      }
+    });
+
+    return Boolean(overlapping);
+  }
+
   async transitionBookingStatus(
     input: TransitionBookingStatusInput
   ): Promise<BookingStatusRecord | null> {
@@ -510,6 +572,21 @@ export class BookingsRepository {
       }
 
       return updated;
+    });
+  }
+
+  async createBookingNotificationSignal(input: BookingNotificationSignalInput): Promise<void> {
+    await databaseClient.auditLog.create({
+      data: {
+        action: "booking.notification_requested",
+        actorUserId: input.actorUserId,
+        entityId: input.bookingId,
+        entityType: "booking",
+        metadata: {
+          signal: input.signal,
+          targetUserId: input.targetUserId
+        }
+      }
     });
   }
 }
