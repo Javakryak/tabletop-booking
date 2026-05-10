@@ -5,7 +5,8 @@ const navItems = [
   { label: "Расписание", href: "/schedule" },
   { label: "Игры", href: "/games" },
   { label: "Правила", href: "/rules" },
-  { label: "Контакты", href: "/contacts" }
+  { label: "Контакты", href: "/contacts" },
+  { label: "Войти", href: "/auth/login" }
 ];
 
 export function SiteHeader() {

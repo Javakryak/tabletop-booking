@@ -399,6 +399,15 @@ Current public web routes:
 /contacts
 ```
 
+Current auth UI routes:
+
+```text
+/auth/login
+/auth/session
+/auth/complete-profile
+/dashboard
+```
+
 API logs are emitted as single-line JSON records with `timestamp`, `level`, and `requestId`.
 Sensitive fields such as tokens, cookies, phone numbers, and emails are redacted.
 
