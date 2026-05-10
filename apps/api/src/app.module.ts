@@ -7,6 +7,7 @@ import { AppService } from "./app.service.js";
 import { AuthController } from "./auth/auth.controller.js";
 import { AuthRepository } from "./auth/auth.repository.js";
 import { AuthService } from "./auth/auth.service.js";
+import { AdminBookingsController } from "./bookings/admin-bookings.controller.js";
 import { BookingsController } from "./bookings/bookings.controller.js";
 import { BookingsRepository } from "./bookings/bookings.repository.js";
 import { BookingsService } from "./bookings/bookings.service.js";
@@ -52,6 +53,7 @@ import { TablesService } from "./rooms/tables.service.js";
   controllers: [
     AppController,
     AuthController,
+    AdminBookingsController,
     BookingsController,
     MeController,
     LegalController,

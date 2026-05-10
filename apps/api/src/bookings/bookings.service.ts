@@ -326,6 +326,82 @@ export class BookingsService {
     };
   }
 
+  async adminConfirmBooking(input: {
+    actorRole: "admin" | "owner";
+    actorUserId: string;
+    bookingId: string;
+  }): Promise<BookingStatusTransitionResponse> {
+    const booking = await this.bookingsRepository.findBookingForAdminAction(input.bookingId);
+    if (!booking) {
+      throw new NotFoundException("Booking was not found");
+    }
+
+    const hasConfirmedOverlap = await this.bookingsRepository.hasOverlappingConfirmedBooking({
+      endAt: booking.endAt,
+      excludeBookingId: booking.id,
+      startAt: booking.startAt,
+      tableId: booking.tableId
+    });
+    if (hasConfirmedOverlap) {
+      throw new ConflictException("The selected table is not available for this time range");
+    }
+
+    const transitionResult = await this.transitionBookingStatus({
+      actorRole: input.actorRole,
+      actorUserId: input.actorUserId,
+      bookingId: input.bookingId,
+      toStatus: BookingStatus.confirmed
+    });
+
+    await this.bookingsRepository.createBookingNotificationSignal({
+      actorUserId: input.actorUserId,
+      bookingId: booking.id,
+      signal: "booking_confirmed_user_follow_up",
+      targetUserId: booking.userId
+    });
+
+    return transitionResult;
+  }
+
+  async adminCancelBooking(input: {
+    actorRole: "admin" | "owner";
+    actorUserId: string;
+    bookingId: string;
+    reason?: string;
+  }): Promise<BookingStatusTransitionResponse> {
+    const booking = await this.bookingsRepository.findBookingForAdminAction(input.bookingId);
+    if (!booking) {
+      throw new NotFoundException("Booking was not found");
+    }
+
+    const transitionInput: {
+      actorRole: TransitionActorRole;
+      actorUserId: string | null;
+      bookingId: string;
+      reason?: string | null;
+      toStatus: BookingStatus;
+    } = {
+      actorRole: input.actorRole,
+      actorUserId: input.actorUserId,
+      bookingId: input.bookingId,
+      toStatus: BookingStatus.cancelled_by_admin
+    };
+    if (input.reason !== undefined) {
+      transitionInput.reason = input.reason;
+    }
+
+    const transitionResult = await this.transitionBookingStatus(transitionInput);
+
+    await this.bookingsRepository.createBookingNotificationSignal({
+      actorUserId: input.actorUserId,
+      bookingId: booking.id,
+      signal: "booking_cancelled_user_follow_up",
+      targetUserId: booking.userId
+    });
+
+    return transitionResult;
+  }
+
   private async resolveScheduleForDate(date: Date): Promise<{
     closesAt: Date | null;
     isClosed: boolean;
