@@ -43,6 +43,7 @@ export type ActiveBookingRangeRecord = {
 };
 
 export type BookingRuleRecord = {
+  allowFullDayBooking: boolean;
   maxActiveBookingsPerUser: number;
   minCancelBeforeMinutes: number;
   slotStepMinutes: number;
@@ -106,6 +107,14 @@ export type BookingNotificationSignalInput = {
   targetUserId: string;
 };
 
+export type UpdateBookingRulesInput = {
+  actorUserId: string;
+  allowFullDayBooking: boolean;
+  maxActiveBookingsPerUser: number;
+  minCancelBeforeMinutes: number;
+  slotStepMinutes: number;
+};
+
 const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [BookingStatus.pending, BookingStatus.confirmed];
 
 @Injectable()
@@ -119,6 +128,7 @@ export class BookingsRepository {
         updatedAt: "desc"
       },
       select: {
+        allowFullDayBooking: true,
         maxActiveBookingsPerUser: true,
         minCancelBeforeMinutes: true,
         slotStepMinutes: true
@@ -589,6 +599,73 @@ export class BookingsRepository {
           targetUserId: input.targetUserId
         }
       }
+    });
+  }
+
+  async updateActiveBookingRules(input: UpdateBookingRulesInput): Promise<BookingRuleRecord> {
+    return await databaseClient.$transaction(async (tx: Prisma.TransactionClient) => {
+      const activeRule = await tx.bookingRule.findFirst({
+        where: {
+          isActive: true
+        },
+        orderBy: {
+          updatedAt: "desc"
+        },
+        select: {
+          id: true
+        }
+      });
+
+      const updated = activeRule
+        ? await tx.bookingRule.update({
+            where: {
+              id: activeRule.id
+            },
+            data: {
+              allowFullDayBooking: input.allowFullDayBooking,
+              maxActiveBookingsPerUser: input.maxActiveBookingsPerUser,
+              minCancelBeforeMinutes: input.minCancelBeforeMinutes,
+              slotStepMinutes: input.slotStepMinutes
+            },
+            select: {
+              allowFullDayBooking: true,
+              maxActiveBookingsPerUser: true,
+              minCancelBeforeMinutes: true,
+              slotStepMinutes: true
+            }
+          })
+        : await tx.bookingRule.create({
+            data: {
+              allowFullDayBooking: input.allowFullDayBooking,
+              isActive: true,
+              maxActiveBookingsPerUser: input.maxActiveBookingsPerUser,
+              minBookingDurationMinutes: input.slotStepMinutes,
+              minCancelBeforeMinutes: input.minCancelBeforeMinutes,
+              slotStepMinutes: input.slotStepMinutes
+            },
+            select: {
+              allowFullDayBooking: true,
+              maxActiveBookingsPerUser: true,
+              minCancelBeforeMinutes: true,
+              slotStepMinutes: true
+            }
+          });
+
+      await tx.auditLog.create({
+        data: {
+          action: "booking.rules_updated",
+          actorUserId: input.actorUserId,
+          entityType: "booking_rules",
+          metadata: {
+            allowFullDayBooking: updated.allowFullDayBooking,
+            maxActiveBookingsPerUser: updated.maxActiveBookingsPerUser,
+            minCancellationNoticeMinutes: updated.minCancelBeforeMinutes,
+            slotMinutes: updated.slotStepMinutes
+          }
+        }
+      });
+
+      return updated;
     });
   }
 }

@@ -9,6 +9,7 @@ import { ConfigService } from "@nestjs/config";
 import { BookingStatus } from "@prisma/client";
 
 import { LegalService } from "../legal/legal.service.js";
+import type { UpdateBookingRulesDto } from "./dto/booking-rules.dto.js";
 import type { CreateBookingRequestDto } from "./dto/create-booking.dto.js";
 import type { GetBookingAvailabilityQueryDto } from "./dto/availability.dto.js";
 import { BookingsRepository } from "./bookings.repository.js";
@@ -57,6 +58,15 @@ type BookingStatusTransitionResponse = {
 };
 
 type TransitionActorRole = "admin" | "owner" | "system" | "user";
+
+type BookingRulesResponse = {
+  data: {
+    allowFullDayBooking: boolean;
+    maxActiveBookingsPerUser: number;
+    minCancellationNoticeMinutes: number;
+    slotMinutes: number;
+  };
+};
 
 @Injectable()
 export class BookingsService {
@@ -173,6 +183,43 @@ export class BookingsService {
         date: formatDate(date),
         rooms: responseRooms,
         slotMinutes
+      }
+    };
+  }
+
+  async getBookingRules(): Promise<BookingRulesResponse> {
+    const activeRule = await this.bookingsRepository.findActiveBookingRule();
+    const normalized = normalizeBookingRules(activeRule);
+
+    return {
+      data: {
+        allowFullDayBooking: normalized.allowFullDayBooking,
+        maxActiveBookingsPerUser: normalized.maxActiveBookingsPerUser,
+        minCancellationNoticeMinutes: normalized.minCancelBeforeMinutes,
+        slotMinutes: normalized.slotStepMinutes
+      }
+    };
+  }
+
+  async updateBookingRules(actorUserId: string, body: UpdateBookingRulesDto): Promise<BookingRulesResponse> {
+    if (body.slotMinutes !== 30) {
+      throw new BadRequestException("slotMinutes must remain 30 in MVP");
+    }
+
+    const updated = await this.bookingsRepository.updateActiveBookingRules({
+      actorUserId,
+      allowFullDayBooking: body.allowFullDayBooking,
+      maxActiveBookingsPerUser: body.maxActiveBookingsPerUser,
+      minCancelBeforeMinutes: body.minCancellationNoticeMinutes,
+      slotStepMinutes: body.slotMinutes
+    });
+
+    return {
+      data: {
+        allowFullDayBooking: updated.allowFullDayBooking,
+        maxActiveBookingsPerUser: updated.maxActiveBookingsPerUser,
+        minCancellationNoticeMinutes: updated.minCancelBeforeMinutes,
+        slotMinutes: updated.slotStepMinutes
       }
     };
   }
@@ -554,6 +601,33 @@ function resolveMinCancelBeforeMinutes(value: number | null): number {
   }
 
   return 120;
+}
+
+function normalizeBookingRules(
+  rule:
+    | {
+        allowFullDayBooking: boolean;
+        maxActiveBookingsPerUser: number;
+        minCancelBeforeMinutes: number;
+        slotStepMinutes: number;
+      }
+    | null
+): {
+  allowFullDayBooking: boolean;
+  maxActiveBookingsPerUser: number;
+  minCancelBeforeMinutes: number;
+  slotStepMinutes: number;
+} {
+  return {
+    allowFullDayBooking: rule?.allowFullDayBooking ?? true,
+    maxActiveBookingsPerUser: resolveActiveBookingLimit(
+      rule?.maxActiveBookingsPerUser ?? null
+    ),
+    minCancelBeforeMinutes: resolveMinCancelBeforeMinutes(
+      rule?.minCancelBeforeMinutes ?? null
+    ),
+    slotStepMinutes: resolveSlotStepMinutes(rule?.slotStepMinutes ?? null)
+  };
 }
 
 function parseDateOnly(value: string): Date {
