@@ -44,6 +44,7 @@ export type ActiveBookingRangeRecord = {
 
 export type BookingRuleRecord = {
   maxActiveBookingsPerUser: number;
+  minCancelBeforeMinutes: number;
   slotStepMinutes: number;
 };
 
@@ -119,6 +120,7 @@ export class BookingsRepository {
       },
       select: {
         maxActiveBookingsPerUser: true,
+        minCancelBeforeMinutes: true,
         slotStepMinutes: true
       }
     });

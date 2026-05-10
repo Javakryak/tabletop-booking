@@ -402,6 +402,52 @@ export class BookingsService {
     return transitionResult;
   }
 
+  async cancelOwnBooking(input: {
+    actorUserId: string;
+    bookingId: string;
+    reason?: string;
+  }): Promise<BookingStatusTransitionResponse> {
+    const booking = await this.bookingsRepository.findBookingForAdminAction(input.bookingId);
+    if (!booking) {
+      throw new NotFoundException("Booking was not found");
+    }
+
+    if (booking.userId !== input.actorUserId) {
+      throw new ForbiddenException("You can cancel only your own bookings");
+    }
+
+    if (!isUserCancellableStatus(booking.status)) {
+      throw new ConflictException("Booking cannot be cancelled in current status");
+    }
+
+    const activeRule = await this.bookingsRepository.findActiveBookingRule();
+    const minCancelBeforeMinutes = resolveMinCancelBeforeMinutes(
+      activeRule?.minCancelBeforeMinutes ?? null
+    );
+    const minutesUntilStart = (booking.startAt.getTime() - Date.now()) / 60_000;
+    if (minutesUntilStart < minCancelBeforeMinutes) {
+      throw new ConflictException("Cancellation is too late according to club rules");
+    }
+
+    const transitionInput: {
+      actorRole: TransitionActorRole;
+      actorUserId: string | null;
+      bookingId: string;
+      reason?: string | null;
+      toStatus: BookingStatus;
+    } = {
+      actorRole: "user",
+      actorUserId: input.actorUserId,
+      bookingId: input.bookingId,
+      toStatus: BookingStatus.cancelled_by_user
+    };
+    if (input.reason !== undefined) {
+      transitionInput.reason = input.reason;
+    }
+
+    return await this.transitionBookingStatus(transitionInput);
+  }
+
   private async resolveScheduleForDate(date: Date): Promise<{
     closesAt: Date | null;
     isClosed: boolean;
@@ -500,6 +546,14 @@ function resolveActiveBookingLimit(value: number | null): number {
   }
 
   return 3;
+}
+
+function resolveMinCancelBeforeMinutes(value: number | null): number {
+  if (Number.isInteger(value) && (value ?? 0) >= 0) {
+    return value as number;
+  }
+
+  return 120;
 }
 
 function parseDateOnly(value: string): Date {
@@ -675,4 +729,8 @@ function isTransitionAllowed(fromStatus: BookingStatus, toStatus: BookingStatus)
   }
 
   return false;
+}
+
+function isUserCancellableStatus(status: BookingStatus): boolean {
+  return status === BookingStatus.pending || status === BookingStatus.confirmed;
 }
