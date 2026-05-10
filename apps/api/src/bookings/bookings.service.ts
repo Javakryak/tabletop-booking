@@ -1,6 +1,14 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
+import { LegalService } from "../legal/legal.service.js";
+import type { CreateBookingRequestDto } from "./dto/create-booking.dto.js";
 import type { GetBookingAvailabilityQueryDto } from "./dto/availability.dto.js";
 import { BookingsRepository } from "./bookings.repository.js";
 
@@ -29,22 +37,31 @@ type BookingAvailabilityResponse = {
   };
 };
 
+type BookingRequestResponse = {
+  data: {
+    comment: string | null;
+    endAt: string;
+    id: string;
+    startAt: string;
+    status: "pending";
+    tableId: string;
+  };
+};
+
 @Injectable()
 export class BookingsService {
   constructor(
     private readonly configService: ConfigService,
-    private readonly bookingsRepository: BookingsRepository
+    private readonly bookingsRepository: BookingsRepository,
+    private readonly legalService: LegalService
   ) {}
 
   async getAvailability(query: GetBookingAvailabilityQueryDto): Promise<BookingAvailabilityResponse> {
     const date = parseDateOnly(query.date);
     const timezone = resolveScheduleTimezone(this.configService);
 
-    const slotMinutesFromRule = await this.bookingsRepository.findSlotStepMinutes();
-    const slotMinutes =
-      Number.isInteger(slotMinutesFromRule) && (slotMinutesFromRule ?? 0) > 0
-        ? (slotMinutesFromRule as number)
-        : 30;
+    const activeRule = await this.bookingsRepository.findActiveBookingRule();
+    const slotMinutes = resolveSlotStepMinutes(activeRule?.slotStepMinutes ?? null);
     const durationMinutes = query.durationMinutes ?? slotMinutes;
     if (durationMinutes < slotMinutes || durationMinutes % slotMinutes !== 0) {
       throw new BadRequestException("durationMinutes must be a multiple of slotMinutes");
@@ -150,6 +167,117 @@ export class BookingsService {
     };
   }
 
+  async createBookingRequest(
+    actorUserId: string,
+    body: CreateBookingRequestDto
+  ): Promise<BookingRequestResponse> {
+    const timezone = resolveScheduleTimezone(this.configService);
+    const startAt = parseIsoDateTime(body.startAt, "startAt");
+    const endAt = parseIsoDateTime(body.endAt, "endAt");
+
+    if (startAt.getTime() >= endAt.getTime()) {
+      throw new BadRequestException("startAt must be earlier than endAt");
+    }
+
+    const startLocal = toZonedDateParts(startAt, timezone);
+    const endLocal = toZonedDateParts(endAt, timezone);
+    if (
+      startLocal.year !== endLocal.year ||
+      startLocal.month !== endLocal.month ||
+      startLocal.day !== endLocal.day
+    ) {
+      throw new BadRequestException("Booking must start and end on the same calendar day");
+    }
+
+    const activeRule = await this.bookingsRepository.findActiveBookingRule();
+    const slotMinutes = resolveSlotStepMinutes(activeRule?.slotStepMinutes ?? null);
+    const maxActiveBookingsPerUser = resolveActiveBookingLimit(
+      activeRule?.maxActiveBookingsPerUser ?? null
+    );
+
+    const startMinutes = startLocal.hour * 60 + startLocal.minute;
+    const endMinutes = endLocal.hour * 60 + endLocal.minute;
+    const durationMinutes = endMinutes - startMinutes;
+
+    if (startMinutes % slotMinutes !== 0 || endMinutes % slotMinutes !== 0) {
+      throw new BadRequestException("startAt and endAt must align with slot step");
+    }
+    if (durationMinutes <= 0 || durationMinutes % slotMinutes !== 0) {
+      throw new BadRequestException("Requested duration must align with slot step");
+    }
+
+    const user = await this.bookingsRepository.findBookingUserById(actorUserId);
+    if (!user) {
+      throw new NotFoundException("Authenticated user was not found");
+    }
+    if (user.status !== "active") {
+      throw new ForbiddenException("User account is not active");
+    }
+    if (!user.phone || user.phone.trim().length === 0) {
+      throw new ForbiddenException("Phone number is required before creating a booking");
+    }
+
+    const hasRequiredConsents = await this.legalService.hasAcceptedRequiredConsents(actorUserId);
+    if (!hasRequiredConsents) {
+      throw new ForbiddenException("Required legal consents must be accepted before booking");
+    }
+
+    const table = await this.bookingsRepository.findActiveTableById(body.tableId);
+    if (!table) {
+      throw new NotFoundException("Table is not available");
+    }
+
+    const localDate = new Date(Date.UTC(startLocal.year, startLocal.month - 1, startLocal.day));
+    const schedule = await this.resolveScheduleForDate(localDate);
+    if (schedule.isClosed || !schedule.opensAt || !schedule.closesAt) {
+      throw new ConflictException("The selected table is not available for this time range");
+    }
+
+    const opensAtMinutes = toMinutes(schedule.opensAt);
+    const closesAtMinutes = toMinutes(schedule.closesAt);
+    if (startMinutes < opensAtMinutes || endMinutes > closesAtMinutes) {
+      throw new ConflictException("The selected table is not available for this time range");
+    }
+
+    const [activeBookingsCount, hasRoomClosure, hasTableClosure, overlappingBookings] =
+      await Promise.all([
+        this.bookingsRepository.countActiveBookingsByUser(actorUserId),
+        this.bookingsRepository.hasOverlappingRoomClosure(table.roomId, startAt, endAt),
+        this.bookingsRepository.hasOverlappingTableClosure(table.id, startAt, endAt),
+        this.bookingsRepository.listActiveBookingsOverlapping([table.id], startAt, endAt)
+      ]);
+
+    if (activeBookingsCount >= maxActiveBookingsPerUser) {
+      throw new ConflictException("Active booking limit was reached");
+    }
+
+    if (hasRoomClosure || hasTableClosure || overlappingBookings.length > 0) {
+      throw new ConflictException("The selected table is not available for this time range");
+    }
+
+    const created = await this.bookingsRepository.createPendingBooking({
+      actorUserId,
+      comment: body.comment ?? null,
+      endAt,
+      startAt,
+      tableId: table.id
+    });
+    if (!created) {
+      throw new ConflictException("The selected table is not available for this time range");
+    }
+
+    return {
+      data: {
+        comment: created.comment,
+        endAt: created.endAt.toISOString(),
+        id: created.id,
+        startAt: created.startAt.toISOString(),
+        status: "pending",
+        tableId: created.tableId
+      }
+    };
+  }
+
   private async resolveScheduleForDate(date: Date): Promise<{
     closesAt: Date | null;
     isClosed: boolean;
@@ -234,6 +362,22 @@ function resolveScheduleTimezone(configService: ConfigService): string {
   return "Europe/Moscow";
 }
 
+function resolveSlotStepMinutes(value: number | null): number {
+  if (Number.isInteger(value) && (value ?? 0) > 0) {
+    return value as number;
+  }
+
+  return 30;
+}
+
+function resolveActiveBookingLimit(value: number | null): number {
+  if (Number.isInteger(value) && (value ?? 0) > 0) {
+    return value as number;
+  }
+
+  return 3;
+}
+
 function parseDateOnly(value: string): Date {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) {
@@ -251,6 +395,15 @@ function parseDateOnly(value: string): Date {
     parsed.getUTCDate() !== day
   ) {
     throw new BadRequestException("date must be a real calendar day");
+  }
+
+  return parsed;
+}
+
+function parseIsoDateTime(value: string, fieldName: string): Date {
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.getTime())) {
+    throw new BadRequestException(`${fieldName} must be a valid ISO datetime value`);
   }
 
   return parsed;
@@ -281,6 +434,47 @@ function toUtcDateForScheduleTime(date: Date, minutes: number, timezone: string)
   const minute = minutes % 60;
 
   return new Date(resolveZonedDateTimeEpoch(year, month, day, hour, minute, timezone));
+}
+
+function toZonedDateParts(
+  date: Date,
+  timezone: string
+): { day: number; hour: number; minute: number; month: number; year: number } {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    hour: "2-digit",
+    hour12: false,
+    minute: "2-digit",
+    month: "2-digit",
+    timeZone: timezone,
+    year: "numeric"
+  });
+
+  const parts = formatter.formatToParts(date);
+
+  const year = Number.parseInt(parts.find((part) => part.type === "year")?.value ?? "", 10);
+  const month = Number.parseInt(parts.find((part) => part.type === "month")?.value ?? "", 10);
+  const day = Number.parseInt(parts.find((part) => part.type === "day")?.value ?? "", 10);
+  const hour = Number.parseInt(parts.find((part) => part.type === "hour")?.value ?? "", 10);
+  const minute = Number.parseInt(parts.find((part) => part.type === "minute")?.value ?? "", 10);
+
+  if (
+    !Number.isInteger(year) ||
+    !Number.isInteger(month) ||
+    !Number.isInteger(day) ||
+    !Number.isInteger(hour) ||
+    !Number.isInteger(minute)
+  ) {
+    throw new BadRequestException("Failed to resolve booking time in schedule timezone");
+  }
+
+  return {
+    day,
+    hour,
+    minute,
+    month,
+    year
+  };
 }
 
 function resolveZonedDateTimeEpoch(

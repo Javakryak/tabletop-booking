@@ -1,6 +1,7 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, Req, UseGuards } from "@nestjs/common";
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
@@ -14,7 +15,17 @@ import {
   BookingAvailabilityEnvelopeDto,
   GetBookingAvailabilityQueryDto
 } from "./dto/availability.dto.js";
+import {
+  BookingRequestEnvelopeDto,
+  CreateBookingRequestDto
+} from "./dto/create-booking.dto.js";
 import { BookingsService } from "./bookings.service.js";
+
+type AuthenticatedRequest = {
+  user: {
+    id: string;
+  };
+};
 
 @ApiTags("bookings")
 @ApiBearerAuth("bearer")
@@ -39,5 +50,16 @@ export class BookingsController {
   @ApiOkResponse({ type: BookingAvailabilityEnvelopeDto })
   async getAvailability(@Query() query: GetBookingAvailabilityQueryDto) {
     return await this.bookingsService.getAvailability(query);
+  }
+
+  @Post("bookings")
+  @ApiOperation({ summary: "Create a pending booking request for an active table" })
+  @ApiBody({ type: CreateBookingRequestDto })
+  @ApiOkResponse({ type: BookingRequestEnvelopeDto })
+  async createBookingRequest(
+    @Req() request: AuthenticatedRequest,
+    @Body() body: CreateBookingRequestDto
+  ) {
+    return await this.bookingsService.createBookingRequest(request.user.id, body);
   }
 }
