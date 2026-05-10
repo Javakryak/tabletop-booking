@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiBody,
@@ -19,6 +19,8 @@ import {
   BookingRequestEnvelopeDto,
   CreateBookingRequestDto
 } from "./dto/create-booking.dto.js";
+import { CancelBookingDto } from "./dto/cancel-booking.dto.js";
+import { BookingStatusTransitionEnvelopeDto } from "./dto/admin-bookings.dto.js";
 import { BookingsService } from "./bookings.service.js";
 
 type AuthenticatedRequest = {
@@ -61,5 +63,29 @@ export class BookingsController {
     @Body() body: CreateBookingRequestDto
   ) {
     return await this.bookingsService.createBookingRequest(request.user.id, body);
+  }
+
+  @Post("bookings/:bookingId/cancel")
+  @ApiOperation({ summary: "Cancel own pending or confirmed booking if cancellation policy allows" })
+  @ApiBody({ type: CancelBookingDto })
+  @ApiOkResponse({ type: BookingStatusTransitionEnvelopeDto })
+  async cancelOwnBooking(
+    @Req() request: AuthenticatedRequest,
+    @Param("bookingId") bookingId: string,
+    @Body() body: CancelBookingDto
+  ) {
+    const payload: {
+      actorUserId: string;
+      bookingId: string;
+      reason?: string;
+    } = {
+      actorUserId: request.user.id,
+      bookingId
+    };
+    if (body.reason !== undefined) {
+      payload.reason = body.reason;
+    }
+
+    return await this.bookingsService.cancelOwnBooking(payload);
   }
 }
