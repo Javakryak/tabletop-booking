@@ -409,6 +409,12 @@ Current public web routes:
 /contacts
 ```
 
+Booking page status:
+
+```text
+/schedule: booking request flow with API availability loading, validation, conflict handling, and pending-success messaging
+```
+
 Current auth UI routes:
 
 ```text

@@ -1,4 +1,4 @@
-import { BookingCalendarDemo } from "@/components/booking/booking-calendar-demo";
+import { BookingCreationFlow } from "@/components/booking/booking-creation-flow";
 
 export default function SchedulePage() {
   return (
@@ -8,12 +8,12 @@ export default function SchedulePage() {
           Календарь бронирования
         </h1>
         <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-          Базовые компоненты выбора даты, комнаты, стола и слотов. Отправка
-          заявки и серверная валидация добавляются отдельным шагом.
+          Выберите дату, комнату, стол и интервалы, затем отправьте заявку на
+          бронь. После отправки требуется подтверждение администратора.
         </p>
       </header>
 
-      <BookingCalendarDemo />
+      <BookingCreationFlow />
     </section>
   );
 }
