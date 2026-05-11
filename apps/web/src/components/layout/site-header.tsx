@@ -6,6 +6,7 @@ const navItems = [
   { label: "Игры", href: "/games" },
   { label: "Правила", href: "/rules" },
   { label: "Контакты", href: "/contacts" },
+  { label: "Админ-панель", href: "/admin" },
   { label: "Войти", href: "/auth/login" }
 ];
 
