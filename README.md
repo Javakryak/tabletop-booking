@@ -422,7 +422,17 @@ Current auth UI routes:
 /auth/session
 /auth/complete-profile
 /dashboard
+/admin
+/admin/bookings
+/admin/schedule
 ```
+
+Admin routes now use frontend role-aware protection:
+
+- allowed: `admin`, `owner`;
+- blocked: unauthenticated users and users without admin/owner role;
+- clear loading/unauthorized/forbidden states are shown in UI;
+- server-side authorization remains mandatory for all protected API operations.
 
 Dashboard currently includes:
 

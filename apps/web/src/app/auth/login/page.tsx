@@ -34,6 +34,29 @@ export default function AuthLoginPage() {
             Проверить сценарий без сессии
           </Link>
         </div>
+        <p className="text-xs text-muted-foreground">
+          Демо-ссылки для проверки доступа к админ-панели:
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-medium transition-colors hover:bg-muted"
+            href="/admin?authenticated=1&role=admin"
+          >
+            Открыть как admin
+          </Link>
+          <Link
+            className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-medium transition-colors hover:bg-muted"
+            href="/admin?authenticated=1&role=owner"
+          >
+            Открыть как owner
+          </Link>
+          <Link
+            className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-medium transition-colors hover:bg-muted"
+            href="/admin?authenticated=1&role=user"
+          >
+            Открыть как user
+          </Link>
+        </div>
       </article>
     </section>
   );
