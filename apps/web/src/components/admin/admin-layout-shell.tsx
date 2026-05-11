@@ -22,6 +22,10 @@ const navItems = [
     label: "Пользователи"
   },
   {
+    href: "/admin/audit-logs",
+    label: "Audit log"
+  },
+  {
     href: "/admin/resources",
     label: "Ресурсы клуба"
   }
