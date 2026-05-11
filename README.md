@@ -426,6 +426,7 @@ Current auth UI routes:
 /admin/bookings
 /admin/schedule
 /admin/users
+/admin/audit-logs
 /admin/resources
 ```
 
@@ -474,6 +475,16 @@ blocked status badges and action-result feedback
 clear statement that blocked users cannot create bookings or meetups
 explicit blocking reason input and confirmation flow
 audit-sensitive action note for block/unblock operations
+```
+
+Owner audit-log UI currently includes:
+
+```text
+audit events list for operational review
+filters by actor, action, and date interval
+explicit highlighting of emergency full-phone reveal events
+privacy-aware metadata rendering with sensitive field redaction
+clear loading, empty, forbidden, and error states
 ```
 
 API logs are emitted as single-line JSON records with `timestamp`, `level`, and `requestId`.
