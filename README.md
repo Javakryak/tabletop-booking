@@ -444,6 +444,16 @@ profile update
 privacy settings update
 ```
 
+Admin bookings queue currently includes:
+
+```text
+pending bookings list
+booking details for operational review
+confirm and cancel actions
+masked contact display by default
+explicit emergency full-phone reveal action with reason payload
+```
+
 API logs are emitted as single-line JSON records with `timestamp`, `level`, and `requestId`.
 Sensitive fields such as tokens, cookies, phone numbers, and emails are redacted.
 
