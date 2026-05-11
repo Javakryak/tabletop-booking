@@ -379,6 +379,16 @@ Start applications:
 pnpm dev
 ```
 
+Build the workspace:
+
+```bash
+pnpm build
+```
+
+On macOS arm64 Node runtimes that cannot load Next.js native SWC because of
+local code-signature restrictions, the web build automatically uses the pinned
+Next.js SWC WASM package with webpack.
+
 Expected local services:
 
 ```text

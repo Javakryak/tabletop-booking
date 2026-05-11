@@ -108,6 +108,9 @@ importers:
         specifier: ^3.5.0
         version: 3.5.0
     devDependencies:
+      '@next/swc-wasm-nodejs':
+        specifier: 16.2.6
+        version: 16.2.6
       '@types/node':
         specifier: ^24.12.2
         version: 24.12.2
@@ -656,6 +659,9 @@ packages:
     cpu: [x64]
     os: [linux]
     libc: [musl]
+
+  '@next/swc-wasm-nodejs@16.2.6':
+    resolution: {integrity: sha512-hwa9pdxfzDsug/m4eukZiy2bOXasDAlZG41YCNHqJfXaVQ0c544ox6MvAbvJn7GaVHDrkD+pwVeJz2djKjcsUA==}
 
   '@next/swc-win32-arm64-msvc@16.2.6':
     resolution: {integrity: sha512-LZXpTlPyS5v7HhSmnvsLGP3iIYgYOBnc8r8ArlT55sGHV89bR2HlDdBjWQ+PY6SJMmk8TuVGFuxalnP3k/0Dwg==}
@@ -2395,6 +2401,8 @@ snapshots:
 
   '@next/swc-linux-x64-musl@16.2.6':
     optional: true
+
+  '@next/swc-wasm-nodejs@16.2.6': {}
 
   '@next/swc-win32-arm64-msvc@16.2.6':
     optional: true
