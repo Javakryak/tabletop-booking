@@ -66,7 +66,8 @@ export function BookingCalendar({
       <header className="space-y-2">
         <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Бронирование стола</h1>
         <p className="text-sm text-muted-foreground">
-          Компоненты календаря готовы к подключению API и повторному использованию в Mini App.
+          Выберите дату, комнату, стол и слоты. Проверка доступности и создание
+          заявки выполняются через API.
         </p>
       </header>
 
