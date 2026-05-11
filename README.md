@@ -425,6 +425,7 @@ Current auth UI routes:
 /admin
 /admin/bookings
 /admin/schedule
+/admin/users
 /admin/resources
 ```
 
@@ -463,6 +464,16 @@ tables create/update/deactivate actions
 weekly working-hours editing
 schedule exceptions create/update/delete actions
 clear loading, empty, validation, and forbidden/error handling states
+```
+
+Owner user-blocking UI currently includes:
+
+```text
+owner-only moderation screen for user block/unblock actions
+blocked status badges and action-result feedback
+clear statement that blocked users cannot create bookings or meetups
+explicit blocking reason input and confirmation flow
+audit-sensitive action note for block/unblock operations
 ```
 
 API logs are emitted as single-line JSON records with `timestamp`, `level`, and `requestId`.

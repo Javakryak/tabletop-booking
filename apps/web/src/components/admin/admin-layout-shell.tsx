@@ -18,6 +18,10 @@ const navItems = [
     label: "Дневной план"
   },
   {
+    href: "/admin/users",
+    label: "Пользователи"
+  },
+  {
     href: "/admin/resources",
     label: "Ресурсы клуба"
   }
