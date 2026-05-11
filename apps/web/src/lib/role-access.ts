@@ -1,8 +1,11 @@
 export const ADMIN_ROUTE_ROLES = ["admin", "owner"] as const;
+export const OWNER_ROUTE_ROLES = ["owner"] as const;
 
 export type AdminRouteRole = (typeof ADMIN_ROUTE_ROLES)[number];
+export type OwnerRouteRole = (typeof OWNER_ROUTE_ROLES)[number];
 
 const adminRoleSet = new Set<string>(ADMIN_ROUTE_ROLES);
+const ownerRoleSet = new Set<string>(OWNER_ROUTE_ROLES);
 
 function splitRoleTokens(value: string): string[] {
   return value
@@ -23,6 +26,16 @@ export function extractRolesFromSearchParams(searchParams: URLSearchParams): str
 export function hasAdminRouteAccess(roles: Iterable<string>): boolean {
   for (const role of roles) {
     if (adminRoleSet.has(role.toLowerCase())) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function hasOwnerRouteAccess(roles: Iterable<string>): boolean {
+  for (const role of roles) {
+    if (ownerRoleSet.has(role.toLowerCase())) {
       return true;
     }
   }

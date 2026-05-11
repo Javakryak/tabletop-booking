@@ -425,6 +425,7 @@ Current auth UI routes:
 /admin
 /admin/bookings
 /admin/schedule
+/admin/resources
 ```
 
 Admin routes now use frontend role-aware protection:
@@ -452,6 +453,16 @@ booking details for operational review
 confirm and cancel actions
 masked contact display by default
 explicit emergency full-phone reveal action with reason payload
+```
+
+Owner resource-management UI currently includes:
+
+```text
+rooms create/update/deactivate actions
+tables create/update/deactivate actions
+weekly working-hours editing
+schedule exceptions create/update/delete actions
+clear loading, empty, validation, and forbidden/error handling states
 ```
 
 API logs are emitted as single-line JSON records with `timestamp`, `level`, and `requestId`.
