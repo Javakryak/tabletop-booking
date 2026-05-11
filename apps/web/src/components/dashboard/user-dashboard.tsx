@@ -42,6 +42,11 @@ type ProfileFormState = {
   phone: string;
 };
 
+type BookingStatusInfo = {
+  badgeClassName: string;
+  label: string;
+};
+
 function normalizeCollection<T>(value: unknown): T[] {
   if (Array.isArray(value)) {
     return value as T[];
@@ -75,6 +80,65 @@ function formatDateTime(value?: string): string {
   }).format(date);
 }
 
+function getBookingStatusInfo(status: string): BookingStatusInfo {
+  const normalizedStatus = status.toLowerCase();
+  switch (normalizedStatus) {
+    case "pending":
+      return {
+        badgeClassName: "border border-amber-600/30 bg-amber-900/20 text-amber-200",
+        label: "Ожидает подтверждения"
+      };
+    case "confirmed":
+      return {
+        badgeClassName: "border border-emerald-600/30 bg-emerald-900/20 text-emerald-200",
+        label: "Подтверждена"
+      };
+    case "cancelled_by_user":
+      return {
+        badgeClassName: "border border-border bg-muted text-muted-foreground",
+        label: "Отменена вами"
+      };
+    case "cancelled_by_admin":
+      return {
+        badgeClassName: "border border-border bg-muted text-muted-foreground",
+        label: "Отменена администратором"
+      };
+    case "completed":
+      return {
+        badgeClassName: "border border-border bg-muted text-muted-foreground",
+        label: "Завершена"
+      };
+    case "expired":
+      return {
+        badgeClassName: "border border-border bg-muted text-muted-foreground",
+        label: "Истекла"
+      };
+    default:
+      return {
+        badgeClassName: "border border-border bg-muted text-muted-foreground",
+        label: status
+      };
+  }
+}
+
+function canCancelBooking(status: string): boolean {
+  return ["pending", "confirmed"].includes(status.toLowerCase());
+}
+
+function mapCancelBookingError(error: ApiRequestError): string {
+  if (error.status === 403) {
+    return "Отмена недоступна для этой брони.";
+  }
+  if (error.status === 404) {
+    return "Бронь не найдена. Обновите страницу.";
+  }
+  if (error.status === 409) {
+    return "Отмена отклонена правилами клуба (например, слишком поздно).";
+  }
+
+  return error.message;
+}
+
 export function UserDashboard() {
   const [dashboardState, setDashboardState] = useState<DashboardState>("loading");
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -96,6 +160,9 @@ export function UserDashboard() {
   const [privacySaving, setPrivacySaving] = useState(false);
   const [profileNotice, setProfileNotice] = useState<string>("");
   const [privacyNotice, setPrivacyNotice] = useState<string>("");
+  const [cancelBookingId, setCancelBookingId] = useState<string | null>(null);
+  const [bookingNotice, setBookingNotice] = useState<string>("");
+  const [bookingErrorById, setBookingErrorById] = useState<Record<string, string>>({});
 
   const loadDashboard = useCallback(async () => {
     setDashboardState("loading");
@@ -220,6 +287,56 @@ export function UserDashboard() {
     }
   }
 
+  async function handleCancelBooking(bookingId: string) {
+    setCancelBookingId(bookingId);
+    setBookingNotice("");
+    setBookingErrorById((previous) => {
+      const nextState = { ...previous };
+      delete nextState[bookingId];
+      return nextState;
+    });
+
+    try {
+      const updatedBooking = await apiRequest<Partial<BookingItem>>(
+        `/bookings/${bookingId}/cancel`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            reason: "Отменено пользователем из личного кабинета"
+          })
+        }
+      );
+
+      const nextStatus =
+        typeof updatedBooking.status === "string" && updatedBooking.status.length > 0
+          ? updatedBooking.status
+          : "cancelled_by_user";
+
+      setBookings((previous) =>
+        previous.map((booking) =>
+          booking.id === bookingId ? { ...booking, status: nextStatus } : booking
+        )
+      );
+      setBookingNotice("Бронь отменена.");
+    } catch (error) {
+      if (error instanceof ApiRequestError && error.status === 401) {
+        setDashboardState("unauthorized");
+      } else if (error instanceof ApiRequestError) {
+        setBookingErrorById((previous) => ({
+          ...previous,
+          [bookingId]: mapCancelBookingError(error)
+        }));
+      } else {
+        setBookingErrorById((previous) => ({
+          ...previous,
+          [bookingId]: "Не удалось отменить бронь. Попробуйте позже."
+        }));
+      }
+    } finally {
+      setCancelBookingId(null);
+    }
+  }
+
   if (dashboardState === "loading") {
     return (
       <section className="mx-auto max-w-5xl rounded-xl border border-border bg-card p-6">
@@ -276,17 +393,41 @@ export function UserDashboard() {
             <ul className="mt-3 space-y-3 text-sm">
               {activeBookings.map((booking) => (
                 <li className="rounded-md border border-border/70 p-3" key={booking.id}>
-                  <p className="font-medium">Статус: {booking.status}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getBookingStatusInfo(booking.status).badgeClassName}`}
+                    >
+                      {getBookingStatusInfo(booking.status).label}
+                    </span>
+                  </div>
                   <p className="text-muted-foreground">
                     {formatDateTime(booking.startAt)} - {formatDateTime(booking.endAt)}
                   </p>
                   <p className="text-muted-foreground">
                     {booking.roomName ?? "Комната не указана"} · стол {booking.tableNumber ?? "-"}
                   </p>
+                  {canCancelBooking(booking.status) ? (
+                    <div className="mt-3 space-y-2">
+                      <button
+                        className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
+                        disabled={cancelBookingId === booking.id}
+                        onClick={() => void handleCancelBooking(booking.id)}
+                        type="button"
+                      >
+                        {cancelBookingId === booking.id ? "Отменяем..." : "Отменить бронь"}
+                      </button>
+                      {bookingErrorById[booking.id] ? (
+                        <p className="text-xs text-amber-200">{bookingErrorById[booking.id]}</p>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </li>
               ))}
             </ul>
           )}
+          {bookingNotice ? (
+            <p className="mt-3 text-sm text-emerald-200">{bookingNotice}</p>
+          ) : null}
         </article>
 
         <article className="rounded-xl border border-border bg-card p-6">
@@ -297,7 +438,13 @@ export function UserDashboard() {
             <ul className="mt-3 space-y-3 text-sm">
               {bookingHistory.map((booking) => (
                 <li className="rounded-md border border-border/70 p-3" key={booking.id}>
-                  <p className="font-medium">Статус: {booking.status}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getBookingStatusInfo(booking.status).badgeClassName}`}
+                    >
+                      {getBookingStatusInfo(booking.status).label}
+                    </span>
+                  </div>
                   <p className="text-muted-foreground">
                     {formatDateTime(booking.startAt)} - {formatDateTime(booking.endAt)}
                   </p>

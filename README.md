@@ -428,6 +428,7 @@ Dashboard currently includes:
 
 ```text
 my bookings
+cancel eligible bookings
 my meetups
 profile update
 privacy settings update
