@@ -509,6 +509,7 @@ Expected core variables:
 
 ```text
 DATABASE_URL=
+TEST_DATABASE_URL=
 REDIS_URL=
 JWT_SECRET=
 JWT_EXPIRES_IN=
@@ -562,6 +563,12 @@ pnpm test
 pnpm test:e2e
 pnpm build
 ```
+
+API integration/e2e test setup notes:
+
+- `apps/api` exposes `test:integration` and `test:e2e` scripts.
+- `TEST_DATABASE_URL` must point to an isolated PostgreSQL database (the script refuses to reset non-test DB names).
+- `pnpm test:e2e` runs database reset+migrations against `TEST_DATABASE_URL` before running API integration tests.
 
 ---
 

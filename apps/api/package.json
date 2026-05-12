@@ -22,7 +22,9 @@
     "build": "tsc -p tsconfig.build.json",
     "dev": "pnpm run build && node dist/main.js",
     "start": "pnpm run build && node dist/main.js",
-    "test": "node --import tsx --test \"test/**/*.test.ts\"",
+    "test": "node --import tsx --test \"test/*.test.ts\"",
+    "test:integration": "node test/scripts/run-integration-tests.mjs",
+    "test:e2e": "pnpm run test:integration",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "devDependencies": {
