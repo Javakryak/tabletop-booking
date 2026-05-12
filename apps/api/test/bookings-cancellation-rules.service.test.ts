@@ -120,6 +120,37 @@ test("cancelOwnBooking rejects non-cancellable status", async () => {
   );
 });
 
+test("cancelOwnBooking allows user to cancel own pending booking before deadline", async () => {
+  const repository = createRepository({
+    booking: {
+      endAt: new Date(Date.now() + 4 * 60 * 60 * 1000),
+      id: "booking-pending-1",
+      startAt: new Date(Date.now() + 3 * 60 * 60 * 1000),
+      status: BookingStatus.pending,
+      tableId: "table-pending-1",
+      userId: "user-pending-1"
+    },
+    minCancelBeforeMinutes: 120
+  });
+  const service = new BookingsService(
+    createConfigService() as never,
+    repository.api as never,
+    createLegalService() as never
+  );
+
+  const result = await service.cancelOwnBooking({
+    actorUserId: "user-pending-1",
+    bookingId: "booking-pending-1",
+    reason: "No longer needed"
+  });
+
+  assert.deepEqual(result.data, {
+    bookingId: "booking-pending-1",
+    status: BookingStatus.cancelled_by_user
+  });
+  assert.equal(repository.state.transitions.length, 1);
+});
+
 test("adminCancelBooking is operational override and does not enforce user deadline", async () => {
   const repository = createRepository({
     booking: {

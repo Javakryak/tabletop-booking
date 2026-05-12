@@ -65,6 +65,38 @@ test("allows confirmed to completed transition without admin audit", async () =>
   assert.equal(repository.state.auditRecords.length, 0);
 });
 
+test("allows owner to cancel pending booking and records audit intent", async () => {
+  const repository = createTransitionRepository({
+    id: "booking-owner-1",
+    status: BookingStatus.pending
+  });
+  const service = new BookingsService(
+    createConfigService() as never,
+    repository.api as never,
+    createLegalService() as never
+  );
+
+  const result = await service.transitionBookingStatus({
+    actorRole: "owner",
+    actorUserId: "owner-1",
+    bookingId: "booking-owner-1",
+    reason: "Owner decision",
+    toStatus: BookingStatus.cancelled_by_admin
+  });
+
+  assert.deepEqual(result.data, {
+    bookingId: "booking-owner-1",
+    status: BookingStatus.cancelled_by_admin
+  });
+  assert.equal(repository.state.history.length, 1);
+  assert.deepEqual(repository.state.auditRecords, [
+    {
+      actorRole: "owner",
+      toStatus: BookingStatus.cancelled_by_admin
+    }
+  ]);
+});
+
 test("rejects invalid status transition", async () => {
   const repository = createTransitionRepository({
     id: "booking-3",

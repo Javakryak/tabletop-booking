@@ -65,6 +65,31 @@ test("returns no slots when schedule exception marks a day as closed", async () 
   assert.equal(result.data.rooms.length, 0);
 });
 
+test("returns no slots when weekly schedule for the day is missing", async () => {
+  const repository = createRepository({
+    rooms: [
+      {
+        id: "room-1",
+        name: "Main",
+        sortOrder: 1,
+        tables: [{ capacity: 4, id: "table-1", number: "T1", sortOrder: 1 }]
+      }
+    ],
+    scheduleException: null,
+    weeklyWorkingHour: null
+  });
+  const service = new BookingsService(
+    createConfigService() as never,
+    repository as never,
+    createLegalService() as never
+  );
+
+  const result = await service.getAvailability({ date: "2026-05-12" });
+
+  assert.equal(result.data.slotMinutes, 30);
+  assert.equal(result.data.rooms.length, 0);
+});
+
 test("filters out blocked slots and removes tables with no available slots", async () => {
   const date = "2026-05-12";
   const repository = createRepository({
@@ -472,6 +497,59 @@ test("createBookingRequest rejects when active booking limit is reached", async 
       }),
     ConflictException
   );
+});
+
+test("createBookingRequest allows booking when active booking count is below limit", async () => {
+  const repository = createRepository({
+    activeBookingCountByUser: {
+      "user-1": 2
+    },
+    activeRule: {
+      maxActiveBookingsPerUser: 3,
+      slotStepMinutes: 30
+    },
+    activeTableById: {
+      "table-1": {
+        capacity: 4,
+        id: "table-1",
+        roomId: "room-1"
+      }
+    },
+    bookingCreateResult: {
+      comment: null,
+      endAt: zonedDateTime("2026-05-12", "13:00"),
+      id: "booking-allowed",
+      startAt: zonedDateTime("2026-05-12", "12:00"),
+      status: "pending",
+      tableId: "table-1"
+    },
+    rooms: [],
+    weeklyWorkingHour: {
+      closesAt: time("22:00"),
+      isClosed: false,
+      opensAt: time("12:00")
+    },
+    users: {
+      "user-1": {
+        phone: "+70000000000",
+        status: "active"
+      }
+    }
+  });
+  const service = new BookingsService(
+    createConfigService() as never,
+    repository as never,
+    createLegalService(true) as never
+  );
+
+  const result = await service.createBookingRequest("user-1", {
+    endAt: "2026-05-12T13:00:00+03:00",
+    startAt: "2026-05-12T12:00:00+03:00",
+    tableId: "table-1"
+  });
+
+  assert.equal(result.data.id, "booking-allowed");
+  assert.equal(result.data.status, "pending");
 });
 
 test("createBookingRequest rejects when closure or overlap exists", async () => {
