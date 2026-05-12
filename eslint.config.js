@@ -15,7 +15,8 @@ export default tseslint.config(
       "**/out/**",
       "**/playwright-report/**",
       "**/test-results/**",
-      "**/.next/**"
+      "**/.next/**",
+      "**/.test-dist/**"
     ]
   },
   eslint.configs.recommended,

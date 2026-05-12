@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import type { INestApplication } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import assert from "node:assert/strict";
