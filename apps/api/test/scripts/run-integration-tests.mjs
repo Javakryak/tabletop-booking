@@ -4,11 +4,14 @@ import { spawn } from "node:child_process";
 import { URL, fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import process from "node:process";
+import { readdir, rm } from "node:fs/promises";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const apiDir = resolve(scriptDir, "../..");
 const repoRoot = resolve(apiDir, "../..");
 const schemaPath = resolve(repoRoot, "prisma/schema.prisma");
+const integrationBuildDir = resolve(apiDir, ".test-dist");
+const integrationTestsBuildDir = resolve(integrationBuildDir, "test/integration");
 
 const testDatabaseUrl = process.env.TEST_DATABASE_URL;
 
@@ -61,7 +64,19 @@ await runCommand(
   }
 );
 
-await runCommand("node", ["--import", "tsx", "--test", "test/integration/**/*.test.ts"], {
+await rm(integrationBuildDir, { force: true, recursive: true });
+
+await runCommand("pnpm", ["exec", "tsc", "-p", "tsconfig.integration.json"], {
+  cwd: apiDir,
+  env: sharedEnv
+});
+
+const testFiles = await collectTestFiles(integrationTestsBuildDir);
+if (testFiles.length === 0) {
+  throw new Error(`No compiled integration tests found in ${integrationTestsBuildDir}`);
+}
+
+await runCommand("node", ["--import", "tsx", "--test", "--test-force-exit", ...testFiles], {
   cwd: apiDir,
   env: sharedEnv
 });
@@ -84,4 +99,24 @@ function runCommand(command, args, options) {
       rejectPromise(new Error(`${command} ${args.join(" ")} exited with code ${code ?? "unknown"}`));
     });
   });
+}
+
+async function collectTestFiles(dir) {
+  const entries = await readdir(dir, { withFileTypes: true });
+  const files = [];
+
+  for (const entry of entries) {
+    const entryPath = resolve(dir, entry.name);
+    if (entry.isDirectory()) {
+      const nested = await collectTestFiles(entryPath);
+      files.push(...nested);
+      continue;
+    }
+
+    if (entry.isFile() && entry.name.endsWith(".test.js")) {
+      files.push(entryPath);
+    }
+  }
+
+  return files.sort((left, right) => left.localeCompare(right));
 }
