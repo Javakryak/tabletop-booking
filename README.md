@@ -570,6 +570,13 @@ API integration/e2e test setup notes:
 - `TEST_DATABASE_URL` must point to an isolated PostgreSQL database (the script refuses to reset non-test DB names).
 - `pnpm test:e2e` runs database reset+migrations against `TEST_DATABASE_URL` before running API integration tests.
 
+UI smoke test notes:
+
+- `apps/web` exposes `test:smoke` script for Playwright critical-flow checks.
+- install browser once locally: `pnpm --filter @tabletop-booking/web exec playwright install chromium`.
+- run smoke suite: `pnpm --filter @tabletop-booking/web test:smoke`.
+- current mode: manual/local run; GitHub Actions flow is focused on lint/typecheck/unit/API integration checks.
+
 ---
 
 ## Telegram integration
