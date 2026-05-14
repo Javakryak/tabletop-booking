@@ -8,7 +8,25 @@
 
 ## Project status
 
-**Status:** planning and documentation ready; implementation is expected to start from repository foundation tasks.
+**Status:** core booking backend and web MVP foundation are implemented; Telegram bot, real notification delivery, production deployment, and MVP 2 meetups remain open.
+
+Implemented as of the current `main` branch:
+
+- monorepo foundation with pnpm workspaces, shared TypeScript config, ESLint, Prettier, and env examples;
+- local PostgreSQL/Redis Docker Compose;
+- Prisma schema, migrations, database package, and deterministic demo seed data;
+- NestJS REST API under `/api/v1` with Swagger, validation, unified errors, structured logging, and healthcheck;
+- Telegram web and Mini App auth payload verification, JWT session issuing, roles/guards, profile, privacy, legal consent, and account deletion request flows;
+- room/table CRUD, working hours, schedule exceptions, room/table closures, booking rules, booking availability, booking creation, cancellation, admin confirmation, status history, audit-log writes, and double-booking protection;
+- Next.js public pages, auth/profile UI, user dashboard, booking creation/history UI, admin layout, admin booking queue, owner resources UI, user blocking UI, and audit-log UI foundation;
+- unit and integration-oriented test setup with API booking/domain/auth/resource coverage and GitHub Actions CI for lint, typecheck, unit tests, and API integration tests.
+
+Known gaps before MVP 1 can be considered production-ready:
+
+- `apps/bot` is still only scaffolded; grammY runtime, `/start`, account linking, commands, webhooks, and real Telegram notifications are not implemented;
+- booking notification handling currently records notification-request signals, but no durable notification service or delivery worker exists yet;
+- some admin/owner web screens include demo/fallback behavior until matching backend endpoints are completed, especially emergency full-phone reveal, owner audit-log API, and user block/unblock API;
+- deployment, Dockerfiles, backups, reverse proxy/HTTPS, uptime monitoring, and production runbooks are still pending.
 
 This project is designed for two goals:
 
@@ -396,7 +414,7 @@ Web:      http://localhost:3000
 API:      http://localhost:3001/api/v1
 Health:   http://localhost:3001/api/v1/health
 Swagger:  http://localhost:3001/api/docs
-Bot:      local polling mode
+Bot:      not implemented yet; `apps/bot` is currently a placeholder package
 ```
 
 Current public web routes:
@@ -583,11 +601,11 @@ UI smoke test notes:
 
 Telegram is used for:
 
-- primary authentication;
-- account linking through `/start`;
-- user notifications;
-- admin notifications;
-- quick actions;
+- primary authentication, implemented for web login and Mini App init data verification in the API;
+- account linking through `/start`, planned but not implemented yet;
+- user notifications, planned but not implemented yet;
+- admin notifications, planned but not implemented yet;
+- quick actions, planned but not implemented yet;
 - future Telegram Mini App entrypoint.
 
 Development modes:
@@ -704,20 +722,13 @@ docs/legal/personal-data-consent.md
 
 ## Roadmap
 
-Implementation starts with repository foundation tasks.
+Foundation, database, backend booking, web booking/admin UI, and core test tasks are already implemented. The next practical work should focus on closing MVP 1 operational gaps:
 
-Recommended first tasks:
-
-1. `TASK-0001` — Create monorepo structure.
-2. `TASK-0002` — Configure package manager and workspace.
-3. `TASK-0003` — Add shared TypeScript config.
-4. `TASK-0004` — Add linting and formatting.
-5. `TASK-0005` — Add environment examples.
-6. `TASK-0101` — Add Docker Compose for PostgreSQL and Redis.
-7. `TASK-0102` — Add database package with Prisma.
-8. `TASK-0103` — Create initial database schema.
-9. `TASK-0104` — Add seed demo data.
-10. `TASK-0201` — Create NestJS API app.
+1. Finish backend endpoints used by current admin/owner UI fallbacks: audit-log listing, emergency phone reveal with audit log, and user block/unblock.
+2. Implement Telegram bot foundation and `/start` account linking.
+3. Add a real notification service and Telegram delivery for booking created/confirmed/cancelled events.
+4. Add production Dockerfiles, deployment guide, reverse proxy/HTTPS config, backups, and uptime monitoring instructions.
+5. Add Playwright web smoke tests and bot tests after the bot runtime exists.
 
 Full roadmap: [ROADMAP.md](./ROADMAP.md).  
 Full backlog: [TASKS.md](./TASKS.md).
