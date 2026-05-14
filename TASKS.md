@@ -4,6 +4,46 @@ Backlog задач для разработки приложения бронир
 
 Документ предназначен для разбиения проекта на GitHub Issues и небольшие PR-задачи для Codex/coding agents.
 
+## Current implementation status
+
+Статусы ниже отражают текущую ветку `main`.
+
+Legend:
+
+- `Done` — implemented and covered by the current repo state.
+- `Partial` — meaningful implementation exists, but acceptance criteria are not fully met or some behavior is still demo/fallback-only.
+- `Open` — not implemented yet.
+
+Completed or effectively completed task groups:
+
+- `TASK-0001`–`TASK-0005`: monorepo, workspace, shared TypeScript config, lint/format, env examples.
+- `TASK-0101`–`TASK-0104`: local Docker Compose, Prisma/database package, initial schema, deterministic seed data.
+- `TASK-0201`–`TASK-0204`: NestJS API foundation, Swagger, healthcheck, structured logging.
+- `TASK-0301`–`TASK-0305`: roles/guards, Telegram auth verification, profile/privacy endpoints, legal consent flow, account deletion request.
+- `TASK-0401`–`TASK-0405`: rooms, tables, working hours, schedule exceptions, room/table closures.
+- `TASK-0501`–`TASK-0507`: booking availability, create request, transitions, admin confirm/cancel, cancellation rules, active booking limit, concurrency test.
+- `TASK-0601`–`TASK-0703`: Next.js web app, public pages, auth UI, dashboard, booking components, booking creation/history UI.
+- `TASK-0801` and `TASK-0803`: admin route shell and owner resources UI.
+- `TASK-1201`–`TASK-1203`: test framework, booking domain tests, API integration tests.
+
+Partial task groups needing follow-up:
+
+- `TASK-0802`: admin booking queue UI exists; backend emergency full-phone reveal endpoint with audit logging still needs completion.
+- `TASK-0804`: user blocking UI exists; owner block/unblock backend endpoint and audit behavior still need completion.
+- `TASK-0805`: audit-log UI exists; owner audit-log listing API still needs completion.
+- `TASK-0901`: `apps/bot` package exists; grammY runtime is not implemented.
+- `TASK-1101`: booking flows emit notification-request signals; real notification service and Telegram delivery are not implemented.
+- `TASK-1301`: GitHub Actions CI exists for lint/typecheck/unit/API integration tests; production build checks are not yet included.
+- `TASK-1402`: audit events are written for several booking/resource actions; dedicated full-phone reveal audit flow and owner audit API are still incomplete.
+- `TASK-1404`: structured log redaction exists and UI masking is present in places; shared masking/redaction utilities and API-wide masked contact DTOs need hardening.
+
+Highest-priority open work:
+
+1. Complete backend endpoints used by admin/owner UI fallbacks: audit-log listing, emergency contact reveal, and user block/unblock.
+2. Implement Telegram bot runtime, `/start` account linking, and notification delivery.
+3. Add production Dockerfiles, deployment guide, backups, reverse proxy/HTTPS, and uptime monitoring.
+4. Add Playwright smoke tests and bot tests after the bot runtime exists.
+
 ---
 
 ## 1. Общие правила работы с задачами
@@ -109,6 +149,7 @@ P3 — улучшение или polish
 
 **Priority:** P0  
 **Labels:** `area:repo`, `type:chore`, `good-first-codex-task`
+**Status:** Done
 
 #### Goal
 Создать базовую структуру монорепозитория.
@@ -147,6 +188,7 @@ docker
 
 **Priority:** P0  
 **Labels:** `area:repo`, `type:chore`
+**Status:** Done
 
 #### Goal
 Настроить pnpm workspace для монорепозитория.
@@ -175,6 +217,7 @@ docker
 
 **Priority:** P0  
 **Labels:** `area:repo`, `type:chore`
+**Status:** Done
 
 #### Goal
 Настроить единый TypeScript config.
@@ -197,6 +240,7 @@ docker
 
 **Priority:** P0  
 **Labels:** `area:repo`, `type:chore`
+**Status:** Done
 
 #### Goal
 Настроить ESLint и Prettier.
@@ -220,6 +264,7 @@ docker
 
 **Priority:** P0  
 **Labels:** `area:repo`, `area:infra`, `type:chore`
+**Status:** Done
 
 #### Goal
 Подготовить `.env.example` для всех приложений.
@@ -253,6 +298,7 @@ apps/bot/.env.example
 
 **Priority:** P0  
 **Labels:** `area:infra`, `area:database`, `type:chore`
+**Status:** Done
 
 #### Goal
 Поднять PostgreSQL и Redis локально.
@@ -278,6 +324,7 @@ apps/bot/.env.example
 
 **Priority:** P0  
 **Labels:** `area:database`, `type:feature`
+**Status:** Done
 
 #### Goal
 Настроить Prisma как единый database layer.
@@ -305,6 +352,7 @@ apps/bot/.env.example
 
 **Priority:** P0  
 **Labels:** `area:database`, `type:feature`
+**Status:** Done
 
 #### Goal
 Создать начальную схему БД для пользователей, ролей, помещений, столов и бронирований.
@@ -341,6 +389,7 @@ apps/bot/.env.example
 
 **Priority:** P1  
 **Labels:** `area:database`, `type:feature`, `area:portfolio`
+**Status:** Done
 
 #### Goal
 Добавить seed данные для локального запуска и demo mode.
@@ -377,6 +426,7 @@ apps/bot/.env.example
 
 **Priority:** P0  
 **Labels:** `area:api`, `type:feature`
+**Status:** Done
 
 #### Goal
 Создать приложение `apps/api`.
@@ -403,6 +453,7 @@ apps/bot/.env.example
 
 **Priority:** P0  
 **Labels:** `area:api`, `type:feature`, `area:docs`
+**Status:** Done
 
 #### Goal
 Добавить Swagger-документацию.
@@ -427,6 +478,7 @@ apps/bot/.env.example
 
 **Priority:** P0  
 **Labels:** `area:api`, `area:infra`, `type:feature`
+**Status:** Done
 
 #### Goal
 Добавить endpoint для мониторинга.
@@ -455,6 +507,7 @@ GET /api/v1/health
 
 **Priority:** P1  
 **Labels:** `area:api`, `area:infra`, `type:feature`
+**Status:** Done
 
 #### Goal
 Настроить структурированные логи.
@@ -484,6 +537,7 @@ GET /api/v1/health
 
 **Priority:** P0  
 **Labels:** `area:auth`, `area:api`, `type:feature`
+**Status:** Done
 
 #### Goal
 Реализовать роли и guards.
@@ -509,6 +563,7 @@ GET /api/v1/health
 
 **Priority:** P0  
 **Labels:** `area:auth`, `area:api`, `area:bot`, `type:feature`
+**Status:** Done
 
 #### Goal
 Реализовать проверку Telegram login/init data.
@@ -533,6 +588,7 @@ GET /api/v1/health
 
 **Priority:** P1  
 **Labels:** `area:auth`, `area:api`, `type:feature`
+**Status:** Done
 
 #### Goal
 Дать пользователю возможность читать и обновлять профиль.
@@ -560,6 +616,7 @@ PATCH /api/v1/me/privacy
 
 **Priority:** P1  
 **Labels:** `area:legal`, `area:auth`, `area:api`, `type:feature`
+**Status:** Done
 
 #### Goal
 Сохранять согласия пользователя с legal documents.
@@ -582,6 +639,7 @@ PATCH /api/v1/me/privacy
 
 **Priority:** P2  
 **Labels:** `area:legal`, `area:auth`, `type:feature`
+**Status:** Done
 
 #### Goal
 Добавить заявку на удаление аккаунта.
@@ -610,6 +668,7 @@ PATCH /api/v1/me/privacy
 
 **Priority:** P1  
 **Labels:** `area:api`, `area:admin`, `area:booking`, `type:feature`
+**Status:** Done
 
 #### Goal
 Владелец может управлять помещениями.
@@ -635,6 +694,7 @@ DELETE /api/v1/admin/rooms/:id
 
 **Priority:** P1  
 **Labels:** `area:api`, `area:admin`, `area:booking`, `type:feature`
+**Status:** Done
 
 #### Goal
 Владелец может управлять столами.
@@ -661,6 +721,7 @@ DELETE /api/v1/admin/rooms/:id
 
 **Priority:** P1  
 **Labels:** `area:api`, `area:admin`, `area:booking`, `type:feature`
+**Status:** Done
 
 #### Goal
 Реализовать базовое недельное расписание клуба.
@@ -684,6 +745,7 @@ DELETE /api/v1/admin/rooms/:id
 
 **Priority:** P1  
 **Labels:** `area:api`, `area:admin`, `area:booking`, `type:feature`
+**Status:** Done
 
 #### Goal
 Добавить праздники, выходные и сокращённые дни.
@@ -707,6 +769,7 @@ DELETE /api/v1/admin/rooms/:id
 
 **Priority:** P2  
 **Labels:** `area:api`, `area:admin`, `area:booking`, `type:feature`
+**Status:** Done
 
 #### Goal
 Позволить блокировать конкретные помещения и столы на период.
@@ -729,6 +792,7 @@ DELETE /api/v1/admin/rooms/:id
 
 **Priority:** P0  
 **Labels:** `area:booking`, `area:api`, `type:feature`
+**Status:** Done
 
 #### Goal
 Рассчитывать доступные слоты для бронирования.
@@ -754,6 +818,7 @@ DELETE /api/v1/admin/rooms/:id
 
 **Priority:** P0  
 **Labels:** `area:booking`, `area:api`, `type:feature`
+**Status:** Done
 
 #### Goal
 Пользователь может создать заявку на бронь.
@@ -779,6 +844,7 @@ POST /api/v1/bookings
 
 **Priority:** P0  
 **Labels:** `area:booking`, `area:api`, `area:admin`, `type:feature`
+**Status:** Done
 
 #### Goal
 Реализовать корректные переходы статусов брони.
@@ -807,6 +873,7 @@ pending -> expired
 
 **Priority:** P0  
 **Labels:** `area:booking`, `area:api`, `area:admin`, `type:feature`
+**Status:** Done
 
 #### Goal
 Администратор подтверждает или отменяет заявку.
@@ -831,6 +898,7 @@ POST /api/v1/admin/bookings/:id/cancel
 
 **Priority:** P1  
 **Labels:** `area:booking`, `area:api`, `type:feature`
+**Status:** Done
 
 #### Goal
 Ограничить отмену брони по правилам клуба.
@@ -853,6 +921,7 @@ POST /api/v1/admin/bookings/:id/cancel
 
 **Priority:** P1  
 **Labels:** `area:booking`, `area:api`, `type:feature`
+**Status:** Done
 
 #### Goal
 Ограничить количество активных броней пользователя.
@@ -869,6 +938,7 @@ POST /api/v1/admin/bookings/:id/cancel
 
 **Priority:** P0  
 **Labels:** `area:booking`, `area:tests`, `type:test`
+**Status:** Done
 
 #### Goal
 Проверить защиту от двойного бронирования.
@@ -896,6 +966,7 @@ POST /api/v1/admin/bookings/:id/cancel
 
 **Priority:** P0  
 **Labels:** `area:web`, `type:feature`
+**Status:** Done
 
 #### Goal
 Создать `apps/web`.
@@ -921,6 +992,7 @@ POST /api/v1/admin/bookings/:id/cancel
 
 **Priority:** P1  
 **Labels:** `area:web`, `type:feature`
+**Status:** Done
 
 #### Scope
 
@@ -945,6 +1017,7 @@ POST /api/v1/admin/bookings/:id/cancel
 
 **Priority:** P1  
 **Labels:** `area:web`, `area:auth`, `type:feature`
+**Status:** Done
 
 #### Goal
 Добавить UI входа через Telegram.
@@ -968,6 +1041,7 @@ POST /api/v1/admin/bookings/:id/cancel
 
 **Priority:** P1  
 **Labels:** `area:web`, `type:feature`
+**Status:** Done
 
 #### Scope
 
@@ -994,6 +1068,7 @@ POST /api/v1/admin/bookings/:id/cancel
 
 **Priority:** P1  
 **Labels:** `area:web`, `area:booking`, `type:feature`
+**Status:** Done
 
 #### Components
 
@@ -1017,6 +1092,7 @@ BookingSummary
 
 **Priority:** P1  
 **Labels:** `area:web`, `area:booking`, `type:feature`
+**Status:** Done
 
 #### Flow
 
@@ -1040,6 +1116,7 @@ BookingSummary
 
 **Priority:** P2  
 **Labels:** `area:web`, `area:booking`, `type:feature`
+**Status:** Done
 
 #### Acceptance criteria
 
@@ -1060,6 +1137,7 @@ BookingSummary
 
 **Priority:** P1  
 **Labels:** `area:web`, `area:admin`, `type:feature`
+**Status:** Done
 
 #### Acceptance criteria
 
@@ -1073,6 +1151,7 @@ BookingSummary
 
 **Priority:** P1  
 **Labels:** `area:web`, `area:admin`, `area:booking`, `type:feature`
+**Status:** Partial — UI exists; emergency full-phone reveal still needs backend/audit completion.
 
 #### Scope
 
@@ -1097,6 +1176,7 @@ BookingSummary
 
 **Priority:** P2  
 **Labels:** `area:web`, `area:admin`, `type:feature`
+**Status:** Done
 
 #### Scope
 
@@ -1118,6 +1198,7 @@ BookingSummary
 
 **Priority:** P2  
 **Labels:** `area:web`, `area:admin`, `area:auth`, `type:feature`
+**Status:** Partial — UI exists; owner block/unblock API and audit behavior still need completion.
 
 #### Acceptance criteria
 
@@ -1131,6 +1212,7 @@ BookingSummary
 
 **Priority:** P1  
 **Labels:** `area:web`, `area:admin`, `type:feature`
+**Status:** Partial — UI exists; owner audit-log API still needs completion.
 
 #### Acceptance criteria
 
@@ -1151,6 +1233,7 @@ BookingSummary
 
 **Priority:** P1  
 **Labels:** `area:bot`, `type:feature`
+**Status:** Partial — package scaffold exists; grammY runtime is still open.
 
 #### Goal
 Создать `apps/bot` на grammY.
@@ -1168,6 +1251,7 @@ BookingSummary
 
 **Priority:** P1  
 **Labels:** `area:bot`, `area:auth`, `type:feature`
+**Status:** Open
 
 #### Acceptance criteria
 
@@ -1182,6 +1266,7 @@ BookingSummary
 
 **Priority:** P2  
 **Labels:** `area:bot`, `type:feature`
+**Status:** Open
 
 #### Commands
 
@@ -1207,6 +1292,7 @@ BookingSummary
 
 **Priority:** P2  
 **Labels:** `area:bot`, `area:admin`, `type:feature`
+**Status:** Open
 
 #### Commands
 
@@ -1228,6 +1314,7 @@ BookingSummary
 
 **Priority:** P1  
 **Labels:** `area:bot`, `area:booking`, `type:feature`
+**Status:** Open — booking backend emits notification-request signals, but delivery is not implemented.
 
 #### Events
 
@@ -1248,6 +1335,7 @@ BookingSummary
 
 **Priority:** P2  
 **Labels:** `area:bot`, `area:infra`, `type:feature`
+**Status:** Open
 
 #### Acceptance criteria
 
@@ -1268,6 +1356,7 @@ BookingSummary
 
 **Priority:** P2  
 **Labels:** `area:games`, `area:api`, `area:database`, `type:feature`
+**Status:** Open
 
 #### Scope
 
@@ -1293,6 +1382,7 @@ Game fields:
 
 **Priority:** P2  
 **Labels:** `area:games`, `area:web`, `type:feature`
+**Status:** Open — public `/games` placeholder page exists, but catalog data/model/filtering is not implemented.
 
 #### Acceptance criteria
 
@@ -1306,6 +1396,7 @@ Game fields:
 
 **Priority:** P2  
 **Labels:** `area:meetups`, `area:api`, `area:database`, `type:feature`
+**Status:** Open
 
 #### Scope
 
@@ -1329,6 +1420,7 @@ Entities:
 
 **Priority:** P2  
 **Labels:** `area:meetups`, `area:api`, `type:feature`
+**Status:** Open
 
 #### Acceptance criteria
 
@@ -1343,6 +1435,7 @@ Entities:
 
 **Priority:** P2  
 **Labels:** `area:meetups`, `area:booking`, `area:api`, `type:feature`
+**Status:** Open
 
 #### Goal
 После набора игроков встреча создаёт заявку на бронь.
@@ -1360,6 +1453,7 @@ Entities:
 
 **Priority:** P2  
 **Labels:** `area:meetups`, `area:api`, `area:web`, `type:feature`
+**Status:** Open
 
 #### Goal
 Добавить простую ленту сообщений без realtime.
@@ -1377,6 +1471,7 @@ Entities:
 
 **Priority:** P3  
 **Labels:** `area:meetups`, `area:web`, `area:api`, `type:feature`
+**Status:** Open
 
 #### Scope
 
@@ -1402,6 +1497,7 @@ Entities:
 
 **Priority:** P1  
 **Labels:** `area:api`, `area:bot`, `type:feature`
+**Status:** Partial — booking flows create notification-request audit signals; durable delivery service is open.
 
 #### Goal
 Создать единый notification layer.
@@ -1425,6 +1521,7 @@ Entities:
 
 **Priority:** P2  
 **Labels:** `area:infra`, `area:api`, `area:bot`, `type:feature`
+**Status:** Open
 
 #### Goal
 Использовать очередь для уведомлений и напоминаний.
@@ -1441,6 +1538,7 @@ Entities:
 
 **Priority:** P2  
 **Labels:** `area:booking`, `area:bot`, `type:feature`
+**Status:** Open
 
 #### Goal
 Напоминать пользователям перед игрой.
@@ -1463,6 +1561,7 @@ Entities:
 
 **Priority:** P0  
 **Labels:** `area:tests`, `type:chore`
+**Status:** Done
 
 #### Scope
 
@@ -1483,6 +1582,7 @@ Entities:
 
 **Priority:** P1  
 **Labels:** `area:tests`, `area:booking`, `type:test`
+**Status:** Done
 
 #### Acceptance criteria
 
@@ -1497,6 +1597,7 @@ Entities:
 
 **Priority:** P1  
 **Labels:** `area:tests`, `area:api`, `type:test`
+**Status:** Done
 
 #### Scenarios
 
@@ -1518,6 +1619,7 @@ Entities:
 
 **Priority:** P2  
 **Labels:** `area:tests`, `area:web`, `type:test`
+**Status:** Open
 
 #### Scenarios
 
@@ -1537,6 +1639,7 @@ Entities:
 
 **Priority:** P2  
 **Labels:** `area:tests`, `area:bot`, `type:test`
+**Status:** Open
 
 #### Acceptance criteria
 
@@ -1551,6 +1654,7 @@ Entities:
 
 **Priority:** P2  
 **Labels:** `area:tests`, `area:legal`, `area:auth`, `type:test`
+**Status:** Partial — role/auth and booking privacy tests exist; focused privacy/security suite still needs hardening.
 
 #### Acceptance criteria
 
@@ -1571,6 +1675,7 @@ Entities:
 
 **Priority:** P1  
 **Labels:** `area:infra`, `type:chore`
+**Status:** Partial — GitHub Actions runs lint, typecheck, unit tests, and API integration tests; build job is still open.
 
 #### Pipeline
 
@@ -1592,6 +1697,7 @@ Entities:
 
 **Priority:** P1  
 **Labels:** `area:infra`, `type:chore`
+**Status:** Open
 
 #### Scope
 
@@ -1612,6 +1718,7 @@ Entities:
 
 **Priority:** P1  
 **Labels:** `area:infra`, `type:feature`
+**Status:** Open
 
 #### Scope
 
@@ -1630,6 +1737,7 @@ Use Caddy or nginx.
 
 **Priority:** P1  
 **Labels:** `area:infra`, `area:database`, `type:feature`
+**Status:** Open
 
 #### Goal
 Настроить PostgreSQL backups.
@@ -1647,6 +1755,7 @@ Use Caddy or nginx.
 
 **Priority:** P1  
 **Labels:** `area:docs`, `area:infra`, `type:docs`
+**Status:** Open
 
 #### Acceptance criteria
 
@@ -1662,6 +1771,7 @@ Use Caddy or nginx.
 
 **Priority:** P2  
 **Labels:** `area:infra`, `area:docs`, `type:docs`
+**Status:** Open
 
 #### Acceptance criteria
 
@@ -1681,6 +1791,7 @@ Use Caddy or nginx.
 
 **Priority:** P1  
 **Labels:** `area:legal`, `area:web`, `type:feature`
+**Status:** Partial — rules page exists; dedicated legal document pages are open.
 
 #### Pages
 
@@ -1701,6 +1812,7 @@ Use Caddy or nginx.
 
 **Priority:** P1  
 **Labels:** `area:api`, `area:admin`, `area:legal`, `type:feature`
+**Status:** Partial — audit events exist for several critical actions; full-phone reveal flow and owner audit API are still incomplete.
 
 #### Events
 
@@ -1726,6 +1838,7 @@ Use Caddy or nginx.
 
 **Priority:** P2  
 **Labels:** `area:legal`, `area:api`, `type:feature`
+**Status:** Open
 
 #### Goal
 Добавить основу для выгрузки данных пользователя.
@@ -1742,6 +1855,7 @@ Use Caddy or nginx.
 
 **Priority:** P1  
 **Labels:** `area:legal`, `area:api`, `type:feature`
+**Status:** Partial — log redaction exists; shared API masking utilities need completion.
 
 #### Acceptance criteria
 
@@ -1761,6 +1875,7 @@ Use Caddy or nginx.
 
 **Priority:** P2  
 **Labels:** `area:portfolio`, `area:docs`, `type:docs`
+**Status:** Partial — README is updated for current implementation; screenshots/GIF placeholders and demo packaging remain open.
 
 #### README sections
 
@@ -1787,6 +1902,7 @@ Use Caddy or nginx.
 
 **Priority:** P2  
 **Labels:** `area:portfolio`, `area:web`, `area:api`, `type:feature`
+**Status:** Open — demo seed data exists, but `/demo` mode does not.
 
 #### Goal
 Позволить работодателю посмотреть проект без реальных данных.
@@ -1810,6 +1926,7 @@ Use Caddy or nginx.
 
 **Priority:** P2  
 **Labels:** `area:portfolio`, `area:docs`, `type:docs`
+**Status:** Open
 
 #### Goal
 Показать AI-assisted development process.
@@ -1826,6 +1943,7 @@ Use Caddy or nginx.
 
 **Priority:** P2  
 **Labels:** `area:portfolio`, `area:docs`, `type:docs`
+**Status:** Open
 
 #### Acceptance criteria
 
@@ -1839,6 +1957,7 @@ Use Caddy or nginx.
 
 **Priority:** P2  
 **Labels:** `area:portfolio`, `area:docs`, `type:docs`
+**Status:** Open
 
 #### Diagrams
 
@@ -1861,6 +1980,7 @@ Use Caddy or nginx.
 
 **Priority:** P2  
 **Labels:** `area:web`, `area:admin`, `type:feature`, `scope:portfolio-polish`
+**Status:** Open
 
 #### Scope
 
@@ -1882,6 +2002,7 @@ Use Caddy or nginx.
 
 **Priority:** P2  
 **Labels:** `area:api`, `area:web`, `area:admin`, `type:feature`, `scope:portfolio-polish`
+**Status:** Open
 
 #### Scope
 
@@ -1902,6 +2023,7 @@ Use Caddy or nginx.
 
 **Priority:** P3  
 **Labels:** `area:portfolio`, `area:docs`, `type:docs`
+**Status:** Open
 
 #### Scenarios
 
@@ -2038,20 +2160,20 @@ Tasks:
 
 ---
 
-## 19. First 10 tasks for Codex
+## 19. Next 10 tasks for Codex
 
-Рекомендуемый стартовый набор задач:
+Рекомендуемый следующий набор задач после текущего состояния `main`:
 
-1. TASK-0001 — Create monorepo structure
-2. TASK-0002 — Configure package manager and workspace
-3. TASK-0003 — Add shared TypeScript config
-4. TASK-0004 — Add linting and formatting
-5. TASK-0005 — Add environment examples
-6. TASK-0101 — Add Docker Compose for PostgreSQL and Redis
-7. TASK-0102 — Add database package with Prisma
-8. TASK-0201 — Create NestJS API app
-9. TASK-0202 — Add Swagger/OpenAPI
-10. TASK-0203 — Add healthcheck endpoint
+1. Finish backend endpoint for owner audit-log listing used by `/admin/audit-logs`.
+2. Finish emergency full-phone reveal endpoint with required audit event and reason payload.
+3. Finish owner user block/unblock endpoint and audit behavior used by `/admin/users`.
+4. TASK-0901 — Create real grammY bot app runtime.
+5. TASK-0902 — Implement `/start` and account linking.
+6. TASK-1101 — Add notification service for booking events.
+7. TASK-0905 — Implement Telegram booking notifications.
+8. TASK-1302 — Add Dockerfiles and production compose.
+9. TASK-1305 — Add production deployment guide, including Telegram webhook setup.
+10. TASK-1204 — Add Playwright smoke tests for critical web flows.
 
 ---
 
@@ -2059,24 +2181,24 @@ Tasks:
 
 MVP можно считать готовым, когда выполнены условия:
 
-- [ ] Пользователь может зарегистрироваться через Telegram.
-- [ ] Пользователь может заполнить профиль, включая телефон для экстренной связи.
-- [ ] Телефон nullable в БД, но обязателен для создания реальной брони.
-- [ ] Пользователь может создать заявку на бронь стола.
-- [ ] Администратор может подтвердить или отменить бронь.
+- [x] Пользователь может зарегистрироваться через Telegram web auth payload.
+- [x] Пользователь может заполнить профиль, включая телефон для экстренной связи.
+- [x] Телефон nullable в БД, но обязателен для создания реальной брони.
+- [x] Пользователь может создать заявку на бронь стола.
+- [x] Администратор может подтвердить или отменить бронь.
 - [ ] Пользователь получает Telegram-уведомление.
-- [ ] Владелец может управлять помещениями, столами и расписанием.
-- [ ] Владелец может просматривать audit log.
-- [ ] Система предотвращает двойное бронирование одного стола.
-- [ ] Есть базовые тесты ключевой бизнес-логики.
-- [ ] Есть Swagger/OpenAPI.
-- [ ] Есть seed demo-data.
-- [ ] Есть Docker-based local setup.
+- [x] Владелец может управлять помещениями, столами и расписанием.
+- [~] Владелец может просматривать audit log — UI foundation exists; backend listing endpoint still needs completion.
+- [x] Система предотвращает двойное бронирование одного стола.
+- [x] Есть базовые тесты ключевой бизнес-логики.
+- [x] Есть Swagger/OpenAPI.
+- [x] Есть seed demo-data.
+- [x] Есть Docker-based local setup.
 - [ ] Есть staging и production deployment plan.
 - [ ] Есть бэкапы БД.
-- [ ] Есть healthcheck.
+- [x] Есть healthcheck.
 - [ ] Нет реальных секретов и персональных данных в репозитории.
-- [ ] README объясняет проект как AI-assisted portfolio case.
+- [x] README объясняет проект как AI-assisted portfolio case.
 
 ---
 

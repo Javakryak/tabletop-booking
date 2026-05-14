@@ -156,6 +156,27 @@
 
 ---
 
+# 3.5. Current Implementation Snapshot
+
+Статус на текущей ветке `main`:
+
+- [x] Foundation, monorepo, workspace scripts, env examples, lint/format/typecheck setup.
+- [x] Local PostgreSQL/Redis Docker Compose.
+- [x] Prisma schema, migrations, database package, seed demo-data.
+- [x] NestJS API foundation: `/api/v1`, Swagger, validation, error handling, structured logs, request/correlation id, healthcheck.
+- [x] Auth/user/legal backend: Telegram web login verification, Telegram Mini App init data verification, JWT sessions, roles/guards, profile/privacy endpoints, legal consent acceptance, account deletion request.
+- [x] Core resources and booking backend: rooms, tables, working hours, schedule exceptions, closures, booking availability, create request, cancellation rules, active booking limits, admin confirmation/cancellation, status history, audit events, concurrency protection.
+- [x] Web MVP foundation: public pages, auth/profile flow, dashboard, booking creation/history UI, admin layout, admin booking queue, owner resource screens, user blocking UI, audit-log UI foundation.
+- [x] Test foundation, booking domain tests, API integration tests, and CI for lint/typecheck/tests.
+- [~] Admin/privacy backend integration is partial: some web screens still have demo/fallback behavior until audit-log listing, emergency full-phone reveal, and user block/unblock APIs are complete.
+- [~] Notification events are represented by audit/log signals, but real notification delivery is not implemented.
+- [ ] Telegram bot runtime, `/start`, commands, webhooks, and Telegram notifications.
+- [ ] Production deployment, Dockerfiles, reverse proxy/HTTPS, backups, uptime monitoring, and runbooks.
+- [ ] MVP 2 game catalog and meetups.
+- [ ] Portfolio demo mode, prompt log, dev diary, diagrams, and media assets.
+
+---
+
 # 4. Фазы реализации
 
 ---
@@ -212,22 +233,22 @@ docker/
 .github/
 ```
 
-- [ ] Создать Next.js приложение `apps/web`.
-- [ ] Создать NestJS приложение `apps/api`.
-- [ ] Создать Telegram bot приложение `apps/bot`.
+- [x] Создать Next.js приложение `apps/web`.
+- [x] Создать NestJS приложение `apps/api`.
+- [~] Создать Telegram bot приложение `apps/bot` — package scaffold exists, grammY runtime is not implemented.
 - [x] Настроить TypeScript config.
 - [x] Настроить ESLint.
 - [x] Настроить Prettier.
 - [x] Настроить `.env.example`.
-- [ ] Добавить Docker Compose для PostgreSQL и Redis.
-- [ ] Добавить базовый CI: lint, typecheck, test.
+- [x] Добавить Docker Compose для PostgreSQL и Redis.
+- [x] Добавить базовый CI: lint, typecheck, test.
 
 ### Deliverables
 
 - [x] Рабочий monorepo.
-- [ ] Локально поднимаются PostgreSQL и Redis.
-- [ ] Все приложения стартуют в dev-режиме.
-- [ ] CI проходит на пустом проекте.
+- [x] Локально поднимаются PostgreSQL и Redis.
+- [~] Все приложения стартуют в dev-режиме — web/API are implemented; bot runtime is still pending.
+- [x] CI проходит для реализованных workspace checks.
 
 ### Acceptance Criteria
 
@@ -249,40 +270,40 @@ pnpm dev
 
 ### Tasks
 
-- [ ] Настроить Prisma.
-- [ ] Подключить PostgreSQL.
-- [ ] Создать начальную схему БД.
-- [ ] Добавить миграции.
-- [ ] Добавить seed demo-data.
-- [ ] Создать database package.
-- [ ] Добавить enum статусов брони.
+- [x] Настроить Prisma.
+- [x] Подключить PostgreSQL.
+- [x] Создать начальную схему БД.
+- [x] Добавить миграции.
+- [x] Добавить seed demo-data.
+- [x] Создать database package.
+- [x] Добавить enum статусов брони.
 - [ ] Добавить enum статусов встречи.
-- [ ] Добавить базовые роли.
+- [x] Добавить базовые роли.
 
 ### Core Entities
 
-- [ ] `User`;
-- [ ] `UserProfile`;
-- [ ] `Role`;
-- [ ] `UserRole`;
-- [ ] `Room`;
-- [ ] `GameTable`;
-- [ ] `ClubWorkingHours`;
-- [ ] `ScheduleException`;
-- [ ] `RoomClosure`;
-- [ ] `TableClosure`;
-- [ ] `BookingRule`;
-- [ ] `Booking`;
-- [ ] `BookingStatusHistory`;
+- [x] `User`;
+- [x] `UserProfile`;
+- [x] `Role` / role enum;
+- [x] `UserRole`;
+- [x] `Room`;
+- [x] `GameTable`;
+- [x] `ClubWorkingHours`;
+- [x] `ScheduleException`;
+- [x] `RoomClosure`;
+- [x] `TableClosure`;
+- [x] `BookingRule`;
+- [x] `Booking`;
+- [x] `BookingStatusHistory`;
 - [ ] `Game`;
 - [ ] `Meetup`;
 - [ ] `MeetupParticipant`;
 - [ ] `MeetupMessage`;
 - [ ] `Friendship`;
 - [ ] `Notification`;
-- [ ] `AuditLog`;
-- [ ] `LegalDocument`;
-- [ ] `Consent`.
+- [x] `AuditLog`;
+- [x] `LegalDocument`;
+- [x] `Consent`.
 
 ### Acceptance Criteria
 
@@ -301,31 +322,31 @@ pnpm dev
 
 ### Tasks
 
-- [ ] Настроить глобальный префикс `/api/v1`.
-- [ ] Настроить Swagger/OpenAPI.
-- [ ] Настроить validation pipe.
-- [ ] Настроить error handling.
-- [ ] Настроить structured logging.
-- [ ] Добавить request id / correlation id.
-- [ ] Добавить healthcheck endpoint.
-- [ ] Подключить Prisma service.
-- [ ] Подключить Redis service.
+- [x] Настроить глобальный префикс `/api/v1`.
+- [x] Настроить Swagger/OpenAPI.
+- [x] Настроить validation pipe.
+- [x] Настроить error handling.
+- [x] Настроить structured logging.
+- [x] Добавить request id / correlation id.
+- [x] Добавить healthcheck endpoint.
+- [x] Подключить Prisma/database package.
+- [~] Подключить Redis service — healthcheck verifies Redis connectivity; queue/service layer is pending.
 
 ### Modules
 
-- [ ] `HealthModule`;
-- [ ] `AuthModule`;
-- [ ] `UsersModule`;
-- [ ] `RoomsModule`;
-- [ ] `TablesModule`;
-- [ ] `ScheduleModule`;
-- [ ] `BookingsModule`;
+- [x] Health/system endpoints;
+- [x] `AuthModule`;
+- [x] User/profile endpoints;
+- [x] `RoomsModule`;
+- [x] `TablesModule`;
+- [x] `ScheduleModule`;
+- [x] `BookingsModule`;
 - [ ] `GamesModule`;
 - [ ] `MeetupsModule`;
 - [ ] `NotificationsModule`;
-- [ ] `AdminModule`;
-- [ ] `AuditModule`;
-- [ ] `LegalModule`.
+- [~] Admin/owner endpoints;
+- [~] Audit logging exists; dedicated audit-log listing/reveal APIs are still partial.
+- [x] `LegalModule`.
 
 ### Acceptance Criteria
 
@@ -342,16 +363,16 @@ pnpm dev
 
 ### Tasks
 
-- [ ] Реализовать модель пользователя.
-- [ ] Реализовать роли и guards.
-- [ ] Реализовать Telegram login flow для web.
+- [x] Реализовать модель пользователя.
+- [x] Реализовать роли и guards.
+- [x] Реализовать Telegram login flow для web.
 - [ ] Реализовать связку аккаунта через Telegram bot `/start`.
-- [ ] Добавить профиль пользователя.
-- [ ] Добавить телефон для экстренной связи.
-- [ ] Добавить опциональный email.
-- [ ] Добавить настройки приватности.
-- [ ] Добавить блокировку пользователя владельцем.
-- [ ] Добавить acceptance of legal documents.
+- [x] Добавить профиль пользователя.
+- [x] Добавить телефон для экстренной связи.
+- [x] Добавить опциональный email.
+- [x] Добавить настройки приватности.
+- [~] Добавить блокировку пользователя владельцем — UI exists; backend endpoint still needs completion.
+- [x] Добавить acceptance of legal documents.
 
 ### Role Matrix
 
@@ -380,16 +401,16 @@ pnpm dev
 
 ### Tasks
 
-- [ ] CRUD помещений.
-- [ ] CRUD столов.
-- [ ] Настройка вместимости стола.
-- [ ] Блокировка помещения.
-- [ ] Блокировка стола.
-- [ ] Базовое недельное расписание.
-- [ ] Исключения расписания по датам.
-- [ ] Сокращённые дни.
-- [ ] Выходные и праздники.
-- [ ] API получения доступных слотов.
+- [x] CRUD помещений.
+- [x] CRUD столов.
+- [x] Настройка вместимости стола.
+- [x] Блокировка помещения.
+- [x] Блокировка стола.
+- [x] Базовое недельное расписание.
+- [x] Исключения расписания по датам.
+- [x] Сокращённые дни.
+- [x] Выходные и праздники.
+- [x] API получения доступных слотов.
 
 ### Acceptance Criteria
 
@@ -417,18 +438,18 @@ expired
 
 ### Tasks
 
-- [ ] Создание заявки на бронь.
-- [ ] Проверка рабочего времени клуба.
-- [ ] Проверка исключений расписания.
-- [ ] Проверка блокировок помещения и стола.
-- [ ] Проверка лимита активных броней.
-- [ ] Проверка права пользователя бронировать.
-- [ ] Подтверждение брони администратором.
-- [ ] Отмена брони пользователем.
-- [ ] Отмена брони администратором.
+- [x] Создание заявки на бронь.
+- [x] Проверка рабочего времени клуба.
+- [x] Проверка исключений расписания.
+- [x] Проверка блокировок помещения и стола.
+- [x] Проверка лимита активных броней.
+- [x] Проверка права пользователя бронировать.
+- [x] Подтверждение брони администратором.
+- [x] Отмена брони пользователем.
+- [x] Отмена брони администратором.
 - [ ] Перенос брони администратором.
-- [ ] История броней пользователя.
-- [ ] История статусов брони.
+- [x] История броней пользователя.
+- [x] История статусов брони.
 - [ ] Завершение прошедших броней.
 - [ ] Expiration для неподтверждённых заявок.
 
@@ -460,22 +481,22 @@ existing.end_at > requested.start_at
 
 ### Admin Panel Tasks
 
-- [ ] Список заявок на подтверждение.
+- [x] Список заявок на подтверждение.
 - [ ] Календарь броней на день.
-- [ ] Подтверждение брони.
-- [ ] Отмена брони.
+- [x] Подтверждение брони.
+- [x] Отмена брони.
 - [ ] Перенос брони.
-- [ ] Просмотр минимальных контактов пользователя.
-- [ ] Управление расписанием.
+- [x] Просмотр минимальных контактов пользователя.
+- [x] Управление расписанием.
 
 ### Owner Panel Tasks
 
-- [ ] Управление помещениями.
-- [ ] Управление столами.
-- [ ] Управление правилами бронирования.
-- [ ] Управление пользователями.
-- [ ] Блокировка пользователей.
-- [ ] Просмотр audit log.
+- [x] Управление помещениями.
+- [x] Управление столами.
+- [x] Управление правилами бронирования.
+- [~] Управление пользователями — UI foundation exists; backend user-management actions are partial.
+- [~] Блокировка пользователей — UI foundation exists; backend endpoint still needs completion.
+- [~] Просмотр audit log — UI foundation exists; owner audit-log API still needs completion.
 
 ### Owner Panel Tasks — Portfolio Polish / MVP 3
 
@@ -498,27 +519,27 @@ existing.end_at > requested.start_at
 
 ### Public Pages
 
-- [ ] Главная.
-- [ ] Расписание.
-- [ ] Игры.
-- [ ] Правила.
-- [ ] Контакты.
+- [x] Главная.
+- [x] Расписание.
+- [x] Игры.
+- [x] Правила.
+- [x] Контакты.
 
 ### User App
 
-- [ ] Профиль.
-- [ ] Мои брони.
-- [ ] Создание брони.
-- [ ] История броней.
-- [ ] Настройки приватности.
-- [ ] Legal documents acceptance.
+- [x] Профиль.
+- [x] Мои брони.
+- [x] Создание брони.
+- [x] История броней.
+- [x] Настройки приватности.
+- [x] Legal documents acceptance.
 
 ### Design Requirements
 
-- [ ] Mobile-first.
-- [ ] Тёмная тема по умолчанию.
-- [ ] Доступность базового уровня.
-- [ ] UI на основе Tailwind CSS + shadcn/ui.
+- [x] Mobile-first.
+- [x] Тёмная тема по умолчанию.
+- [~] Доступность базового уровня.
+- [x] UI на основе Tailwind CSS + shadcn/ui.
 
 ### Acceptance Criteria
 
@@ -640,10 +661,10 @@ completed
 
 ### Tasks
 
-- [ ] Выделить переиспользуемые компоненты бронирования.
-- [ ] Выделить mobile-first layout.
+- [x] Выделить переиспользуемые компоненты бронирования.
+- [x] Выделить mobile-first layout.
 - [ ] Подготовить route для Mini App.
-- [ ] Реализовать проверку Telegram init data.
+- [x] Реализовать проверку Telegram init data.
 - [ ] Подготовить кнопку открытия Mini App из бота.
 - [ ] Проверить базовый сценарий открытия приложения внутри Telegram.
 
@@ -661,14 +682,14 @@ completed
 
 ### Tasks
 
-- [ ] Добавить legal documents model.
-- [ ] Добавить consent records.
-- [ ] Добавить обязательное принятие документов при регистрации.
-- [ ] Добавить версионирование документов.
+- [x] Добавить legal documents model.
+- [x] Добавить consent records.
+- [x] Добавить обязательное принятие документов при регистрации.
+- [x] Добавить версионирование документов.
 - [ ] Добавить страницу privacy policy.
 - [ ] Добавить страницу user agreement.
 - [ ] Добавить страницу согласия на обработку ПДн.
-- [ ] Добавить запрос на удаление аккаунта.
+- [x] Добавить запрос на удаление аккаунта.
 - [ ] Добавить экспорт данных пользователя.
 - [ ] Добавить анонимизацию персональных данных.
 
@@ -699,30 +720,30 @@ completed
 
 ### Unit Tests
 
-- [ ] Правила бронирования.
-- [ ] Проверка пересечений.
-- [ ] Лимит активных броней.
-- [ ] Права доступа.
-- [ ] Статусы брони.
+- [x] Правила бронирования.
+- [x] Проверка пересечений.
+- [x] Лимит активных броней.
+- [x] Права доступа.
+- [x] Статусы брони.
 - [ ] Статусы встречи.
 
 ### Integration Tests
 
-- [ ] Создание пользователя.
-- [ ] Создание заявки на бронь.
-- [ ] Подтверждение брони.
-- [ ] Отмена брони.
-- [ ] Конфликт бронирования.
+- [x] Создание пользователя.
+- [x] Создание заявки на бронь.
+- [x] Подтверждение брони.
+- [x] Отмена брони.
+- [x] Конфликт бронирования.
 - [ ] Создание встречи.
 - [ ] Набор участников.
 
 ### API E2E Tests
 
-- [ ] User creates booking request.
-- [ ] Admin confirms booking.
-- [ ] User cancels booking.
-- [ ] Owner blocks table.
-- [ ] Blocked user cannot book.
+- [x] User creates booking request.
+- [x] Admin confirms booking.
+- [x] User cancels booking.
+- [x] Owner blocks table.
+- [~] Blocked user cannot book — backend rejects inactive/blocked user state, owner block endpoint still needs completion.
 
 ### UI E2E Tests
 
@@ -742,9 +763,9 @@ completed
 
 ### Critical Test
 
-- [ ] Два пользователя одновременно пытаются забронировать один стол на пересекающееся время.
-- [ ] Система создаёт или подтверждает только одну бронь.
-- [ ] Вторая попытка получает понятную ошибку.
+- [x] Два пользователя одновременно пытаются забронировать один стол на пересекающееся время.
+- [x] Система создаёт или подтверждает только одну бронь.
+- [x] Вторая попытка получает понятную ошибку.
 
 ### Acceptance Criteria
 
@@ -778,9 +799,9 @@ completed
 
 ### Operations
 
-- [ ] Healthcheck endpoint.
+- [x] Healthcheck endpoint.
 - [ ] Uptime monitoring.
-- [ ] Structured logs.
+- [x] Structured logs.
 - [ ] Log rotation.
 - [ ] PostgreSQL backups.
 - [ ] Backup restore instruction.
@@ -947,17 +968,17 @@ Includes:
 
 MVP 1 готов, если:
 
-- [ ] пользователь может зарегистрироваться через Telegram;
-- [ ] пользователь может заполнить телефон для экстренной связи;
-- [ ] пользователь может создать заявку на бронь;
-- [ ] администратор может подтвердить бронь;
+- [x] пользователь может зарегистрироваться через Telegram web auth payload;
+- [x] пользователь может заполнить телефон для экстренной связи;
+- [x] пользователь может создать заявку на бронь;
+- [x] администратор может подтвердить бронь;
 - [ ] пользователь получает уведомление;
-- [ ] владелец может управлять помещениями, столами и расписанием;
-- [ ] нельзя создать конфликтующую бронь;
+- [x] владелец может управлять помещениями, столами и расписанием;
+- [x] нельзя создать конфликтующую бронь;
 - [ ] есть staging;
 - [ ] есть production;
 - [ ] есть backup БД;
-- [ ] есть README с запуском проекта.
+- [x] есть README с запуском проекта.
 
 ---
 
@@ -998,23 +1019,18 @@ MVP 1 готов, если:
 
 ---
 
-# 9. Suggested First Issues
+# 9. Suggested Next Issues
 
-1. `chore: initialize monorepo`
-2. `chore: add docker compose for postgres and redis`
-3. `chore: create Next.js web app`
-4. `chore: create NestJS api app`
-5. `chore: create grammY bot app`
-6. `chore: configure eslint prettier typescript`
-7. `chore: configure CI pipeline`
-8. `feat(db): add initial prisma schema`
-9. `feat(db): add seed demo data`
-10. `feat(api): add health endpoint`
-11. `feat(api): add swagger setup`
-12. `feat(auth): add telegram auth draft`
-13. `docs: add architecture overview`
-14. `docs: add codex workflow files`
-15. `docs: add PR checklist`
+1. `feat(api): add owner audit log listing endpoint`
+2. `feat(api): add emergency contact reveal with audit log`
+3. `feat(api): add owner user block and unblock endpoint`
+4. `feat(bot): create grammY runtime`
+5. `feat(bot): implement start command and account linking`
+6. `feat(notifications): add notification service`
+7. `feat(bot): send booking status notifications`
+8. `test(web): add Playwright booking smoke tests`
+9. `chore(infra): add production Dockerfiles`
+10. `docs(infra): add deployment and backup guide`
 
 ---
 
