@@ -345,7 +345,7 @@ pnpm dev
 - [ ] `MeetupsModule`;
 - [ ] `NotificationsModule`;
 - [~] Admin/owner endpoints;
-- [~] Audit logging exists; dedicated audit-log listing/reveal APIs are still partial.
+- [x] Audit logging exists; owner audit-log listing and emergency reveal APIs are implemented.
 - [x] `LegalModule`.
 
 ### Acceptance Criteria

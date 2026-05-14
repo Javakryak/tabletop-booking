@@ -21,6 +21,8 @@ import { LegalService } from "./legal/legal.service.js";
 import { MeController } from "./me/me.controller.js";
 import { MeRepository } from "./me/me.repository.js";
 import { MeService } from "./me/me.service.js";
+import { AdminUsersController } from "./owner/admin-users.controller.js";
+import { OwnerAuditLogsController } from "./owner/owner-audit-logs.controller.js";
 import { OwnerController } from "./owner/owner.controller.js";
 import { OwnerRepository } from "./owner/owner.repository.js";
 import { OwnerService } from "./owner/owner.service.js";
@@ -56,12 +58,14 @@ import { TablesService } from "./rooms/tables.service.js";
     AppController,
     AuthController,
     AdminBookingsController,
+    AdminUsersController,
     BookingRulesController,
     BookingsController,
     OwnerBookingRulesController,
     MeController,
     LegalController,
     OwnerController,
+    OwnerAuditLogsController,
     RoomsController,
     OwnerRoomsController,
     OwnerRoomClosuresController,

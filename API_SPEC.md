@@ -1501,9 +1501,12 @@ Response:
 ```json
 {
   "data": {
+    "userId": "user_id",
     "displayName": "Ivan",
     "telegramUsername": "ivan_boardgames",
-    "phone": "+79990000000"
+    "phone": "+79990000000",
+    "auditLogId": "audit_log_id",
+    "revealedAt": "2026-05-10T18:45:00.000Z"
   }
 }
 ```
@@ -1587,6 +1590,7 @@ Query parameters:
 | Name | Type | Description |
 |---|---|---|
 | `actorUserId` | string | Actor filter |
+| `action` | string | Audit action filter |
 | `entityType` | string | Entity type |
 | `entityId` | string | Entity id |
 | `from` | datetime | Start date |

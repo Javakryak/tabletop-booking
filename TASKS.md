@@ -1212,14 +1212,14 @@ BookingSummary
 
 **Priority:** P1  
 **Labels:** `area:web`, `area:admin`, `type:feature`
-**Status:** Partial — UI exists; owner audit-log API still needs completion.
+**Status:** Done — UI exists and owner audit-log API is available.
 
 #### Acceptance criteria
 
-- [ ] Owner can see audit events.
-- [ ] Audit log can be filtered by actor/action/date.
-- [ ] Emergency full-phone reveal events are visible.
-- [ ] Sensitive data is not exposed unnecessarily.
+- [x] Owner can see audit events.
+- [x] Audit log can be filtered by actor/action/date.
+- [x] Emergency full-phone reveal events are visible.
+- [x] Sensitive data is not exposed unnecessarily.
 
 ---
 
@@ -1828,9 +1828,9 @@ Use Caddy or nginx.
 #### Acceptance criteria
 
 - [ ] Audit events are written for critical admin/owner actions.
-- [ ] Emergency full-phone reveal is audit-logged.
-- [ ] Audit log does not store sensitive values unnecessarily.
-- [ ] Owner can view audit log via UI/API.
+- [x] Emergency full-phone reveal is audit-logged.
+- [x] Audit log does not store sensitive values unnecessarily.
+- [x] Owner can view audit log via UI/API.
 
 ---
 
