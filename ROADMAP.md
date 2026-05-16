@@ -168,7 +168,7 @@
 - [x] Core resources and booking backend: rooms, tables, working hours, schedule exceptions, closures, booking availability, create request, cancellation rules, active booking limits, admin confirmation/cancellation, status history, audit events, concurrency protection.
 - [x] Web MVP foundation: public pages, auth/profile flow, dashboard, booking creation/history UI, admin layout, admin booking queue, owner resource screens, user blocking UI, audit-log UI foundation.
 - [x] Test foundation, booking domain tests, API integration tests, and CI for lint/typecheck/tests.
-- [~] Admin/privacy backend integration is partial: some web screens still have demo/fallback behavior until audit-log listing, emergency full-phone reveal, and user block/unblock APIs are complete.
+- [~] Admin/privacy backend integration is partial: admin booking queue backend API (list pending + move/reschedule) is implemented, while audit-log listing, emergency full-phone reveal, and user block/unblock APIs remain to finish full web integration.
 - [~] Notification events are represented by audit/log signals, but real notification delivery is not implemented.
 - [ ] Telegram bot runtime, `/start`, commands, webhooks, and Telegram notifications.
 - [ ] Production deployment, Dockerfiles, reverse proxy/HTTPS, backups, uptime monitoring, and runbooks.

@@ -9,6 +9,7 @@ import { ConfigService } from "@nestjs/config";
 import { BookingStatus } from "@prisma/client";
 
 import { LegalService } from "../legal/legal.service.js";
+import type { AdminBookingsQueryDto } from "./dto/admin-bookings.dto.js";
 import type { UpdateBookingRulesDto } from "./dto/booking-rules.dto.js";
 import type { CreateBookingRequestDto } from "./dto/create-booking.dto.js";
 import type { GetBookingAvailabilityQueryDto } from "./dto/availability.dto.js";
@@ -54,6 +55,42 @@ type BookingStatusTransitionResponse = {
   data: {
     bookingId: string;
     status: BookingStatus;
+  };
+};
+
+type AdminBookingQueueResponse = {
+  data: Array<{
+    contact: {
+      emailMasked: string | null;
+      phoneMasked: string | null;
+    };
+    endAt: string;
+    id: string;
+    room: {
+      id: string;
+      name: string;
+    };
+    startAt: string;
+    status: BookingStatus;
+    table: {
+      id: string;
+      number: string;
+    };
+    user: {
+      displayName: string;
+      id: string;
+      telegramUsername: string | null;
+    };
+  }>;
+};
+
+type AdminMoveBookingResponse = {
+  data: {
+    bookingId: string;
+    endAt: string;
+    startAt: string;
+    status: BookingStatus;
+    tableId: string;
   };
 };
 
@@ -221,6 +258,44 @@ export class BookingsService {
         minCancellationNoticeMinutes: updated.minCancelBeforeMinutes,
         slotMinutes: updated.slotStepMinutes
       }
+    };
+  }
+
+  async getAdminBookings(query: AdminBookingsQueryDto): Promise<AdminBookingQueueResponse> {
+    const filters: {
+      status?: BookingStatus;
+    } = {};
+    const statusFilter = mapBookingStatusFilter(query.status);
+    if (statusFilter !== undefined) {
+      filters.status = statusFilter;
+    }
+
+    const bookings = await this.bookingsRepository.listAdminBookings(filters);
+
+    return {
+      data: bookings.map((booking) => ({
+        contact: {
+          emailMasked: maskEmail(booking.userEmail),
+          phoneMasked: maskPhone(booking.userPhone)
+        },
+        endAt: booking.endAt.toISOString(),
+        id: booking.id,
+        room: {
+          id: booking.roomId,
+          name: booking.roomName
+        },
+        startAt: booking.startAt.toISOString(),
+        status: booking.status,
+        table: {
+          id: booking.tableId,
+          number: booking.tableNumber
+        },
+        user: {
+          displayName: booking.userDisplayName,
+          id: booking.userId,
+          telegramUsername: booking.userTelegramUsername
+        }
+      }))
     };
   }
 
@@ -447,6 +522,114 @@ export class BookingsService {
     });
 
     return transitionResult;
+  }
+
+  async adminMoveBooking(input: {
+    actorUserId: string;
+    bookingId: string;
+    endAt: string;
+    reason?: string;
+    startAt: string;
+    tableId: string;
+  }): Promise<AdminMoveBookingResponse> {
+    const booking = await this.bookingsRepository.findBookingForAdminAction(input.bookingId);
+    if (!booking) {
+      throw new NotFoundException("Booking was not found");
+    }
+    if (!isAdminMovableStatus(booking.status)) {
+      throw new ConflictException("Booking cannot be moved in current status");
+    }
+
+    const timezone = resolveScheduleTimezone(this.configService);
+    const startAt = parseIsoDateTime(input.startAt, "startAt");
+    const endAt = parseIsoDateTime(input.endAt, "endAt");
+    if (startAt.getTime() >= endAt.getTime()) {
+      throw new BadRequestException("startAt must be earlier than endAt");
+    }
+
+    const startLocal = toZonedDateParts(startAt, timezone);
+    const endLocal = toZonedDateParts(endAt, timezone);
+    if (
+      startLocal.year !== endLocal.year ||
+      startLocal.month !== endLocal.month ||
+      startLocal.day !== endLocal.day
+    ) {
+      throw new BadRequestException("Booking must start and end on the same calendar day");
+    }
+
+    const activeRule = await this.bookingsRepository.findActiveBookingRule();
+    const slotMinutes = resolveSlotStepMinutes(activeRule?.slotStepMinutes ?? null);
+    const startMinutes = startLocal.hour * 60 + startLocal.minute;
+    const endMinutes = endLocal.hour * 60 + endLocal.minute;
+    const durationMinutes = endMinutes - startMinutes;
+
+    if (startMinutes % slotMinutes !== 0 || endMinutes % slotMinutes !== 0) {
+      throw new BadRequestException("startAt and endAt must align with slot step");
+    }
+    if (durationMinutes <= 0 || durationMinutes % slotMinutes !== 0) {
+      throw new BadRequestException("Requested duration must align with slot step");
+    }
+
+    const table = await this.bookingsRepository.findActiveTableById(input.tableId);
+    if (!table) {
+      throw new NotFoundException("Table is not available");
+    }
+
+    const localDate = new Date(Date.UTC(startLocal.year, startLocal.month - 1, startLocal.day));
+    const schedule = await this.resolveScheduleForDate(localDate);
+    if (schedule.isClosed || !schedule.opensAt || !schedule.closesAt) {
+      throw new ConflictException("The selected table is not available for this time range");
+    }
+
+    const opensAtMinutes = toMinutes(schedule.opensAt);
+    const closesAtMinutes = toMinutes(schedule.closesAt);
+    if (startMinutes < opensAtMinutes || endMinutes > closesAtMinutes) {
+      throw new ConflictException("The selected table is not available for this time range");
+    }
+
+    const [hasRoomClosure, hasTableClosure, hasOverlappingBooking] = await Promise.all([
+      this.bookingsRepository.hasOverlappingRoomClosure(table.roomId, startAt, endAt),
+      this.bookingsRepository.hasOverlappingTableClosure(table.id, startAt, endAt),
+      this.bookingsRepository.hasOverlappingActiveBookingExcludingBooking({
+        bookingId: booking.id,
+        endAt,
+        startAt,
+        tableId: table.id
+      })
+    ]);
+    if (hasRoomClosure || hasTableClosure || hasOverlappingBooking) {
+      throw new ConflictException("The selected table is not available for this time range");
+    }
+
+    const moved = await this.bookingsRepository.moveBookingForAdmin({
+      actorUserId: input.actorUserId,
+      bookingId: booking.id,
+      endAt,
+      fromStatus: booking.status,
+      reason: input.reason?.trim() || null,
+      startAt,
+      tableId: table.id
+    });
+    if (!moved) {
+      throw new ConflictException("The selected table is not available for this time range");
+    }
+
+    await this.bookingsRepository.createBookingNotificationSignal({
+      actorUserId: input.actorUserId,
+      bookingId: moved.id,
+      signal: "booking_moved_user_follow_up",
+      targetUserId: moved.userId
+    });
+
+    return {
+      data: {
+        bookingId: moved.id,
+        endAt: moved.endAt.toISOString(),
+        startAt: moved.startAt.toISOString(),
+        status: moved.status,
+        tableId: moved.tableId
+      }
+    };
   }
 
   async cancelOwnBooking(input: {
@@ -807,4 +990,70 @@ function isTransitionAllowed(fromStatus: BookingStatus, toStatus: BookingStatus)
 
 function isUserCancellableStatus(status: BookingStatus): boolean {
   return status === BookingStatus.pending || status === BookingStatus.confirmed;
+}
+
+function isAdminMovableStatus(status: BookingStatus): boolean {
+  return status === BookingStatus.pending || status === BookingStatus.confirmed;
+}
+
+function mapBookingStatusFilter(
+  status:
+    | "pending"
+    | "confirmed"
+    | "cancelled_by_user"
+    | "cancelled_by_admin"
+    | "completed"
+    | "expired"
+    | undefined
+): BookingStatus | undefined {
+  if (!status) {
+    return undefined;
+  }
+
+  if (status === "pending") {
+    return BookingStatus.pending;
+  }
+  if (status === "confirmed") {
+    return BookingStatus.confirmed;
+  }
+  if (status === "cancelled_by_user") {
+    return BookingStatus.cancelled_by_user;
+  }
+  if (status === "cancelled_by_admin") {
+    return BookingStatus.cancelled_by_admin;
+  }
+  if (status === "completed") {
+    return BookingStatus.completed;
+  }
+
+  return BookingStatus.expired;
+}
+
+function maskPhone(phone: string | null): string | null {
+  if (!phone) {
+    return null;
+  }
+
+  const digits = phone.replace(/[^\d]/g, "");
+  if (digits.length < 4) {
+    return "***";
+  }
+
+  const head = digits[0] ?? "7";
+  const tail = digits.slice(-2);
+  return `+${head}*** *** **${tail}`;
+}
+
+function maskEmail(email: string | null): string | null {
+  if (!email) {
+    return null;
+  }
+
+  const [localPart, domain] = email.split("@");
+  if (!localPart || !domain) {
+    return "***";
+  }
+
+  const first = localPart[0] ?? "*";
+  return `${first}***@${domain}`;
 }
