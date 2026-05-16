@@ -28,7 +28,7 @@ Completed or effectively completed task groups:
 
 Partial task groups needing follow-up:
 
-- `TASK-0802`: admin booking queue UI exists; backend emergency full-phone reveal endpoint with audit logging still needs completion.
+- `TASK-0802`: admin booking queue and emergency full-phone reveal flow integrated with backend audit logging.
 - `TASK-0804`: user blocking UI exists; owner block/unblock backend endpoint and audit behavior still need completion.
 - `TASK-0805`: audit-log UI exists; owner audit-log listing API still needs completion.
 - `TASK-0901`: `apps/bot` package exists; grammY runtime is not implemented.
@@ -1151,7 +1151,7 @@ BookingSummary
 
 **Priority:** P1  
 **Labels:** `area:web`, `area:admin`, `area:booking`, `type:feature`
-**Status:** Partial — UI exists; emergency full-phone reveal still needs backend/audit completion.
+**Status:** Done
 
 #### Scope
 
@@ -1163,12 +1163,12 @@ BookingSummary
 
 #### Acceptance criteria
 
-- [ ] Admin can confirm booking.
-- [ ] Admin can cancel booking.
-- [ ] Phone/email are hidden or masked unless explicitly needed.
-- [ ] Full phone reveal is available only through an explicit emergency contact action.
-- [ ] Full phone reveal writes an audit event.
-- [ ] Actions update status in UI.
+- [x] Admin can confirm booking.
+- [x] Admin can cancel booking.
+- [x] Phone/email are hidden or masked unless explicitly needed.
+- [x] Full phone reveal is available only through an explicit emergency contact action.
+- [x] Full phone reveal writes an audit event.
+- [x] Actions update status in UI.
 
 ---
 

@@ -9,7 +9,6 @@ type QueueViewState = "loading" | "ready" | "unauthorized" | "forbidden" | "erro
 type QueueBooking = {
   emailMasked: string | null;
   endAt: string;
-  fullPhone: string | null;
   id: string;
   roomName: string;
   startAt: string;
@@ -34,37 +33,6 @@ type ConfirmResponse = {
 };
 
 type CancelResponse = ConfirmResponse;
-
-const DEMO_PENDING_BOOKINGS: QueueBooking[] = [
-  {
-    emailMasked: "a***@example.com",
-    endAt: "2026-05-14T21:00:00+03:00",
-    fullPhone: "+79991234567",
-    id: "demo-booking-1",
-    phoneMasked: "+7*** *** **67",
-    roomName: "Большой зал",
-    startAt: "2026-05-14T18:00:00+03:00",
-    status: "pending",
-    tableNumber: "A1",
-    telegramUsername: "boardgames_ivan",
-    userDisplayName: "Иван П.",
-    userId: "demo-user-1"
-  },
-  {
-    emailMasked: "m***@mail.ru",
-    endAt: "2026-05-14T20:30:00+03:00",
-    fullPhone: "+79857654321",
-    id: "demo-booking-2",
-    phoneMasked: "+7*** *** **21",
-    roomName: "Турнирная",
-    startAt: "2026-05-14T19:00:00+03:00",
-    status: "pending",
-    tableNumber: "B3",
-    telegramUsername: null,
-    userDisplayName: "Мария К.",
-    userId: "demo-user-2"
-  }
-];
 
 function parseString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
@@ -222,7 +190,6 @@ function normalizeQueue(payload: unknown): QueueBooking[] {
       return {
         emailMasked,
         endAt,
-        fullPhone: phoneRaw,
         id,
         phoneMasked,
         roomName:
@@ -283,7 +250,6 @@ export function AdminBookingsQueue() {
   const [revealReasonByBookingId, setRevealReasonByBookingId] = useState<Record<string, string>>({});
   const [revealedPhonesByBookingId, setRevealedPhonesByBookingId] = useState<Record<string, string>>({});
   const [actionErrorByBookingId, setActionErrorByBookingId] = useState<Record<string, string>>({});
-  const [isDemoData, setIsDemoData] = useState(false);
 
   const loadQueue = useCallback(async () => {
     setViewState("loading");
@@ -295,7 +261,6 @@ export function AdminBookingsQueue() {
       const parsed = normalizeQueue(payload);
       setBookings(parsed);
       setViewState("ready");
-      setIsDemoData(false);
     } catch (error) {
       if (error instanceof ApiRequestError) {
         if (error.status === 401) {
@@ -305,14 +270,6 @@ export function AdminBookingsQueue() {
 
         if (error.status === 403) {
           setViewState("forbidden");
-          return;
-        }
-
-        if (error.status === 404) {
-          setBookings(DEMO_PENDING_BOOKINGS);
-          setIsDemoData(true);
-          setViewState("ready");
-          setNotice("Демо-режим: используется локальный список заявок.");
           return;
         }
 
@@ -353,16 +310,6 @@ export function AdminBookingsQueue() {
     setNotice("");
 
     try {
-      if (isDemoData) {
-        setBookings((previous) =>
-          previous.map((booking) =>
-            booking.id === bookingId ? { ...booking, status: "confirmed" } : booking
-          )
-        );
-        setNotice("Заявка подтверждена (демо-режим).");
-        return;
-      }
-
       const response = await apiRequest<ConfirmResponse>(`/admin/bookings/${bookingId}/confirm`, {
         method: "POST"
       });
@@ -399,16 +346,6 @@ export function AdminBookingsQueue() {
     setNotice("");
 
     try {
-      if (isDemoData) {
-        setBookings((previous) =>
-          previous.map((booking) =>
-            booking.id === bookingId ? { ...booking, status: "cancelled_by_admin" } : booking
-          )
-        );
-        setNotice("Заявка отменена (демо-режим).");
-        return;
-      }
-
       const reason = cancelReasonByBookingId[bookingId]?.trim();
       const response = await apiRequest<CancelResponse>(`/admin/bookings/${bookingId}/cancel`, {
         body: JSON.stringify({
@@ -467,19 +404,6 @@ export function AdminBookingsQueue() {
     setNotice("");
 
     try {
-      if (isDemoData) {
-        if (booking.fullPhone) {
-          setRevealedPhonesByBookingId((previous) => ({
-            ...previous,
-            [booking.id]: booking.fullPhone as string
-          }));
-          setNotice(
-            "Экстренный доступ предоставлен (демо-режим). В рабочем API это действие должно писать audit log."
-          );
-        }
-        return;
-      }
-
       const response = await apiRequest<unknown>(
         `/admin/users/${booking.userId}/emergency-contact-access`,
         {
@@ -507,14 +431,6 @@ export function AdminBookingsQueue() {
       }
       if (error instanceof ApiRequestError && error.status === 403) {
         setViewState("forbidden");
-        return;
-      }
-      if (error instanceof ApiRequestError && error.status === 404) {
-        setActionErrorByBookingId((previous) => ({
-          ...previous,
-          [booking.id]:
-            "Endpoint emergency-contact-access пока недоступен на API. Включите его для audit-logged раскрытия номера."
-        }));
         return;
       }
 

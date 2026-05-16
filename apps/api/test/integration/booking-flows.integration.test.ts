@@ -90,6 +90,74 @@ test("registers user and executes create/confirm/cancel booking flow", async () 
   assert.equal(createBookingPayload.data.status, "pending");
   assert.equal(createBookingPayload.data.tableId, tableId);
 
+  const queueResponse = await fetch(`${baseUrl}/api/v1/admin/bookings?status=pending`, {
+    headers: {
+      authorization: `Bearer ${adminToken}`
+    }
+  });
+
+  assert.equal(queueResponse.status, 200);
+  const queuePayload = (await queueResponse.json()) as {
+    data: Array<{
+      contact: {
+        emailMasked: string | null;
+        phoneMasked: string | null;
+      };
+      id: string;
+      status: string;
+      user: {
+        id: string;
+      };
+    }>;
+  };
+  const queueItem = queuePayload.data.find((item) => item.id === createBookingPayload.data.id);
+  assert.equal(queueItem?.status, "pending");
+  assert.equal(queueItem?.contact.phoneMasked, "+7*** *** **00");
+  assert.equal(queueItem?.contact.emailMasked, "i***@example.local");
+  assert.equal(typeof queueItem?.user.id, "string");
+
+  const emergencyAccessResponse = await fetch(
+    `${baseUrl}/api/v1/admin/users/${queueItem?.user.id ?? ""}/emergency-contact-access`,
+    {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${adminToken}`,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        reason: "Telegram unavailable for urgent confirmation",
+        relatedBookingId: createBookingPayload.data.id
+      })
+    }
+  );
+
+  assert.equal(emergencyAccessResponse.status, 201);
+  const emergencyAccessPayload = (await emergencyAccessResponse.json()) as {
+    data: {
+      auditLogId: string;
+      phone: string;
+      userId: string;
+    };
+  };
+  assert.equal(emergencyAccessPayload.data.phone, "+70000000000");
+  assert.equal(emergencyAccessPayload.data.userId, queueItem?.user.id);
+  assert.equal(typeof emergencyAccessPayload.data.auditLogId, "string");
+
+  const emergencyAuditLog = await databaseClient.auditLog.findUnique({
+    where: {
+      id: emergencyAccessPayload.data.auditLogId
+    },
+    select: {
+      action: true,
+      metadata: true
+    }
+  });
+  assert.equal(emergencyAuditLog?.action, "user.emergency_phone_reveal");
+  assert.equal(
+    typeof (emergencyAuditLog?.metadata as Record<string, unknown> | null)?.phone,
+    "undefined"
+  );
+
   const confirmResponse = await fetch(
     `${baseUrl}/api/v1/admin/bookings/${createBookingPayload.data.id}/confirm`,
     {
@@ -229,6 +297,15 @@ async function prepareBookingFixture(userId: string): Promise<{ tableId: string 
       title: "Personal Data Consent",
       type: "personal_data_consent",
       version: TEST_LEGAL_VERSION
+    }
+  });
+
+  await databaseClient.user.update({
+    where: {
+      id: userId
+    },
+    data: {
+      email: "integration-user@example.local"
     }
   });
 

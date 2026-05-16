@@ -9,6 +9,7 @@ import { ConfigService } from "@nestjs/config";
 import { BookingStatus } from "@prisma/client";
 
 import { LegalService } from "../legal/legal.service.js";
+import type { AdminBookingsQueryDto } from "./dto/admin-bookings.dto.js";
 import type { UpdateBookingRulesDto } from "./dto/booking-rules.dto.js";
 import type { CreateBookingRequestDto } from "./dto/create-booking.dto.js";
 import type { GetBookingAvailabilityQueryDto } from "./dto/availability.dto.js";
@@ -55,6 +56,32 @@ type BookingStatusTransitionResponse = {
     bookingId: string;
     status: BookingStatus;
   };
+};
+
+type AdminBookingQueueResponse = {
+  data: Array<{
+    contact: {
+      emailMasked: string | null;
+      phoneMasked: string | null;
+    };
+    endAt: string;
+    id: string;
+    room: {
+      id: string;
+      name: string;
+    };
+    startAt: string;
+    status: BookingStatus;
+    table: {
+      id: string;
+      number: string;
+    };
+    user: {
+      displayName: string;
+      id: string;
+      telegramUsername: string | null;
+    };
+  }>;
 };
 
 type TransitionActorRole = "admin" | "owner" | "system" | "user";
@@ -221,6 +248,44 @@ export class BookingsService {
         minCancellationNoticeMinutes: updated.minCancelBeforeMinutes,
         slotMinutes: updated.slotStepMinutes
       }
+    };
+  }
+
+  async getAdminBookings(query: AdminBookingsQueryDto): Promise<AdminBookingQueueResponse> {
+    const filters: {
+      status?: BookingStatus;
+    } = {};
+    const statusFilter = mapBookingStatusFilter(query.status);
+    if (statusFilter !== undefined) {
+      filters.status = statusFilter;
+    }
+
+    const bookings = await this.bookingsRepository.listAdminBookings(filters);
+
+    return {
+      data: bookings.map((booking) => ({
+        contact: {
+          emailMasked: maskEmail(booking.userEmail),
+          phoneMasked: maskPhone(booking.userPhone)
+        },
+        endAt: booking.endAt.toISOString(),
+        id: booking.id,
+        room: {
+          id: booking.roomId,
+          name: booking.roomName
+        },
+        startAt: booking.startAt.toISOString(),
+        status: booking.status,
+        table: {
+          id: booking.tableId,
+          number: booking.tableNumber
+        },
+        user: {
+          displayName: booking.userDisplayName,
+          id: booking.userId,
+          telegramUsername: booking.userTelegramUsername
+        }
+      }))
     };
   }
 
@@ -807,4 +872,66 @@ function isTransitionAllowed(fromStatus: BookingStatus, toStatus: BookingStatus)
 
 function isUserCancellableStatus(status: BookingStatus): boolean {
   return status === BookingStatus.pending || status === BookingStatus.confirmed;
+}
+
+function mapBookingStatusFilter(
+  status:
+    | "pending"
+    | "confirmed"
+    | "cancelled_by_user"
+    | "cancelled_by_admin"
+    | "completed"
+    | "expired"
+    | undefined
+): BookingStatus | undefined {
+  if (!status) {
+    return undefined;
+  }
+
+  if (status === "pending") {
+    return BookingStatus.pending;
+  }
+  if (status === "confirmed") {
+    return BookingStatus.confirmed;
+  }
+  if (status === "cancelled_by_user") {
+    return BookingStatus.cancelled_by_user;
+  }
+  if (status === "cancelled_by_admin") {
+    return BookingStatus.cancelled_by_admin;
+  }
+  if (status === "completed") {
+    return BookingStatus.completed;
+  }
+
+  return BookingStatus.expired;
+}
+
+function maskPhone(phone: string | null): string | null {
+  if (!phone) {
+    return null;
+  }
+
+  const digits = phone.replace(/[^\d]/g, "");
+  if (digits.length < 4) {
+    return "***";
+  }
+
+  const head = digits[0] ?? "7";
+  const tail = digits.slice(-2);
+  return `+${head}*** *** **${tail}`;
+}
+
+function maskEmail(email: string | null): string | null {
+  if (!email) {
+    return null;
+  }
+
+  const [localPart, domain] = email.split("@");
+  if (!localPart || !domain) {
+    return "***";
+  }
+
+  const first = localPart[0] ?? "*";
+  return `${first}***@${domain}`;
 }

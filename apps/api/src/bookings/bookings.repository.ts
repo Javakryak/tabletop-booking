@@ -83,6 +83,26 @@ export type BookingForAdminActionRecord = {
   userId: string;
 };
 
+export type AdminBookingQueueRecord = {
+  endAt: Date;
+  id: string;
+  roomId: string;
+  roomName: string;
+  startAt: Date;
+  status: BookingStatus;
+  tableId: string;
+  tableNumber: string;
+  userDisplayName: string;
+  userEmail: string | null;
+  userId: string;
+  userPhone: string | null;
+  userTelegramUsername: string | null;
+};
+
+export type AdminBookingQueueFilters = {
+  status?: BookingStatus;
+};
+
 export type CreatePendingBookingInput = {
   actorUserId: string;
   comment: string | null;
@@ -498,6 +518,67 @@ export class BookingsRepository {
         userId: true
       }
     });
+  }
+
+  async listAdminBookings(filters: AdminBookingQueueFilters): Promise<AdminBookingQueueRecord[]> {
+    const statusFilter =
+      filters.status !== undefined
+        ? {
+            status: filters.status
+          }
+        : {};
+
+    const bookings = await databaseClient.booking.findMany({
+      where: statusFilter,
+      select: {
+        endAt: true,
+        id: true,
+        startAt: true,
+        status: true,
+        table: {
+          select: {
+            id: true,
+            number: true,
+            room: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          }
+        },
+        user: {
+          select: {
+            email: true,
+            id: true,
+            telegramUsername: true,
+            profile: {
+              select: {
+                displayName: true,
+                phone: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: [{ startAt: "asc" }, { createdAt: "asc" }]
+    });
+
+    return bookings.map((booking) => ({
+      endAt: booking.endAt,
+      id: booking.id,
+      roomId: booking.table.room.id,
+      roomName: booking.table.room.name,
+      startAt: booking.startAt,
+      status: booking.status,
+      tableId: booking.table.id,
+      tableNumber: booking.table.number,
+      userDisplayName: booking.user.profile?.displayName ?? "Пользователь",
+      userEmail: booking.user.email,
+      userId: booking.user.id,
+      userPhone: booking.user.profile?.phone ?? null,
+      userTelegramUsername: booking.user.telegramUsername
+    }));
   }
 
   async hasOverlappingConfirmedBooking(

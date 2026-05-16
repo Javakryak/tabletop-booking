@@ -60,3 +60,13 @@ test("allows owner role for cancel endpoint", () => {
 
   assert.equal(canActivate, true);
 });
+
+test("allows admin role for list endpoint", () => {
+  const guard = new RolesGuard(new Reflector());
+
+  const canActivate = guard.canActivate(
+    createContext({ user: { roles: ["admin"] } }, "listBookings") as never
+  );
+
+  assert.equal(canActivate, true);
+});
