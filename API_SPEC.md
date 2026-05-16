@@ -982,6 +982,43 @@ Query parameters:
 | `page` | number | Page |
 | `pageSize` | number | Page size |
 
+Response:
+
+```json
+{
+  "data": [
+    {
+      "id": "booking_uuid",
+      "status": "pending",
+      "startAt": "2026-05-02T16:00:00.000Z",
+      "endAt": "2026-05-02T19:00:00.000Z",
+      "user": {
+        "id": "user_uuid",
+        "displayName": "Иван П.",
+        "telegramUsername": "ivan_petrov"
+      },
+      "room": {
+        "id": "room_uuid",
+        "name": "Большой зал"
+      },
+      "table": {
+        "id": "table_uuid",
+        "number": "A1"
+      },
+      "contact": {
+        "phoneMasked": "+7*** *** **67",
+        "emailMasked": "i***@example.com"
+      }
+    }
+  ]
+}
+```
+
+Notes:
+
+- queue endpoints must return masked contact data only;
+- full emergency phone reveal remains a separate audit-logged break-glass flow.
+
 ### 12.7. Admin confirm booking
 
 #### `POST /admin/bookings/:bookingId/confirm`
@@ -1032,11 +1069,26 @@ Request:
 
 Response: updated booking.
 
+Response:
+
+```json
+{
+  "data": {
+    "bookingId": "booking_uuid",
+    "status": "pending",
+    "tableId": "new_table_id",
+    "startAt": "2026-05-02T16:00:00.000Z",
+    "endAt": "2026-05-02T19:00:00.000Z"
+  }
+}
+```
+
 Implementation notes:
 
 - same validation as booking creation;
 - run conflict check in a transaction;
-- notify user.
+- write booking status history + audit intent for move action;
+- emit notification request signal.
 
 ---
 

@@ -956,6 +956,44 @@ POST /api/v1/admin/bookings/:id/cancel
 
 ---
 
+### TASK-0508 — Booking gap: admin booking listing and move/reschedule API
+
+**Priority:** P0
+**Labels:** `area:booking`, `area:api`, `area:admin`, `type:feature`
+**Status:** Done
+**GitHub Issue:** [#108](https://github.com/Javakryak/tabletop-booking/issues/108)
+
+#### Goal
+
+Закрыть backend gap для админской очереди броней и переноса брони.
+
+#### Scope
+
+- `GET /api/v1/admin/bookings` для admin/owner с фильтром `status=pending`.
+- Безопасный формат очереди с masked phone/email.
+- `POST /api/v1/admin/bookings/:bookingId/move` для переноса pending/confirmed брони.
+- Переиспользование валидаций слотов, расписания, закрытий и конфликтов.
+- Запись history/audit intent и notification signal для move action.
+
+#### Acceptance criteria
+
+- [x] Admin/owner can list pending bookings for the admin queue.
+- [x] Unauthorized and regular user roles cannot access admin booking listing.
+- [x] Listing response contains masked contact data and does not expose full phone/email.
+- [x] Admin/owner can move/reschedule a pending or confirmed booking when the target slot is valid.
+- [x] Move/reschedule rejects unavailable tables, closed intervals, invalid slot alignment, and overlapping confirmed bookings.
+- [x] Move/reschedule writes booking history and audit event.
+- [x] Existing confirm/cancel behavior remains unchanged.
+
+#### Tests
+
+- [x] Unit tests for listing mapping and masked contact data.
+- [x] Unit tests for move/reschedule validation and conflict handling.
+- [x] Controller/guard tests for admin/owner access.
+- [x] API integration test for admin queue + move flow.
+
+---
+
 ## 8. Epic 6 — Web app foundation
 
 Цель: создать Next.js приложение с базовым UI, темой, layout и публичными страницами.

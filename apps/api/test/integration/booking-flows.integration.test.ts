@@ -15,6 +15,8 @@ const TEST_JWT_SECRET = "test-jwt-secret";
 const TEST_LEGAL_VERSION = "2026-05-integration";
 const TEST_BOOKING_START = "2030-05-15T12:00:00+03:00";
 const TEST_BOOKING_END = "2030-05-15T13:00:00+03:00";
+const TEST_MOVED_BOOKING_START = "2030-05-15T13:00:00+03:00";
+const TEST_MOVED_BOOKING_END = "2030-05-15T14:00:00+03:00";
 
 process.env.TELEGRAM_BOT_TOKEN = TEST_BOT_TOKEN;
 process.env.JWT_SECRET = TEST_JWT_SECRET;
@@ -61,7 +63,7 @@ test("registers user and executes create/confirm/cancel booking flow", async () 
   const userToken = registration.data.accessToken;
   const userId = registration.data.user.id;
 
-  const { tableId } = await prepareBookingFixture(userId);
+  const { alternateTableId, tableId } = await prepareBookingFixture(userId);
   const adminToken = await issueAdminToken();
 
   const createBookingResponse = await fetch(`${baseUrl}/api/v1/bookings`, {
@@ -89,6 +91,61 @@ test("registers user and executes create/confirm/cancel booking flow", async () 
 
   assert.equal(createBookingPayload.data.status, "pending");
   assert.equal(createBookingPayload.data.tableId, tableId);
+
+  const queueResponse = await fetch(`${baseUrl}/api/v1/admin/bookings?status=pending`, {
+    headers: {
+      authorization: `Bearer ${adminToken}`
+    }
+  });
+
+  assert.equal(queueResponse.status, 200);
+  const queuePayload = (await queueResponse.json()) as {
+    data: Array<{
+      contact: {
+        emailMasked: string | null;
+        phoneMasked: string | null;
+      };
+      id: string;
+      status: string;
+    }>;
+  };
+  const queueItem = queuePayload.data.find((item) => item.id === createBookingPayload.data.id);
+  assert.equal(queueItem?.status, "pending");
+  assert.equal(queueItem?.contact.phoneMasked, "+7*** *** **00");
+  assert.equal(queueItem?.contact.emailMasked, "i***@example.local");
+
+  const moveResponse = await fetch(
+    `${baseUrl}/api/v1/admin/bookings/${createBookingPayload.data.id}/move`,
+    {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${adminToken}`,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        endAt: TEST_MOVED_BOOKING_END,
+        reason: "Integration move",
+        startAt: TEST_MOVED_BOOKING_START,
+        tableId: alternateTableId
+      })
+    }
+  );
+
+  assert.equal(moveResponse.status, 201);
+  const movePayload = (await moveResponse.json()) as {
+    data: {
+      bookingId: string;
+      endAt: string;
+      startAt: string;
+      status: string;
+      tableId: string;
+    };
+  };
+  assert.equal(movePayload.data.bookingId, createBookingPayload.data.id);
+  assert.equal(movePayload.data.status, "pending");
+  assert.equal(movePayload.data.tableId, alternateTableId);
+  assert.equal(movePayload.data.startAt, "2030-05-15T10:00:00.000Z");
+  assert.equal(movePayload.data.endAt, "2030-05-15T11:00:00.000Z");
 
   const confirmResponse = await fetch(
     `${baseUrl}/api/v1/admin/bookings/${createBookingPayload.data.id}/confirm`,
@@ -175,7 +232,9 @@ async function authenticateTelegramUser(telegramId: string, username: string): P
   };
 }
 
-async function prepareBookingFixture(userId: string): Promise<{ tableId: string }> {
+async function prepareBookingFixture(
+  userId: string
+): Promise<{ alternateTableId: string; tableId: string }> {
   await databaseClient.bookingRule.create({
     data: {
       allowFullDayBooking: true,
@@ -209,6 +268,13 @@ async function prepareBookingFixture(userId: string): Promise<{ tableId: string 
       roomId: room.id
     }
   });
+  const alternateTable = await databaseClient.clubTable.create({
+    data: {
+      capacity: 4,
+      number: "INT-2",
+      roomId: room.id
+    }
+  });
 
   const privacyDocument = await databaseClient.legalDocument.create({
     data: {
@@ -232,6 +298,15 @@ async function prepareBookingFixture(userId: string): Promise<{ tableId: string 
     }
   });
 
+  await databaseClient.user.update({
+    where: {
+      id: userId
+    },
+    data: {
+      email: "integration-user@example.local"
+    }
+  });
+
   await databaseClient.userProfile.update({
     where: {
       userId
@@ -251,7 +326,7 @@ async function prepareBookingFixture(userId: string): Promise<{ tableId: string 
     }))
   });
 
-  return { tableId: table.id };
+  return { alternateTableId: alternateTable.id, tableId: table.id };
 }
 
 async function issueAdminToken(): Promise<string> {

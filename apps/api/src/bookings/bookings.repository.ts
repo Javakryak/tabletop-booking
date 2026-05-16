@@ -83,6 +83,26 @@ export type BookingForAdminActionRecord = {
   userId: string;
 };
 
+export type AdminBookingQueueRecord = {
+  endAt: Date;
+  id: string;
+  roomId: string;
+  roomName: string;
+  startAt: Date;
+  status: BookingStatus;
+  tableId: string;
+  tableNumber: string;
+  userDisplayName: string;
+  userEmail: string | null;
+  userId: string;
+  userPhone: string | null;
+  userTelegramUsername: string | null;
+};
+
+export type AdminBookingQueueFilters = {
+  status?: BookingStatus;
+};
+
 export type CreatePendingBookingInput = {
   actorUserId: string;
   comment: string | null;
@@ -103,7 +123,10 @@ export type TransitionBookingStatusInput = {
 export type BookingNotificationSignalInput = {
   actorUserId: string;
   bookingId: string;
-  signal: "booking_cancelled_user_follow_up" | "booking_confirmed_user_follow_up";
+  signal:
+    | "booking_cancelled_user_follow_up"
+    | "booking_confirmed_user_follow_up"
+    | "booking_moved_user_follow_up";
   targetUserId: string;
 };
 
@@ -113,6 +136,25 @@ export type UpdateBookingRulesInput = {
   maxActiveBookingsPerUser: number;
   minCancelBeforeMinutes: number;
   slotStepMinutes: number;
+};
+
+export type MoveBookingForAdminInput = {
+  actorUserId: string;
+  bookingId: string;
+  endAt: Date;
+  fromStatus: BookingStatus;
+  reason: string | null;
+  startAt: Date;
+  tableId: string;
+};
+
+export type MovedBookingRecord = {
+  endAt: Date;
+  id: string;
+  startAt: Date;
+  status: BookingStatus;
+  tableId: string;
+  userId: string;
 };
 
 const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [BookingStatus.pending, BookingStatus.confirmed];
@@ -500,6 +542,67 @@ export class BookingsRepository {
     });
   }
 
+  async listAdminBookings(filters: AdminBookingQueueFilters): Promise<AdminBookingQueueRecord[]> {
+    const statusFilter =
+      filters.status !== undefined
+        ? {
+            status: filters.status
+          }
+        : {};
+
+    const bookings = await databaseClient.booking.findMany({
+      where: statusFilter,
+      select: {
+        endAt: true,
+        id: true,
+        startAt: true,
+        status: true,
+        table: {
+          select: {
+            id: true,
+            number: true,
+            room: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          }
+        },
+        user: {
+          select: {
+            email: true,
+            id: true,
+            telegramUsername: true,
+            profile: {
+              select: {
+                displayName: true,
+                phone: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: [{ startAt: "asc" }, { createdAt: "asc" }]
+    });
+
+    return bookings.map((booking) => ({
+      endAt: booking.endAt,
+      id: booking.id,
+      roomId: booking.table.room.id,
+      roomName: booking.table.room.name,
+      startAt: booking.startAt,
+      status: booking.status,
+      tableId: booking.table.id,
+      tableNumber: booking.table.number,
+      userDisplayName: booking.user.profile?.displayName ?? "Пользователь",
+      userEmail: booking.user.email,
+      userId: booking.user.id,
+      userPhone: booking.user.profile?.phone ?? null,
+      userTelegramUsername: booking.user.telegramUsername
+    }));
+  }
+
   async hasOverlappingConfirmedBooking(
     input: {
       endAt: Date;
@@ -515,6 +618,36 @@ export class BookingsRepository {
         },
         tableId: input.tableId,
         status: BookingStatus.confirmed,
+        startAt: {
+          lt: input.endAt
+        },
+        endAt: {
+          gt: input.startAt
+        }
+      },
+      select: {
+        id: true
+      }
+    });
+
+    return Boolean(overlapping);
+  }
+
+  async hasOverlappingActiveBookingExcludingBooking(input: {
+    bookingId: string;
+    endAt: Date;
+    startAt: Date;
+    tableId: string;
+  }): Promise<boolean> {
+    const overlapping = await databaseClient.booking.findFirst({
+      where: {
+        id: {
+          not: input.bookingId
+        },
+        tableId: input.tableId,
+        status: {
+          in: ACTIVE_BOOKING_STATUSES
+        },
         startAt: {
           lt: input.endAt
         },
@@ -599,6 +732,93 @@ export class BookingsRepository {
           targetUserId: input.targetUserId
         }
       }
+    });
+  }
+
+  async moveBookingForAdmin(input: MoveBookingForAdminInput): Promise<MovedBookingRecord | null> {
+    return await databaseClient.$transaction(async (tx: Prisma.TransactionClient) => {
+      const booking = await tx.booking.findUnique({
+        where: {
+          id: input.bookingId
+        },
+        select: {
+          id: true,
+          status: true,
+          userId: true
+        }
+      });
+      if (!booking || booking.status !== input.fromStatus) {
+        return null;
+      }
+
+      const hasOverlap = await tx.booking.findFirst({
+        where: {
+          id: {
+            not: input.bookingId
+          },
+          tableId: input.tableId,
+          status: {
+            in: ACTIVE_BOOKING_STATUSES
+          },
+          startAt: {
+            lt: input.endAt
+          },
+          endAt: {
+            gt: input.startAt
+          }
+        },
+        select: {
+          id: true
+        }
+      });
+      if (hasOverlap) {
+        return null;
+      }
+
+      const updated = await tx.booking.update({
+        where: {
+          id: input.bookingId
+        },
+        data: {
+          adminComment: input.reason ?? null,
+          startAt: input.startAt,
+          endAt: input.endAt,
+          tableId: input.tableId
+        },
+        select: {
+          endAt: true,
+          id: true,
+          startAt: true,
+          status: true,
+          tableId: true,
+          userId: true
+        }
+      });
+
+      await tx.bookingStatusHistory.create({
+        data: {
+          bookingId: updated.id,
+          changedByUserId: input.actorUserId,
+          fromStatus: input.fromStatus,
+          reason: input.reason ?? "booking moved by admin",
+          toStatus: input.fromStatus
+        }
+      });
+
+      await tx.auditLog.create({
+        data: {
+          action: "booking.moved",
+          actorUserId: input.actorUserId,
+          entityId: updated.id,
+          entityType: "booking",
+          metadata: {
+            status: updated.status,
+            tableId: updated.tableId
+          }
+        }
+      });
+
+      return updated;
     });
   }
 
