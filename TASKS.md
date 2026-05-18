@@ -31,7 +31,7 @@ Partial task groups needing follow-up:
 - `TASK-0802`: admin booking queue UI exists; backend emergency full-phone reveal endpoint with audit logging still needs completion.
 - `TASK-0804`: user blocking UI exists; owner block/unblock backend endpoint and audit behavior still need completion.
 - `TASK-0805`: audit-log UI exists; owner audit-log listing API still needs completion.
-- `TASK-0901`: bot runtime scaffold is implemented; follow-up bot behavior tasks remain open.
+- `TASK-0901` and `TASK-0902`: bot runtime scaffold and `/start` account linking baseline are implemented; follow-up bot behavior tasks remain open.
 - `TASK-1101`: booking flows emit notification-request signals; real notification service and Telegram delivery are not implemented.
 - `TASK-1301`: GitHub Actions CI exists for lint/typecheck/unit/API integration tests; production build checks are not yet included.
 - `TASK-1402`: audit events are written for several booking/resource actions; dedicated full-phone reveal audit flow and owner audit API are still incomplete.
@@ -40,7 +40,7 @@ Partial task groups needing follow-up:
 Highest-priority open work:
 
 1. Complete backend endpoints used by admin/owner UI fallbacks: audit-log listing, emergency contact reveal, and user block/unblock.
-2. Implement `/start` account linking and Telegram notification delivery on top of the existing bot runtime scaffold.
+2. Implement Telegram notification delivery and expand bot command coverage on top of existing `/start` linking.
 3. Add production Dockerfiles, deployment guide, backups, reverse proxy/HTTPS, and uptime monitoring.
 4. Add Playwright smoke tests and bot tests after the bot runtime exists.
 
@@ -1319,7 +1319,7 @@ BookingSummary
 
 **Priority:** P1  
 **Labels:** `area:bot`, `area:auth`, `type:feature`
-**Status:** Open
+**Status:** Done
 
 #### Acceptance criteria
 
@@ -2235,8 +2235,8 @@ Tasks:
 1. Finish backend endpoint for owner audit-log listing used by `/admin/audit-logs`.
 2. Finish emergency full-phone reveal endpoint with required audit event and reason payload.
 3. Finish owner user block/unblock endpoint and audit behavior used by `/admin/users`.
-4. TASK-0901 — Create real grammY bot app runtime.
-5. TASK-0902 — Implement `/start` and account linking.
+4. TASK-0903 — Implement user bot commands.
+5. TASK-0904 — Implement admin bot commands.
 6. TASK-1101 — Add notification service for booking events.
 7. TASK-0905 — Implement Telegram booking notifications.
 8. TASK-1302 — Add Dockerfiles and production compose.

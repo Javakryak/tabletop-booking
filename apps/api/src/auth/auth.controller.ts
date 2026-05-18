@@ -1,7 +1,8 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Headers, Post } from "@nestjs/common";
 import { ApiBody, ApiOkResponse, ApiOperation, ApiProperty, ApiTags } from "@nestjs/swagger";
 
 import {
+  TelegramBotLinkRequestDto,
   TelegramLoginRequestDto,
   TelegramMiniAppLoginRequestDto
 } from "./dto/telegram-auth.dto.js";
@@ -37,6 +38,22 @@ class TelegramAuthEnvelopeDto {
   data!: TelegramAuthResponseDto;
 }
 
+class TelegramBotLinkResponseDto {
+  @ApiProperty()
+  userId!: string;
+
+  @ApiProperty()
+  isNewUser!: boolean;
+
+  @ApiProperty()
+  profileCompleted!: boolean;
+}
+
+class TelegramBotLinkEnvelopeDto {
+  @ApiProperty({ type: TelegramBotLinkResponseDto })
+  data!: TelegramBotLinkResponseDto;
+}
+
 @ApiTags("auth")
 @Controller("auth")
 export class AuthController {
@@ -56,5 +73,16 @@ export class AuthController {
   @ApiOkResponse({ type: TelegramAuthEnvelopeDto })
   async loginTelegramMiniApp(@Body() body: TelegramMiniAppLoginRequestDto) {
     return await this.authService.authenticateTelegramMiniApp(body);
+  }
+
+  @Post("telegram-bot/link")
+  @ApiOperation({ summary: "Link Telegram bot user to application account" })
+  @ApiBody({ type: TelegramBotLinkRequestDto })
+  @ApiOkResponse({ type: TelegramBotLinkEnvelopeDto })
+  async linkTelegramBotUser(
+    @Body() body: TelegramBotLinkRequestDto,
+    @Headers("x-telegram-bot-token") botTokenHeader?: string
+  ) {
+    return await this.authService.linkTelegramBotUser(body, botTokenHeader);
   }
 }

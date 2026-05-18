@@ -1,10 +1,12 @@
 import { Injectable, ServiceUnavailableException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { timingSafeEqual } from "node:crypto";
 import jwt from "jsonwebtoken";
 import type { SignOptions } from "jsonwebtoken";
 import type { AppRole } from "@tabletop-booking/shared";
 
 import type {
+  TelegramBotLinkRequestDto,
   TelegramAuthDataDto,
   TelegramMiniAppLoginRequestDto
 } from "./dto/telegram-auth.dto.js";
@@ -26,6 +28,14 @@ type AuthResponse = {
       profileCompleted: boolean;
       roles: AppRole[];
     };
+  };
+};
+
+type TelegramBotLinkResponse = {
+  data: {
+    isNewUser: boolean;
+    profileCompleted: boolean;
+    userId: string;
   };
 };
 
@@ -64,6 +74,53 @@ export class AuthService {
     }
 
     return await this.authenticateIdentity(identity);
+  }
+
+  async linkTelegramBotUser(
+    payload: TelegramBotLinkRequestDto,
+    providedBotToken: string | undefined
+  ): Promise<TelegramBotLinkResponse> {
+    this.assertInternalBotToken(providedBotToken);
+
+    const telegramUsername = payload.telegramUsername?.trim() || null;
+    let user = await this.authRepository.findByTelegramId(payload.telegramId);
+    let isNewUser = false;
+
+    if (!user) {
+      try {
+        user = await this.authRepository.createUserFromTelegramBotLink({
+          displayName: payload.displayName.trim(),
+          telegramId: payload.telegramId,
+          telegramUsername
+        });
+        isNewUser = true;
+      } catch (error) {
+        if (!isPrismaUniqueConstraintError(error)) {
+          throw error;
+        }
+
+        user = await this.authRepository.findByTelegramId(payload.telegramId);
+        if (!user) {
+          throw error;
+        }
+      }
+    } else if (user.telegramUsername !== telegramUsername) {
+      await this.authRepository.updateTelegramMetadata(user.id, telegramUsername);
+      user = {
+        ...user,
+        telegramUsername
+      };
+    }
+
+    const hasRequiredConsents = await this.legalService.hasAcceptedRequiredConsents(user.id);
+
+    return {
+      data: {
+        isNewUser,
+        profileCompleted: Boolean(user.phone) && hasRequiredConsents,
+        userId: user.id
+      }
+    };
   }
 
   private async authenticateIdentity(identity: VerifiedTelegramIdentity): Promise<AuthResponse> {
@@ -129,6 +186,24 @@ export class AuthService {
     return botToken;
   }
 
+  private assertInternalBotToken(providedBotToken: string | undefined): void {
+    const expectedBotToken = this.requireBotToken();
+    const provided = providedBotToken?.trim();
+
+    if (!provided) {
+      throw new UnauthorizedException("Invalid bot token");
+    }
+
+    const expectedBuffer = Buffer.from(expectedBotToken);
+    const providedBuffer = Buffer.from(provided);
+    const isSameLength = expectedBuffer.length === providedBuffer.length;
+    const isValid = isSameLength && timingSafeEqual(expectedBuffer, providedBuffer);
+
+    if (!isValid) {
+      throw new UnauthorizedException("Invalid bot token");
+    }
+  }
+
   private getMaxAgeSeconds(): number {
     const raw = this.configService.get<string>("TELEGRAM_AUTH_MAX_AGE_SECONDS");
     if (!raw) {
@@ -142,6 +217,14 @@ export class AuthService {
 
     return parsed;
   }
+}
+
+function isPrismaUniqueConstraintError(error: unknown): boolean {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  return "code" in error && error.code === "P2002";
 }
 
 function mapDatabaseRolesToAppRoles(

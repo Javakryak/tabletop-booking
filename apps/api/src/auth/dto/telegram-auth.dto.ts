@@ -42,3 +42,17 @@ export class TelegramMiniAppLoginRequestDto {
   @IsNotEmpty()
   initData!: string;
 }
+
+export class TelegramBotLinkRequestDto {
+  @IsString()
+  @IsNotEmpty()
+  telegramId!: string;
+
+  @IsString()
+  @IsOptional()
+  telegramUsername?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  displayName!: string;
+}
