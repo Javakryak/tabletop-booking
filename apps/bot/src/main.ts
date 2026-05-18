@@ -1,3 +1,4 @@
+import { ADMIN_BOT_COMMANDS } from "./bot/admin-commands.js";
 import { createBot } from "./bot/create-bot.js";
 import { USER_BOT_COMMANDS } from "./bot/user-commands.js";
 import { readBotEnv } from "./config/env.js";
@@ -5,7 +6,7 @@ import { readBotEnv } from "./config/env.js";
 async function bootstrap(): Promise<void> {
   const config = readBotEnv();
   const bot = createBot(config);
-  await bot.api.setMyCommands(USER_BOT_COMMANDS);
+  await bot.api.setMyCommands([...USER_BOT_COMMANDS, ...ADMIN_BOT_COMMANDS]);
 
   if (config.updateMode === "polling") {
     await bot.start({

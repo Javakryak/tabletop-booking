@@ -1,6 +1,12 @@
 import { Bot } from "grammy";
 
 import type { BotEnvConfig } from "../config/env.js";
+import {
+  createAdminBookingsFetcher,
+  handleAdminCommand,
+  handlePendingCommand,
+  handleTodayCommand
+} from "./admin-commands.js";
 import { linkTelegramUser } from "./link-telegram-user.js";
 import { handleStartCommand } from "./start-command.js";
 import {
@@ -14,9 +20,26 @@ import {
 } from "./user-commands.js";
 
 export function createBot(
-  config: Pick<BotEnvConfig, "telegramBotToken" | "appBaseUrl" | "apiBaseUrl">
+  config: Pick<
+    BotEnvConfig,
+    | "adminApiToken"
+    | "adminTelegramIds"
+    | "telegramBotToken"
+    | "appBaseUrl"
+    | "apiBaseUrl"
+    | "scheduleTimezone"
+  >
 ): Bot {
   const bot = new Bot(config.telegramBotToken);
+  const adminBookingsUrl = `${config.appBaseUrl}/admin/bookings`;
+  const fetchAdminBookings = config.adminApiToken
+    ? createAdminBookingsFetcher({
+        adminApiToken: config.adminApiToken,
+        apiBaseUrl: config.apiBaseUrl
+      })
+    : async () => {
+        throw new Error("BOT_ADMIN_API_TOKEN is not configured");
+      };
 
   bot.command("start", async (context) => {
     await handleStartCommand(context, {
@@ -58,6 +81,36 @@ export function createBot(
 
   bot.command("settings", async (context) => {
     await handleSettingsCommand(context, { appBaseUrl: config.appBaseUrl });
+  });
+
+  bot.command("admin", async (context) => {
+    await handleAdminCommand(context, {
+      adminBookingsUrl,
+      adminTelegramIds: config.adminTelegramIds,
+      appBaseUrl: config.appBaseUrl,
+      fetchAdminBookings,
+      timezone: config.scheduleTimezone
+    });
+  });
+
+  bot.command("pending", async (context) => {
+    await handlePendingCommand(context, {
+      adminBookingsUrl,
+      adminTelegramIds: config.adminTelegramIds,
+      appBaseUrl: config.appBaseUrl,
+      fetchAdminBookings,
+      timezone: config.scheduleTimezone
+    });
+  });
+
+  bot.command("today", async (context) => {
+    await handleTodayCommand(context, {
+      adminBookingsUrl,
+      adminTelegramIds: config.adminTelegramIds,
+      appBaseUrl: config.appBaseUrl,
+      fetchAdminBookings,
+      timezone: config.scheduleTimezone
+    });
   });
 
   bot.catch((error) => {
