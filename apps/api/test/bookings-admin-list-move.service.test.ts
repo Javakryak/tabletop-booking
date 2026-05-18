@@ -100,6 +100,44 @@ test("adminMoveBooking moves pending booking and emits notification signal", asy
   assert.equal(repository.state.moveInput?.reason, "Перенос по просьбе пользователя");
 });
 
+test("adminMoveBooking moves confirmed booking and preserves confirmed status", async () => {
+  const repository = createRepository({
+    booking: {
+      endAt: new Date("2030-05-15T13:00:00.000Z"),
+      id: "booking-1",
+      startAt: new Date("2030-05-15T12:00:00.000Z"),
+      status: BookingStatus.confirmed,
+      tableId: "table-1",
+      userId: "user-1"
+    },
+    queue: []
+  });
+  const service = new BookingsService(
+    createConfigService() as never,
+    repository.api as never,
+    createLegalService() as never
+  );
+
+  const result = await service.adminMoveBooking({
+    actorUserId: "admin-1",
+    bookingId: "booking-1",
+    endAt: "2030-05-15T14:00:00+03:00",
+    reason: "Перенос подтвержденной брони",
+    startAt: "2030-05-15T13:00:00+03:00",
+    tableId: "table-2"
+  });
+
+  assert.deepEqual(result.data, {
+    bookingId: "booking-1",
+    endAt: "2030-05-15T11:00:00.000Z",
+    startAt: "2030-05-15T10:00:00.000Z",
+    status: BookingStatus.confirmed,
+    tableId: "table-2"
+  });
+  assert.equal(repository.state.signals.length, 1);
+  assert.equal(repository.state.signals[0]?.signal, "booking_moved_user_follow_up");
+});
+
 test("adminMoveBooking rejects conflicting target slot", async () => {
   const repository = createRepository({
     booking: {
@@ -111,6 +149,37 @@ test("adminMoveBooking rejects conflicting target slot", async () => {
       userId: "user-1"
     },
     hasOverlappingActiveBooking: true,
+    queue: []
+  });
+  const service = new BookingsService(
+    createConfigService() as never,
+    repository.api as never,
+    createLegalService() as never
+  );
+
+  await assert.rejects(
+    () =>
+      service.adminMoveBooking({
+        actorUserId: "owner-1",
+        bookingId: "booking-1",
+        endAt: "2030-05-15T14:00:00+03:00",
+        startAt: "2030-05-15T13:00:00+03:00",
+        tableId: "table-2"
+      }),
+    ConflictException
+  );
+});
+
+test("adminMoveBooking rejects non-movable booking statuses", async () => {
+  const repository = createRepository({
+    booking: {
+      endAt: new Date("2030-05-15T13:00:00.000Z"),
+      id: "booking-1",
+      startAt: new Date("2030-05-15T12:00:00.000Z"),
+      status: BookingStatus.cancelled_by_admin,
+      tableId: "table-1",
+      userId: "user-1"
+    },
     queue: []
   });
   const service = new BookingsService(

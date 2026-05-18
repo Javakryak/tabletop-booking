@@ -961,7 +961,7 @@ POST /api/v1/admin/bookings/:id/cancel
 **Priority:** P0
 **Labels:** `area:booking`, `area:api`, `area:admin`, `type:feature`
 **Status:** Done
-**GitHub Issue:** [#108](https://github.com/Javakryak/tabletop-booking/issues/108)
+**GitHub Issue:** [#108](https://github.com/Javakryak/tabletop-booking/issues/108), hardening follow-up [#114](https://github.com/Javakryak/tabletop-booking/issues/114)
 
 #### Goal
 

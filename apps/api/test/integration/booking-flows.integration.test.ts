@@ -147,6 +147,52 @@ test("registers user and executes create/confirm/cancel booking flow", async () 
   assert.equal(movePayload.data.startAt, "2030-05-15T10:00:00.000Z");
   assert.equal(movePayload.data.endAt, "2030-05-15T11:00:00.000Z");
 
+  const moveHistoryRecord = await databaseClient.bookingStatusHistory.findFirst({
+    where: {
+      bookingId: createBookingPayload.data.id,
+      fromStatus: "pending",
+      reason: "Integration move",
+      toStatus: "pending"
+    }
+  });
+  assert.ok(moveHistoryRecord, "Expected move status-history record to be created");
+
+  const moveAuditRecord = await databaseClient.auditLog.findFirst({
+    where: {
+      action: "booking.moved",
+      entityId: createBookingPayload.data.id,
+      entityType: "booking"
+    },
+    orderBy: {
+      createdAt: "desc"
+    }
+  });
+  assert.ok(moveAuditRecord, "Expected move audit log record to be created");
+  const moveMetadata = (moveAuditRecord.metadata ?? {}) as { status?: string; tableId?: string };
+  assert.equal(moveMetadata.status, "pending");
+  assert.equal(moveMetadata.tableId, alternateTableId);
+
+  const moveNotificationSignal = await databaseClient.auditLog.findFirst({
+    where: {
+      action: "booking.notification_requested",
+      entityId: createBookingPayload.data.id,
+      entityType: "booking"
+    },
+    orderBy: {
+      createdAt: "desc"
+    }
+  });
+  assert.ok(
+    moveNotificationSignal,
+    "Expected notification-request audit signal for booking move to be created"
+  );
+  const notificationMetadata = (moveNotificationSignal.metadata ?? {}) as {
+    signal?: string;
+    targetUserId?: string;
+  };
+  assert.equal(notificationMetadata.signal, "booking_moved_user_follow_up");
+  assert.equal(notificationMetadata.targetUserId, userId);
+
   const confirmResponse = await fetch(
     `${baseUrl}/api/v1/admin/bookings/${createBookingPayload.data.id}/confirm`,
     {
