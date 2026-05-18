@@ -21,7 +21,7 @@ Completed or effectively completed task groups:
 - `TASK-0201`–`TASK-0204`: NestJS API foundation, Swagger, healthcheck, structured logging.
 - `TASK-0301`–`TASK-0305`: roles/guards, Telegram auth verification, profile/privacy endpoints, legal consent flow, account deletion request.
 - `TASK-0401`–`TASK-0405`: rooms, tables, working hours, schedule exceptions, room/table closures.
-- `TASK-0501`–`TASK-0507`: booking availability, create request, transitions, admin confirm/cancel, cancellation rules, active booking limit, concurrency test.
+- `TASK-0501`–`TASK-0509`: booking availability, create request, transitions, admin confirm/cancel, admin queue listing, admin move/reschedule, cancellation rules, active booking limit, concurrency test.
 - `TASK-0601`–`TASK-0703`: Next.js web app, public pages, auth UI, dashboard, booking components, booking creation/history UI.
 - `TASK-0801` and `TASK-0803`: admin route shell and owner resources UI.
 - `TASK-1201`–`TASK-1203`: test framework, booking domain tests, API integration tests.
@@ -991,6 +991,36 @@ POST /api/v1/admin/bookings/:id/cancel
 - [x] Unit tests for move/reschedule validation and conflict handling.
 - [x] Controller/guard tests for admin/owner access.
 - [x] API integration test for admin queue + move flow.
+
+---
+
+### TASK-0509 — Admin queue listing integration cleanup (real API only)
+
+**Priority:** P0
+**Labels:** `area:booking`, `area:api`, `area:web`, `area:admin`, `type:feature`
+**Status:** Done
+**GitHub Issue:** [#111](https://github.com/Javakryak/tabletop-booking/issues/111)
+
+#### Goal
+
+Довести интеграцию очереди броней до real API path без локального demo fallback для списка заявок.
+
+#### Scope
+
+- Использовать `GET /api/v1/admin/bookings?status=pending` как основной и единственный источник списка заявок в web admin queue.
+- Убрать локальный demo fallback списка заявок при `404`.
+- Обновить smoke test для admin queue на реальный ответ listing endpoint.
+
+#### Acceptance criteria
+
+- [x] Admin queue list loads from real API endpoint `/api/v1/admin/bookings?status=pending`.
+- [x] No local demo fallback is used for queue listing.
+- [x] Existing confirm/cancel flows remain compatible with loaded queue items.
+- [x] Smoke test covers real listing + confirm flow.
+
+#### Tests
+
+- [x] Web smoke test for admin queue listing and confirm flow.
 
 ---
 
