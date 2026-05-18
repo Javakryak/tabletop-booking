@@ -3,6 +3,15 @@ import { Bot } from "grammy";
 import type { BotEnvConfig } from "../config/env.js";
 import { linkTelegramUser } from "./link-telegram-user.js";
 import { handleStartCommand } from "./start-command.js";
+import {
+  handleBookCommand,
+  handleCancelCommand,
+  handleFindGameCommand,
+  handleHelpCommand,
+  handleMyBookingsCommand,
+  handleMyMeetupsCommand,
+  handleSettingsCommand
+} from "./user-commands.js";
 
 export function createBot(
   config: Pick<BotEnvConfig, "telegramBotToken" | "appBaseUrl" | "apiBaseUrl">
@@ -24,9 +33,31 @@ export function createBot(
   });
 
   bot.command("help", async (context) => {
-    await context.reply(
-      "Доступные команды сейчас: /start и /help. Команды бронирования и администрирования добавим по следующим задачам."
-    );
+    await handleHelpCommand(context, { appBaseUrl: config.appBaseUrl });
+  });
+
+  bot.command("book", async (context) => {
+    await handleBookCommand(context, { appBaseUrl: config.appBaseUrl });
+  });
+
+  bot.command("my_bookings", async (context) => {
+    await handleMyBookingsCommand(context, { appBaseUrl: config.appBaseUrl });
+  });
+
+  bot.command("my_meetups", async (context) => {
+    await handleMyMeetupsCommand(context, { appBaseUrl: config.appBaseUrl });
+  });
+
+  bot.command("find_game", async (context) => {
+    await handleFindGameCommand(context, { appBaseUrl: config.appBaseUrl });
+  });
+
+  bot.command("cancel", async (context) => {
+    await handleCancelCommand(context, { appBaseUrl: config.appBaseUrl });
+  });
+
+  bot.command("settings", async (context) => {
+    await handleSettingsCommand(context, { appBaseUrl: config.appBaseUrl });
   });
 
   bot.catch((error) => {
