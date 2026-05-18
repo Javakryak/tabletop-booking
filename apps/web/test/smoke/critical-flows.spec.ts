@@ -4,6 +4,7 @@ const AVAILABILITY_ROUTE = /\/api\/v1\/bookings\/availability\?/;
 const CREATE_BOOKING_ROUTE = /\/api\/v1\/bookings$/;
 const AUTH_ME_ROUTE = /\/api\/v1\/auth\/me$/;
 const ADMIN_BOOKINGS_ROUTE = /\/api\/v1\/admin\/bookings\?status=pending$/;
+const ADMIN_CONFIRM_ROUTE = /\/api\/v1\/admin\/bookings\/[^/]+\/confirm$/;
 
 test("opens the landing page", async ({ page }) => {
   await page.goto("/");
@@ -146,7 +147,7 @@ test("blocks admin routes for non-admin demo user", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("confirms a booking from admin queue in demo mode", async ({ page }) => {
+test("confirms a booking from admin queue using API listing", async ({ page }) => {
   await page.route(AUTH_ME_ROUTE, async (route) => {
     await route.fulfill({
       status: 404,
@@ -159,10 +160,47 @@ test("confirms a booking from admin queue in demo mode", async ({ page }) => {
 
   await page.route(ADMIN_BOOKINGS_ROUTE, async (route) => {
     await route.fulfill({
-      status: 404,
+      status: 200,
       contentType: "application/json",
       body: JSON.stringify({
-        message: "Not Found"
+        data: [
+          {
+            id: "booking-admin-smoke-1",
+            status: "pending",
+            startAt: "2026-05-15T15:00:00.000Z",
+            endAt: "2026-05-15T15:30:00.000Z",
+            user: {
+              id: "user-admin-smoke-1",
+              displayName: "Иван П.",
+              telegramUsername: "ivan_petrov"
+            },
+            room: {
+              id: "room-1",
+              name: "Большой зал"
+            },
+            table: {
+              id: "table-1",
+              number: "A1"
+            },
+            contact: {
+              phoneMasked: "+7*** *** **67",
+              emailMasked: "i***@example.com"
+            }
+          }
+        ]
+      })
+    });
+  });
+
+  await page.route(ADMIN_CONFIRM_ROUTE, async (route) => {
+    await route.fulfill({
+      status: 201,
+      contentType: "application/json",
+      body: JSON.stringify({
+        data: {
+          bookingId: "booking-admin-smoke-1",
+          status: "confirmed"
+        }
       })
     });
   });
@@ -172,7 +210,6 @@ test("confirms a booking from admin queue in demo mode", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Очередь броней" })).toBeVisible();
   await page.getByRole("button", { name: "Подтвердить" }).first().click();
 
-  await expect(page.getByText("Заявка подтверждена (демо-режим)."))
-    .toBeVisible();
+  await expect(page.getByText("Заявка подтверждена.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Недавно обработанные" })).toBeVisible();
 });
