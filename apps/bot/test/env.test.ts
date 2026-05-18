@@ -15,6 +15,8 @@ describe("readBotEnv", () => {
     assert.equal(config.apiBaseUrl, "http://localhost:3001/api/v1");
     assert.equal(config.appBaseUrl, "http://localhost:3000");
     assert.equal(config.scheduleTimezone, "Europe/Moscow");
+    assert.equal(config.notificationBatchSize, 20);
+    assert.equal(config.notificationPollIntervalMs, 30000);
     assert.equal(config.adminTelegramIds.size, 0);
   });
 
@@ -44,12 +46,16 @@ describe("readBotEnv", () => {
     const config = readBotEnv({
       BOT_ADMIN_API_TOKEN: "admin-jwt",
       BOT_ADMIN_TELEGRAM_IDS: "123, 456,789",
+      BOT_NOTIFICATION_BATCH_SIZE: "25",
+      BOT_NOTIFICATION_POLL_INTERVAL_MS: "45000",
       BOT_SCHEDULE_TIMEZONE: "UTC",
       TELEGRAM_BOT_TOKEN: "test-token"
     });
 
     assert.equal(config.adminApiToken, "admin-jwt");
     assert.equal(config.scheduleTimezone, "UTC");
+    assert.equal(config.notificationBatchSize, 25);
+    assert.equal(config.notificationPollIntervalMs, 45000);
     assert.equal(config.adminTelegramIds.has("123"), true);
     assert.equal(config.adminTelegramIds.has("456"), true);
     assert.equal(config.adminTelegramIds.has("789"), true);

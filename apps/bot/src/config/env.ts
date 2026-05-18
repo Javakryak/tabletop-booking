@@ -6,6 +6,8 @@ export interface BotEnvConfig {
   appEnv: string;
   apiBaseUrl: string;
   appBaseUrl: string;
+  notificationBatchSize: number;
+  notificationPollIntervalMs: number;
   scheduleTimezone: string;
   telegramBotToken: string;
   updateMode: TelegramUpdateMode;
@@ -43,6 +45,27 @@ function parseCommaSeparatedSet(value: string | undefined): ReadonlySet<string> 
   return new Set(parsed);
 }
 
+function readPositiveInteger(
+  source: NodeJS.ProcessEnv,
+  key: string,
+  fallback: number,
+  options?: { max?: number; min?: number }
+): number {
+  const raw = source[key]?.trim();
+  if (!raw) {
+    return fallback;
+  }
+
+  const parsed = Number.parseInt(raw, 10);
+  const min = options?.min ?? 1;
+  const max = options?.max ?? Number.MAX_SAFE_INTEGER;
+  if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
 export function readBotEnv(source: NodeJS.ProcessEnv = process.env): BotEnvConfig {
   const updateModeRaw = source.TELEGRAM_UPDATE_MODE?.trim() ?? "polling";
 
@@ -55,6 +78,19 @@ export function readBotEnv(source: NodeJS.ProcessEnv = process.env): BotEnvConfi
     appEnv: source.APP_ENV?.trim() ?? "local",
     apiBaseUrl: source.API_BASE_URL?.trim() ?? "http://localhost:3001/api/v1",
     appBaseUrl: source.APP_BASE_URL?.trim() ?? "http://localhost:3000",
+    notificationBatchSize: readPositiveInteger(source, "BOT_NOTIFICATION_BATCH_SIZE", 20, {
+      max: 100,
+      min: 1
+    }),
+    notificationPollIntervalMs: readPositiveInteger(
+      source,
+      "BOT_NOTIFICATION_POLL_INTERVAL_MS",
+      30_000,
+      {
+        max: 300_000,
+        min: 5_000
+      }
+    ),
     scheduleTimezone: source.BOT_SCHEDULE_TIMEZONE?.trim() ?? "Europe/Moscow",
     telegramBotToken: readRequiredEnv(source, "TELEGRAM_BOT_TOKEN"),
     updateMode: updateModeRaw as TelegramUpdateMode
