@@ -31,7 +31,7 @@ Partial task groups needing follow-up:
 - `TASK-0802`: admin booking queue UI exists; backend emergency full-phone reveal endpoint with audit logging still needs completion.
 - `TASK-0804`: user blocking UI exists; owner block/unblock backend endpoint and audit behavior still need completion.
 - `TASK-0805`: audit-log UI exists; owner audit-log listing API still needs completion.
-- `TASK-0901`: `apps/bot` package exists; grammY runtime is not implemented.
+- `TASK-0901`: bot runtime scaffold is implemented; follow-up bot behavior tasks remain open.
 - `TASK-1101`: booking flows emit notification-request signals; real notification service and Telegram delivery are not implemented.
 - `TASK-1301`: GitHub Actions CI exists for lint/typecheck/unit/API integration tests; production build checks are not yet included.
 - `TASK-1402`: audit events are written for several booking/resource actions; dedicated full-phone reveal audit flow and owner audit API are still incomplete.
@@ -40,7 +40,7 @@ Partial task groups needing follow-up:
 Highest-priority open work:
 
 1. Complete backend endpoints used by admin/owner UI fallbacks: audit-log listing, emergency contact reveal, and user block/unblock.
-2. Implement Telegram bot runtime, `/start` account linking, and notification delivery.
+2. Implement `/start` account linking and Telegram notification delivery on top of the existing bot runtime scaffold.
 3. Add production Dockerfiles, deployment guide, backups, reverse proxy/HTTPS, and uptime monitoring.
 4. Add Playwright smoke tests and bot tests after the bot runtime exists.
 
@@ -1301,7 +1301,7 @@ BookingSummary
 
 **Priority:** P1  
 **Labels:** `area:bot`, `type:feature`
-**Status:** Partial — package scaffold exists; grammY runtime is still open.
+**Status:** Done
 
 #### Goal
 Создать `apps/bot` на grammY.
