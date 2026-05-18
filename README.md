@@ -8,7 +8,7 @@
 
 ## Project status
 
-**Status:** core booking backend and web MVP foundation are implemented; Telegram bot runtime and `/start` account linking foundation exist, while full bot commands, real notification delivery, production deployment, and MVP 2 meetups remain open.
+**Status:** core booking backend and web MVP foundation are implemented; Telegram bot runtime, `/start` account linking, and baseline user commands exist, while admin commands, real notification delivery, production deployment, and MVP 2 meetups remain open.
 
 Implemented as of the current `main` branch:
 
@@ -23,7 +23,7 @@ Implemented as of the current `main` branch:
 
 Known gaps before MVP 1 can be considered production-ready:
 
-- `apps/bot` now has a grammY runtime scaffold with `/start` account linking, env-based config, and local polling startup; extended commands, webhook server wiring, and real Telegram notifications are not implemented yet;
+- `apps/bot` now has a grammY runtime scaffold with `/start` account linking, baseline user commands, env-based config, and local polling startup; admin commands, deeper bot workflows, webhook server wiring, and real Telegram notifications are not implemented yet;
 - booking notification handling currently records notification-request signals, but no durable notification service or delivery worker exists yet;
 - some admin/owner web screens include demo/fallback behavior until matching backend endpoints are completed, especially emergency full-phone reveal, owner audit-log API, and user block/unblock API;
 - deployment, Dockerfiles, backups, reverse proxy/HTTPS, uptime monitoring, and production runbooks are still pending.
@@ -605,7 +605,7 @@ Telegram is used for:
 - account linking through `/start`, implemented as a baseline flow with idempotent Telegram-to-app linking;
 - user notifications, planned but not implemented yet;
 - admin notifications, planned but not implemented yet;
-- quick actions, planned but not implemented yet;
+- baseline quick actions are implemented through lightweight user commands; deeper flows remain planned;
 - future Telegram Mini App entrypoint.
 
 Development modes:

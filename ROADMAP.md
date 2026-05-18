@@ -170,7 +170,7 @@
 - [x] Test foundation, booking domain tests, API integration tests, and CI for lint/typecheck/tests.
 - [~] Admin/privacy backend integration is partial: admin booking queue backend API (list pending + move/reschedule) is implemented, while audit-log listing, emergency full-phone reveal, and user block/unblock APIs remain to finish full web integration.
 - [~] Notification events are represented by audit/log signals, but real notification delivery is not implemented.
-- [~] Telegram bot runtime scaffold and `/start` account linking baseline are implemented; full commands, webhook server wiring, and Telegram notifications remain pending.
+- [~] Telegram bot runtime scaffold, `/start` account linking, and baseline user commands are implemented; admin commands, webhook server wiring, and Telegram notifications remain pending.
 - [ ] Production deployment, Dockerfiles, reverse proxy/HTTPS, backups, uptime monitoring, and runbooks.
 - [ ] MVP 2 game catalog and meetups.
 - [ ] Portfolio demo mode, prompt log, dev diary, diagrams, and media assets.
@@ -580,6 +580,7 @@ existing.end_at > requested.start_at
 - [ ] Настроить grammY.
 - [x] Реализовать `/start`.
 - [x] Реализовать связку Telegram-аккаунта.
+- [x] Реализовать базовые пользовательские команды (`/help`, `/book`, `/my_bookings`, `/my_meetups`, `/find_game`, `/cancel`, `/settings`).
 - [ ] Реализовать уведомления о создании заявки.
 - [ ] Реализовать уведомления о подтверждении брони.
 - [ ] Реализовать уведомления об отмене.

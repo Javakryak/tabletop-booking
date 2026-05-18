@@ -24,6 +24,7 @@ Completed or effectively completed task groups:
 - `TASK-0501`–`TASK-0509`: booking availability, create request, transitions, admin confirm/cancel, admin queue listing, admin move/reschedule, cancellation rules, active booking limit, concurrency test.
 - `TASK-0601`–`TASK-0703`: Next.js web app, public pages, auth UI, dashboard, booking components, booking creation/history UI.
 - `TASK-0801` and `TASK-0803`: admin route shell and owner resources UI.
+- `TASK-0901`–`TASK-0903`: bot runtime scaffold, `/start` account linking, and baseline user command set.
 - `TASK-1201`–`TASK-1203`: test framework, booking domain tests, API integration tests.
 
 Partial task groups needing follow-up:
@@ -31,7 +32,7 @@ Partial task groups needing follow-up:
 - `TASK-0802`: admin booking queue UI exists; backend emergency full-phone reveal endpoint with audit logging still needs completion.
 - `TASK-0804`: user blocking UI exists; owner block/unblock backend endpoint and audit behavior still need completion.
 - `TASK-0805`: audit-log UI exists; owner audit-log listing API still needs completion.
-- `TASK-0901` and `TASK-0902`: bot runtime scaffold and `/start` account linking baseline are implemented; follow-up bot behavior tasks remain open.
+- `TASK-0904`: admin command workflows remain open after baseline user command rollout.
 - `TASK-1101`: booking flows emit notification-request signals; real notification service and Telegram delivery are not implemented.
 - `TASK-1301`: GitHub Actions CI exists for lint/typecheck/unit/API integration tests; production build checks are not yet included.
 - `TASK-1402`: audit events are written for several booking/resource actions; dedicated full-phone reveal audit flow and owner audit API are still incomplete.
@@ -1334,7 +1335,7 @@ BookingSummary
 
 **Priority:** P2  
 **Labels:** `area:bot`, `type:feature`
-**Status:** Open
+**Status:** Done
 
 #### Commands
 
