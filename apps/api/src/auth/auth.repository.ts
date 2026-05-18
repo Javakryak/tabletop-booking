@@ -109,6 +109,57 @@ export class AuthRepository {
     };
   }
 
+  async createUserFromTelegramBotLink(input: {
+    displayName: string;
+    telegramId: string;
+    telegramUsername: string | null;
+  }): Promise<AuthUserRecord> {
+    const createdUser = await this.prisma.user.create({
+      data: {
+        telegramId: input.telegramId,
+        telegramUsername: input.telegramUsername,
+        profile: {
+          create: {
+            displayName: input.displayName
+          }
+        },
+        roles: {
+          create: [{ role: "user" }]
+        }
+      },
+      include: {
+        consents: {
+          select: {
+            id: true
+          }
+        },
+        profile: {
+          select: {
+            displayName: true,
+            phone: true
+          }
+        },
+        roles: {
+          select: {
+            role: true
+          }
+        }
+      }
+    });
+
+    return {
+      consentsCount: createdUser.consents.length,
+      id: createdUser.id,
+      phone: createdUser.profile?.phone ?? null,
+      roles: createdUser.roles.map(
+        (roleAssignment: { role: string }) => roleAssignment.role as Exclude<AppRole, "guest">
+      ),
+      telegramId: createdUser.telegramId,
+      telegramUsername: createdUser.telegramUsername,
+      userProfileDisplayName: createdUser.profile?.displayName ?? input.displayName
+    };
+  }
+
   async updateTelegramMetadata(
     userId: string,
     telegramUsername: string | null

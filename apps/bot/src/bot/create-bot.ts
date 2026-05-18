@@ -1,18 +1,26 @@
 import { Bot } from "grammy";
 
 import type { BotEnvConfig } from "../config/env.js";
+import { linkTelegramUser } from "./link-telegram-user.js";
+import { handleStartCommand } from "./start-command.js";
 
-export function createBot(config: Pick<BotEnvConfig, "telegramBotToken" | "appBaseUrl">): Bot {
+export function createBot(
+  config: Pick<BotEnvConfig, "telegramBotToken" | "appBaseUrl" | "apiBaseUrl">
+): Bot {
   const bot = new Bot(config.telegramBotToken);
 
   bot.command("start", async (context) => {
-    await context.reply(
-      [
-        "Привет! Это бот клуба настольных игр.",
-        "Базовый runtime уже запущен.",
-        `Расширенный функционал будет добавлен в следующих задачах. Веб-версия: ${config.appBaseUrl}`
-      ].join("\n")
-    );
+    await handleStartCommand(context, {
+      appBaseUrl: config.appBaseUrl,
+      linkTelegramUser: async (input) =>
+        await linkTelegramUser(
+          {
+            apiBaseUrl: config.apiBaseUrl,
+            botToken: config.telegramBotToken
+          },
+          input
+        )
+    });
   });
 
   bot.command("help", async (context) => {

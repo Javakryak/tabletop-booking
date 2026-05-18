@@ -98,6 +98,69 @@ test("authenticateTelegramWeb rejects invalid signature", async () => {
   );
 });
 
+test("linkTelegramBotUser creates user and is idempotent on repeated /start", async () => {
+  const repository = createInMemoryRepository();
+  const legalService = createLegalService(false);
+  const authService = new AuthService(
+    createConfigService() as never,
+    repository as never,
+    legalService as never
+  );
+
+  const firstResult = await authService.linkTelegramBotUser(
+    {
+      displayName: "Иван",
+      telegramId: "123456",
+      telegramUsername: "ivan_user"
+    } as never,
+    BOT_TOKEN
+  );
+
+  assert.equal(firstResult.data.userId, "user-1");
+  assert.equal(firstResult.data.isNewUser, true);
+  assert.equal(firstResult.data.profileCompleted, false);
+  assert.equal(repository.createCalls, 1);
+
+  legalService.hasAcceptedRequiredConsents = async () => true;
+
+  const secondResult = await authService.linkTelegramBotUser(
+    {
+      displayName: "Иван",
+      telegramId: "123456",
+      telegramUsername: "ivan_new"
+    } as never,
+    BOT_TOKEN
+  );
+
+  assert.equal(secondResult.data.userId, "user-1");
+  assert.equal(secondResult.data.isNewUser, false);
+  assert.equal(secondResult.data.profileCompleted, false);
+  assert.equal(repository.createCalls, 1);
+  assert.equal(repository.updateCalls, 1);
+});
+
+test("linkTelegramBotUser rejects invalid internal bot token", async () => {
+  const repository = createInMemoryRepository();
+  const authService = new AuthService(
+    createConfigService() as never,
+    repository as never,
+    createLegalService(false) as never
+  );
+
+  await assert.rejects(
+    () =>
+      authService.linkTelegramBotUser(
+        {
+          displayName: "Иван",
+          telegramId: "123456",
+          telegramUsername: "ivan_user"
+        } as never,
+        "wrong-token"
+      ),
+    UnauthorizedException
+  );
+});
+
 function createConfigService() {
   return {
     get(key: string): string | undefined {
@@ -153,6 +216,25 @@ function createInMemoryRepository() {
         telegramId: identity.telegramId,
         telegramUsername: identity.telegramUsername,
         userProfileDisplayName: identity.firstName
+      };
+
+      return { ...storedUser };
+    },
+
+    async createUserFromTelegramBotLink(input: {
+      displayName: string;
+      telegramId: string;
+      telegramUsername: string | null;
+    }): Promise<StoredUser> {
+      createCalls += 1;
+      storedUser = {
+        consentsCount: 0,
+        id: "user-1",
+        phone: null,
+        roles: ["user"],
+        telegramId: input.telegramId,
+        telegramUsername: input.telegramUsername,
+        userProfileDisplayName: input.displayName
       };
 
       return { ...storedUser };
