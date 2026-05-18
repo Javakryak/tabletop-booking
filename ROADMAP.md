@@ -170,7 +170,7 @@
 - [x] Test foundation, booking domain tests, API integration tests, and CI for lint/typecheck/tests.
 - [~] Admin/privacy backend integration is partial: admin booking queue backend API (list pending + move/reschedule) is implemented, while audit-log listing, emergency full-phone reveal, and user block/unblock APIs remain to finish full web integration.
 - [~] Notification events are represented by audit/log signals, but real notification delivery is not implemented.
-- [ ] Telegram bot runtime, `/start`, commands, webhooks, and Telegram notifications.
+- [~] Telegram bot runtime scaffold exists; `/start` account linking, full commands, webhook server wiring, and Telegram notifications remain pending.
 - [ ] Production deployment, Dockerfiles, reverse proxy/HTTPS, backups, uptime monitoring, and runbooks.
 - [ ] MVP 2 game catalog and meetups.
 - [ ] Portfolio demo mode, prompt log, dev diary, diagrams, and media assets.
@@ -235,7 +235,7 @@ docker/
 
 - [x] Создать Next.js приложение `apps/web`.
 - [x] Создать NestJS приложение `apps/api`.
-- [~] Создать Telegram bot приложение `apps/bot` — package scaffold exists, grammY runtime is not implemented.
+- [x] Создать Telegram bot приложение `apps/bot` — grammY runtime scaffold, env-based config, and local polling startup are implemented.
 - [x] Настроить TypeScript config.
 - [x] Настроить ESLint.
 - [x] Настроить Prettier.
@@ -247,7 +247,7 @@ docker/
 
 - [x] Рабочий monorepo.
 - [x] Локально поднимаются PostgreSQL и Redis.
-- [~] Все приложения стартуют в dev-режиме — web/API are implemented; bot runtime is still pending.
+- [x] Все приложения стартуют в dev-режиме — web/API implemented; bot has local polling runtime scaffold.
 - [x] CI проходит для реализованных workspace checks.
 
 ### Acceptance Criteria

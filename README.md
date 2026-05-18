@@ -8,7 +8,7 @@
 
 ## Project status
 
-**Status:** core booking backend and web MVP foundation are implemented; Telegram bot, real notification delivery, production deployment, and MVP 2 meetups remain open.
+**Status:** core booking backend and web MVP foundation are implemented; Telegram bot runtime foundation exists, while `/start` account linking, full bot commands, real notification delivery, production deployment, and MVP 2 meetups remain open.
 
 Implemented as of the current `main` branch:
 
@@ -23,7 +23,7 @@ Implemented as of the current `main` branch:
 
 Known gaps before MVP 1 can be considered production-ready:
 
-- `apps/bot` is still only scaffolded; grammY runtime, `/start`, account linking, commands, webhooks, and real Telegram notifications are not implemented;
+- `apps/bot` now has a minimal grammY runtime scaffold with env-based config and local polling startup; `/start` account linking, extended commands, webhook server wiring, and real Telegram notifications are not implemented yet;
 - booking notification handling currently records notification-request signals, but no durable notification service or delivery worker exists yet;
 - some admin/owner web screens include demo/fallback behavior until matching backend endpoints are completed, especially emergency full-phone reveal, owner audit-log API, and user block/unblock API;
 - deployment, Dockerfiles, backups, reverse proxy/HTTPS, uptime monitoring, and production runbooks are still pending.
@@ -351,7 +351,7 @@ board-club-booking/
 ## Local development
 
 > These commands describe the intended local workflow. Exact scripts should be implemented during repository foundation tasks.
-> The pnpm workspace is configured, the initial NestJS API shell exists, and `apps/web` now provides a minimal Next.js app shell. `apps/bot` is still a placeholder package, so some root scripts currently exercise mostly the implemented API/database and web foundation.
+> The pnpm workspace is configured, the initial NestJS API shell exists, and `apps/web` provides a minimal Next.js app shell. `apps/bot` now includes a basic grammY runtime scaffold, but business bot flows are still under active development.
 > Shared strict TypeScript settings live in `packages/config/tsconfig/base.json`; workspace projects extend this config through their local `tsconfig.json` files.
 > ESLint and Prettier are configured at the repository root. `pnpm lint` checks the repository, while `pnpm format` checks root config files plus `apps/*` and `packages/*` sources.
 
@@ -414,7 +414,7 @@ Web:      http://localhost:3000
 API:      http://localhost:3001/api/v1
 Health:   http://localhost:3001/api/v1/health
 Swagger:  http://localhost:3001/api/docs
-Bot:      not implemented yet; `apps/bot` is currently a placeholder package
+Bot:      polling runtime scaffold via `pnpm --filter @tabletop-booking/bot dev`
 ```
 
 Current public web routes:
@@ -602,7 +602,7 @@ UI smoke test notes:
 Telegram is used for:
 
 - primary authentication, implemented for web login and Mini App init data verification in the API;
-- account linking through `/start`, planned but not implemented yet;
+- account linking through `/start`, planned but not implemented yet (runtime command stub exists, linking logic is pending);
 - user notifications, planned but not implemented yet;
 - admin notifications, planned but not implemented yet;
 - quick actions, planned but not implemented yet;
