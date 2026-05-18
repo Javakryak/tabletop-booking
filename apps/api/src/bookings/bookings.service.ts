@@ -475,7 +475,7 @@ export class BookingsService {
       toStatus: BookingStatus.confirmed
     });
 
-    await this.bookingsRepository.createBookingNotificationSignal({
+    await this.tryCreateNotificationSignal({
       actorUserId: input.actorUserId,
       bookingId: booking.id,
       signal: "booking_confirmed_user_follow_up",
@@ -514,7 +514,7 @@ export class BookingsService {
 
     const transitionResult = await this.transitionBookingStatus(transitionInput);
 
-    await this.bookingsRepository.createBookingNotificationSignal({
+    await this.tryCreateNotificationSignal({
       actorUserId: input.actorUserId,
       bookingId: booking.id,
       signal: "booking_cancelled_user_follow_up",
@@ -614,7 +614,7 @@ export class BookingsService {
       throw new ConflictException("The selected table is not available for this time range");
     }
 
-    await this.bookingsRepository.createBookingNotificationSignal({
+    await this.tryCreateNotificationSignal({
       actorUserId: input.actorUserId,
       bookingId: moved.id,
       signal: "booking_moved_user_follow_up",
@@ -699,6 +699,27 @@ export class BookingsService {
     }
 
     return fromWeeklySchedule;
+  }
+
+  private async tryCreateNotificationSignal(input: {
+    actorUserId: string;
+    bookingId: string;
+    signal:
+      | "booking_cancelled_user_follow_up"
+      | "booking_confirmed_user_follow_up"
+      | "booking_moved_user_follow_up";
+    targetUserId: string;
+  }): Promise<void> {
+    try {
+      await this.bookingsRepository.createBookingNotificationSignal(input);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Failed to persist booking notification signal", {
+        bookingId: input.bookingId,
+        signal: input.signal,
+        error: errorMessage
+      });
+    }
   }
 }
 

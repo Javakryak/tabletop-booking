@@ -117,6 +117,34 @@ test("adminCancelBooking rejects unknown booking", async () => {
   );
 });
 
+test("adminConfirmBooking succeeds even when notification signal persistence fails", async () => {
+  const repository = createRepository({
+    booking: {
+      endAt: new Date("2026-05-12T10:00:00.000Z"),
+      id: "booking-3",
+      startAt: new Date("2026-05-12T09:00:00.000Z"),
+      status: BookingStatus.pending,
+      tableId: "table-3",
+      userId: "user-3"
+    },
+    notificationSignalShouldFail: true
+  });
+  const service = new BookingsService(
+    createConfigService() as never,
+    repository.api as never,
+    createLegalService() as never
+  );
+
+  const result = await service.adminConfirmBooking({
+    actorRole: "admin",
+    actorUserId: "admin-1",
+    bookingId: "booking-3"
+  });
+
+  assert.equal(result.data.status, BookingStatus.confirmed);
+  assert.equal(repository.state.transitions.length, 1);
+});
+
 function createRepository(state: {
   booking: {
     endAt: Date;
@@ -127,10 +155,12 @@ function createRepository(state: {
     userId: string;
   } | null;
   hasConfirmedOverlap?: boolean;
+  notificationSignalShouldFail?: boolean;
 }) {
   const internal = {
     booking: state.booking,
     hasConfirmedOverlap: state.hasConfirmedOverlap ?? false,
+    notificationSignalShouldFail: state.notificationSignalShouldFail ?? false,
     signals: [] as Array<{
       actorUserId: string;
       bookingId: string;
@@ -201,6 +231,10 @@ function createRepository(state: {
         signal: string;
         targetUserId: string;
       }) {
+        if (internal.notificationSignalShouldFail) {
+          throw new Error("signal write failed");
+        }
+
         internal.signals.push(input);
       }
     }

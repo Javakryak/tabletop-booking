@@ -18,6 +18,10 @@ import { RolesGuard } from "./auth/roles.guard.js";
 import { LegalController } from "./legal/legal.controller.js";
 import { LegalRepository } from "./legal/legal.repository.js";
 import { LegalService } from "./legal/legal.service.js";
+import { BotInternalAuthService } from "./internal-bot/bot-internal-auth.service.js";
+import { InternalBotController } from "./internal-bot/internal-bot.controller.js";
+import { InternalBotRepository } from "./internal-bot/internal-bot.repository.js";
+import { InternalBotService } from "./internal-bot/internal-bot.service.js";
 import { MeController } from "./me/me.controller.js";
 import { MeRepository } from "./me/me.repository.js";
 import { MeService } from "./me/me.service.js";
@@ -57,6 +61,7 @@ import { TablesService } from "./rooms/tables.service.js";
   controllers: [
     AppController,
     AuthController,
+    InternalBotController,
     AdminBookingsController,
     AdminUsersController,
     BookingRulesController,
@@ -89,6 +94,9 @@ import { TablesService } from "./rooms/tables.service.js";
     MeService,
     LegalRepository,
     LegalService,
+    BotInternalAuthService,
+    InternalBotRepository,
+    InternalBotService,
     OwnerRepository,
     OwnerService,
     ClosuresRepository,

@@ -8,7 +8,7 @@
 
 ## Project status
 
-**Status:** core booking backend and web MVP foundation are implemented; Telegram bot runtime, `/start` account linking, and baseline user commands exist, while admin commands, real notification delivery, production deployment, and MVP 2 meetups remain open.
+**Status:** core booking backend and web MVP foundation are implemented; Telegram bot runtime, `/start` account linking, baseline user/admin commands, and booking notification delivery worker are now available in polling mode, while webhook production wiring, production deployment, and MVP 2 meetups remain open.
 
 Implemented as of the current `main` branch:
 
@@ -23,8 +23,8 @@ Implemented as of the current `main` branch:
 
 Known gaps before MVP 1 can be considered production-ready:
 
-- `apps/bot` now has a grammY runtime scaffold with `/start` account linking, baseline user commands, env-based config, and local polling startup; admin commands, deeper bot workflows, webhook server wiring, and real Telegram notifications are not implemented yet;
-- booking notification handling currently records notification-request signals, but no durable notification service or delivery worker exists yet;
+- `apps/bot` now has a grammY runtime scaffold with `/start` account linking, baseline user/admin commands, env-based config, local polling startup, and a polling notification delivery worker; webhook server wiring and deeper bot workflows are still pending;
+- booking notification handling now uses internal bot endpoints and retry-by-redelivery semantics over notification request signals; dedicated queue infrastructure is still a follow-up task;
 - some admin/owner web screens include demo/fallback behavior until matching backend endpoints are completed, especially emergency full-phone reveal, owner audit-log API, and user block/unblock API;
 - deployment, Dockerfiles, backups, reverse proxy/HTTPS, uptime monitoring, and production runbooks are still pending.
 
@@ -603,8 +603,8 @@ Telegram is used for:
 
 - primary authentication, implemented for web login and Mini App init data verification in the API;
 - account linking through `/start`, implemented as a baseline flow with idempotent Telegram-to-app linking;
-- user notifications, planned but not implemented yet;
-- admin notifications, planned but not implemented yet;
+- user notifications for booking confirmed/cancelled/moved and reminder events, implemented via bot delivery worker;
+- admin notifications for new booking requests, implemented via bot delivery worker;
 - baseline quick actions are implemented through lightweight user commands; deeper flows remain planned;
 - future Telegram Mini App entrypoint.
 
@@ -725,10 +725,9 @@ docs/legal/personal-data-consent.md
 Foundation, database, backend booking, web booking/admin UI, and core test tasks are already implemented. The next practical work should focus on closing MVP 1 operational gaps:
 
 1. Finish backend endpoints used by current admin/owner UI fallbacks: audit-log listing, emergency phone reveal with audit log, and user block/unblock.
-2. Expand Telegram bot user/admin commands and delivery workflows after baseline `/start` linking.
-3. Add a real notification service and Telegram delivery for booking created/confirmed/cancelled events.
-4. Add production Dockerfiles, deployment guide, reverse proxy/HTTPS config, backups, and uptime monitoring instructions.
-5. Add Playwright web smoke tests and bot tests after the bot runtime exists.
+2. Add webhook runtime wiring for staging/production bot processing.
+3. Add production Dockerfiles, deployment guide, reverse proxy/HTTPS config, backups, and uptime monitoring instructions.
+4. Add Playwright web smoke tests and extend bot test coverage.
 
 Full roadmap: [ROADMAP.md](./ROADMAP.md).  
 Full backlog: [TASKS.md](./TASKS.md).

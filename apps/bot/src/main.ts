@@ -1,4 +1,6 @@
 import { ADMIN_BOT_COMMANDS } from "./bot/admin-commands.js";
+import { createBookingNotificationsClient } from "./bot/booking-notifications-client.js";
+import { startBookingNotificationsWorker } from "./bot/booking-notifications-worker.js";
 import { createBot } from "./bot/create-bot.js";
 import { USER_BOT_COMMANDS } from "./bot/user-commands.js";
 import { readBotEnv } from "./config/env.js";
@@ -9,6 +11,18 @@ async function bootstrap(): Promise<void> {
   await bot.api.setMyCommands([...USER_BOT_COMMANDS, ...ADMIN_BOT_COMMANDS]);
 
   if (config.updateMode === "polling") {
+    startBookingNotificationsWorker({
+      appBaseUrl: config.appBaseUrl,
+      batchSize: config.notificationBatchSize,
+      bot,
+      client: createBookingNotificationsClient({
+        apiBaseUrl: config.apiBaseUrl,
+        botToken: config.telegramBotToken
+      }),
+      pollIntervalMs: config.notificationPollIntervalMs,
+      timezone: config.scheduleTimezone
+    });
+
     await bot.start({
       onStart: () => {
         console.info("Telegram bot started in polling mode.");
