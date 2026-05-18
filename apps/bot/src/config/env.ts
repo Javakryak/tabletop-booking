@@ -1,9 +1,12 @@
 export type TelegramUpdateMode = "polling" | "webhook";
 
 export interface BotEnvConfig {
+  adminApiToken?: string;
+  adminTelegramIds: ReadonlySet<string>;
   appEnv: string;
   apiBaseUrl: string;
   appBaseUrl: string;
+  scheduleTimezone: string;
   telegramBotToken: string;
   updateMode: TelegramUpdateMode;
   telegramWebhookUrl?: string;
@@ -27,6 +30,19 @@ function readOptionalEnv(source: NodeJS.ProcessEnv, key: string): string | undef
   return value && value.length > 0 ? value : undefined;
 }
 
+function parseCommaSeparatedSet(value: string | undefined): ReadonlySet<string> {
+  if (!value) {
+    return new Set<string>();
+  }
+
+  const parsed = value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+
+  return new Set(parsed);
+}
+
 export function readBotEnv(source: NodeJS.ProcessEnv = process.env): BotEnvConfig {
   const updateModeRaw = source.TELEGRAM_UPDATE_MODE?.trim() ?? "polling";
 
@@ -35,12 +51,19 @@ export function readBotEnv(source: NodeJS.ProcessEnv = process.env): BotEnvConfi
   }
 
   const config: BotEnvConfig = {
+    adminTelegramIds: parseCommaSeparatedSet(source.BOT_ADMIN_TELEGRAM_IDS),
     appEnv: source.APP_ENV?.trim() ?? "local",
     apiBaseUrl: source.API_BASE_URL?.trim() ?? "http://localhost:3001/api/v1",
     appBaseUrl: source.APP_BASE_URL?.trim() ?? "http://localhost:3000",
+    scheduleTimezone: source.BOT_SCHEDULE_TIMEZONE?.trim() ?? "Europe/Moscow",
     telegramBotToken: readRequiredEnv(source, "TELEGRAM_BOT_TOKEN"),
     updateMode: updateModeRaw as TelegramUpdateMode
   };
+
+  const adminApiToken = readOptionalEnv(source, "BOT_ADMIN_API_TOKEN");
+  if (adminApiToken) {
+    config.adminApiToken = adminApiToken;
+  }
 
   const webhookUrl = readOptionalEnv(source, "TELEGRAM_WEBHOOK_URL");
   const webhookSecret = readOptionalEnv(source, "TELEGRAM_WEBHOOK_SECRET");
