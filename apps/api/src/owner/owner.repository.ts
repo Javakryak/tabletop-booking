@@ -50,8 +50,74 @@ export type EmergencyPhoneRevealAuditRecord = {
   id: string;
 };
 
+export type AdminUserRecord = {
+  blockedReason: string | null;
+  displayName: string;
+  status: string;
+  telegramUsername: string | null;
+  userId: string;
+};
+
+export type UserBlockInput = {
+  reason: string;
+  targetUserId: string;
+};
+
+export type UserUnblockInput = {
+  targetUserId: string;
+};
+
+export type UserModerationAuditInput = {
+  action: "user.block" | "user.unblock";
+  actorUserId: string;
+  metadata: Prisma.JsonObject;
+  targetUserId: string;
+};
+
+export type UserModerationAuditRecord = {
+  createdAt: Date;
+  id: string;
+};
+
 @Injectable()
 export class OwnerRepository {
+  async listAdminUsers(): Promise<AdminUserRecord[]> {
+    const users = await databaseClient.user.findMany({
+      where: {
+        status: {
+          not: "deleted"
+        }
+      },
+      select: {
+        blockedReason: true,
+        id: true,
+        profile: {
+          select: {
+            displayName: true
+          }
+        },
+        status: true,
+        telegramUsername: true
+      },
+      orderBy: {
+        createdAt: "desc"
+      },
+      take: 100
+    });
+
+    return users
+      .filter((user): user is typeof user & { profile: { displayName: string } } =>
+        Boolean(user.profile)
+      )
+      .map((user) => ({
+        blockedReason: user.blockedReason,
+        displayName: user.profile.displayName,
+        status: user.status,
+        telegramUsername: user.telegramUsername,
+        userId: user.id
+      }));
+  }
+
   async listPendingDeletionRequests(): Promise<PendingDeletionRequestRecord[]> {
     const users: Array<{
       deletionRequestReason: string | null;
@@ -234,4 +300,116 @@ export class OwnerRepository {
       }
     });
   }
+
+  async blockUser(input: UserBlockInput): Promise<AdminUserRecord | null> {
+    const user = await databaseClient.user.findFirst({
+      where: {
+        id: input.targetUserId,
+        status: {
+          not: "deleted"
+        }
+      },
+      select: {
+        id: true
+      }
+    });
+    if (!user) {
+      return null;
+    }
+
+    const updated = await databaseClient.user.update({
+      where: {
+        id: input.targetUserId
+      },
+      data: {
+        blockedAt: new Date(),
+        blockedReason: input.reason,
+        status: "blocked"
+      },
+      select: adminUserSelect
+    });
+
+    return mapAdminUser(updated);
+  }
+
+  async unblockUser(input: UserUnblockInput): Promise<AdminUserRecord | null> {
+    const user = await databaseClient.user.findFirst({
+      where: {
+        id: input.targetUserId,
+        status: {
+          not: "deleted"
+        }
+      },
+      select: {
+        id: true
+      }
+    });
+    if (!user) {
+      return null;
+    }
+
+    const updated = await databaseClient.user.update({
+      where: {
+        id: input.targetUserId
+      },
+      data: {
+        blockedAt: null,
+        blockedReason: null,
+        status: "active"
+      },
+      select: adminUserSelect
+    });
+
+    return mapAdminUser(updated);
+  }
+
+  async writeUserModerationAudit(
+    input: UserModerationAuditInput
+  ): Promise<UserModerationAuditRecord> {
+    return await databaseClient.auditLog.create({
+      data: {
+        action: input.action,
+        actorUserId: input.actorUserId,
+        entityId: input.targetUserId,
+        entityType: "user",
+        metadata: input.metadata
+      },
+      select: {
+        createdAt: true,
+        id: true
+      }
+    });
+  }
+}
+
+const adminUserSelect = {
+  blockedReason: true,
+  id: true,
+  profile: {
+    select: {
+      displayName: true
+    }
+  },
+  status: true,
+  telegramUsername: true
+} satisfies Prisma.UserSelect;
+
+function mapAdminUser(user: {
+  blockedReason: string | null;
+  id: string;
+  profile: { displayName: string } | null;
+  status: string;
+  telegramUsername: string | null;
+}): AdminUserRecord | null {
+  if (!user.profile) {
+    return null;
+  }
+
+  return {
+    blockedReason: user.blockedReason,
+    displayName: user.profile.displayName,
+    status: user.status,
+    telegramUsername: user.telegramUsername,
+    userId: user.id
+  };
 }

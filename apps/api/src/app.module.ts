@@ -30,6 +30,7 @@ import { OwnerAuditLogsController } from "./owner/owner-audit-logs.controller.js
 import { OwnerController } from "./owner/owner.controller.js";
 import { OwnerRepository } from "./owner/owner.repository.js";
 import { OwnerService } from "./owner/owner.service.js";
+import { OwnerUsersController } from "./owner/owner-users.controller.js";
 import { OwnerRoomsController } from "./rooms/owner-rooms.controller.js";
 import { OwnerRoomClosuresController } from "./rooms/owner-room-closures.controller.js";
 import { OwnerTableClosuresController } from "./rooms/owner-table-closures.controller.js";
@@ -71,6 +72,7 @@ import { TablesService } from "./rooms/tables.service.js";
     LegalController,
     OwnerController,
     OwnerAuditLogsController,
+    OwnerUsersController,
     RoomsController,
     OwnerRoomsController,
     OwnerRoomClosuresController,

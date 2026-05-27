@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiBody,
@@ -12,6 +12,7 @@ import { JwtAuthGuard } from "../auth/jwt-auth.guard.js";
 import { Roles } from "../auth/roles.decorator.js";
 import { RolesGuard } from "../auth/roles.guard.js";
 import {
+  AdminUsersEnvelopeDto,
   EmergencyContactAccessDto,
   EmergencyContactAccessEnvelopeDto
 } from "./dto/audit-log.dto.js";
@@ -31,6 +32,13 @@ type AuthenticatedRequest = {
 @Controller("admin/users")
 export class AdminUsersController {
   constructor(private readonly ownerService: OwnerService) {}
+
+  @Get()
+  @ApiOperation({ summary: "List users for admin and owner moderation screens" })
+  @ApiOkResponse({ type: AdminUsersEnvelopeDto })
+  async listUsers() {
+    return await this.ownerService.listAdminUsers();
+  }
 
   @Post(":userId/emergency-contact-access")
   @ApiOperation({ summary: "Reveal emergency contact phone with audit logging" })
