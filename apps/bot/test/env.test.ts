@@ -31,6 +31,36 @@ describe("readBotEnv", () => {
     );
   });
 
+  test("reads webhook server configuration in webhook mode", () => {
+    const config = readBotEnv({
+      TELEGRAM_BOT_TOKEN: "test-token",
+      TELEGRAM_UPDATE_MODE: "webhook",
+      TELEGRAM_WEBHOOK_SECRET: "secret-token",
+      TELEGRAM_WEBHOOK_URL: "https://bot.example.com/telegram/webhook"
+    });
+
+    assert.equal(config.updateMode, "webhook");
+    assert.equal(config.telegramWebhookSecret, "secret-token");
+    assert.equal(config.telegramWebhookUrl, "https://bot.example.com/telegram/webhook");
+    assert.equal(config.telegramWebhookHost, "0.0.0.0");
+    assert.equal(config.telegramWebhookPort, 8081);
+    assert.equal(config.telegramWebhookPath, "/telegram/webhook");
+  });
+
+  test("rejects mismatched webhook path and url pathname", () => {
+    assert.throws(
+      () =>
+        readBotEnv({
+          TELEGRAM_BOT_TOKEN: "test-token",
+          TELEGRAM_UPDATE_MODE: "webhook",
+          TELEGRAM_WEBHOOK_PATH: "/telegram/custom",
+          TELEGRAM_WEBHOOK_SECRET: "secret-token",
+          TELEGRAM_WEBHOOK_URL: "https://bot.example.com/telegram/webhook"
+        }),
+      /TELEGRAM_WEBHOOK_PATH/
+    );
+  });
+
   test("rejects unsupported update mode", () => {
     assert.throws(
       () =>
