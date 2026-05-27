@@ -1404,7 +1404,7 @@ BookingSummary
 
 **Priority:** P2  
 **Labels:** `area:bot`, `area:infra`, `type:feature`
-**Status:** Open
+**Status:** Done
 
 #### Acceptance criteria
 

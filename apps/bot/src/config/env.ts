@@ -13,6 +13,9 @@ export interface BotEnvConfig {
   updateMode: TelegramUpdateMode;
   telegramWebhookUrl?: string;
   telegramWebhookSecret?: string;
+  telegramWebhookHost?: string;
+  telegramWebhookPort?: number;
+  telegramWebhookPath?: string;
 }
 
 const SUPPORTED_UPDATE_MODES = new Set<TelegramUpdateMode>(["polling", "webhook"]);
@@ -30,6 +33,16 @@ function readRequiredEnv(source: NodeJS.ProcessEnv, key: string): string {
 function readOptionalEnv(source: NodeJS.ProcessEnv, key: string): string | undefined {
   const value = source[key]?.trim();
   return value && value.length > 0 ? value : undefined;
+}
+
+function normalizeWebhookPath(value: string): string {
+  const normalized = value.trim();
+
+  if (!normalized) {
+    return "/telegram/webhook";
+  }
+
+  return normalized.startsWith("/") ? normalized : `/${normalized}`;
 }
 
 function parseCommaSeparatedSet(value: string | undefined): ReadonlySet<string> {
@@ -103,6 +116,8 @@ export function readBotEnv(source: NodeJS.ProcessEnv = process.env): BotEnvConfi
 
   const webhookUrl = readOptionalEnv(source, "TELEGRAM_WEBHOOK_URL");
   const webhookSecret = readOptionalEnv(source, "TELEGRAM_WEBHOOK_SECRET");
+  const webhookHost = readOptionalEnv(source, "TELEGRAM_WEBHOOK_HOST");
+  const webhookPath = readOptionalEnv(source, "TELEGRAM_WEBHOOK_PATH");
 
   if (webhookUrl) {
     config.telegramWebhookUrl = webhookUrl;
@@ -112,9 +127,46 @@ export function readBotEnv(source: NodeJS.ProcessEnv = process.env): BotEnvConfi
     config.telegramWebhookSecret = webhookSecret;
   }
 
+  if (webhookHost) {
+    config.telegramWebhookHost = webhookHost;
+  }
+
+  if (webhookPath) {
+    config.telegramWebhookPath = normalizeWebhookPath(webhookPath);
+  }
+
+  const webhookPort = readPositiveInteger(source, "TELEGRAM_WEBHOOK_PORT", 8081, {
+    min: 1,
+    max: 65535
+  });
+
+  if (source.TELEGRAM_WEBHOOK_PORT?.trim()) {
+    config.telegramWebhookPort = webhookPort;
+  }
+
   if (config.updateMode === "webhook") {
     config.telegramWebhookUrl = readRequiredEnv(source, "TELEGRAM_WEBHOOK_URL");
     config.telegramWebhookSecret = readRequiredEnv(source, "TELEGRAM_WEBHOOK_SECRET");
+    config.telegramWebhookHost = webhookHost ?? "0.0.0.0";
+    config.telegramWebhookPort = webhookPort;
+
+    let webhookUrlParsed: URL;
+    try {
+      webhookUrlParsed = new URL(config.telegramWebhookUrl);
+    } catch {
+      throw new Error("TELEGRAM_WEBHOOK_URL must be a valid absolute URL.");
+    }
+
+    const pathFromUrl = normalizeWebhookPath(webhookUrlParsed.pathname);
+    const configuredPath = config.telegramWebhookPath ?? pathFromUrl;
+
+    if (config.telegramWebhookPath && config.telegramWebhookPath !== pathFromUrl) {
+      throw new Error(
+        "TELEGRAM_WEBHOOK_PATH must match TELEGRAM_WEBHOOK_URL pathname in webhook mode."
+      );
+    }
+
+    config.telegramWebhookPath = configuredPath;
   }
 
   return config;

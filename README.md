@@ -8,7 +8,7 @@
 
 ## Project status
 
-**Status:** core booking backend and web MVP foundation are implemented; Telegram bot runtime, `/start` account linking, baseline user/admin commands, and booking notification delivery worker are now available in polling mode, while webhook production wiring, production deployment, and MVP 2 meetups remain open.
+**Status:** core booking backend and web MVP foundation are implemented; Telegram bot runtime, `/start` account linking, baseline user/admin commands, booking notification delivery worker, and webhook/polling runtime modes are available, while production deployment and MVP 2 meetups remain open.
 
 Implemented as of the current `main` branch:
 
@@ -23,7 +23,7 @@ Implemented as of the current `main` branch:
 
 Known gaps before MVP 1 can be considered production-ready:
 
-- `apps/bot` now has a grammY runtime scaffold with `/start` account linking, baseline user/admin commands, env-based config, local polling startup, and a polling notification delivery worker; webhook server wiring and deeper bot workflows are still pending;
+- `apps/bot` now has a grammY runtime scaffold with `/start` account linking, baseline user/admin commands, env-based config, local polling startup, staging/production webhook handling with secret validation, and a notification delivery worker;
 - booking notification handling now uses internal bot endpoints and retry-by-redelivery semantics over notification request signals; dedicated queue infrastructure is still a follow-up task;
 - some admin/owner web screens include demo/fallback behavior until matching backend endpoints are completed, especially emergency full-phone reveal, owner audit-log API, and user block/unblock API;
 - deployment, Dockerfiles, backups, reverse proxy/HTTPS, uptime monitoring, and production runbooks are still pending.
@@ -414,7 +414,7 @@ Web:      http://localhost:3000
 API:      http://localhost:3001/api/v1
 Health:   http://localhost:3001/api/v1/health
 Swagger:  http://localhost:3001/api/docs
-Bot:      polling runtime scaffold via `pnpm --filter @tabletop-booking/bot dev`
+Bot:      polling runtime via `pnpm --filter @tabletop-booking/bot dev` (`TELEGRAM_UPDATE_MODE=polling`)
 ```
 
 Current public web routes:
@@ -539,6 +539,9 @@ CORS_ORIGIN=
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_WEBHOOK_SECRET=
 TELEGRAM_WEBHOOK_URL=
+TELEGRAM_WEBHOOK_HOST=
+TELEGRAM_WEBHOOK_PORT=
+TELEGRAM_WEBHOOK_PATH=
 API_DOCS_ENABLED=
 ```
 
@@ -617,6 +620,21 @@ Development modes:
 | production | webhook |
 
 The Telegram Mini App should be prepared architecturally from the beginning, but implemented after the core web booking flow.
+
+Webhook setup (staging/production):
+
+1. Set `TELEGRAM_UPDATE_MODE=webhook` in `apps/bot/.env`.
+2. Set `TELEGRAM_WEBHOOK_URL` to the public HTTPS endpoint that Telegram can reach.
+3. Set `TELEGRAM_WEBHOOK_SECRET` to a long random token and keep it private.
+4. Ensure `TELEGRAM_WEBHOOK_PATH` matches the pathname part of `TELEGRAM_WEBHOOK_URL`.
+5. Start bot service (`pnpm --filter @tabletop-booking/bot dev` for local verification, or `pnpm --filter @tabletop-booking/bot start` in deployment).
+
+Webhook runtime behavior:
+
+- local development should keep `TELEGRAM_UPDATE_MODE=polling`;
+- in webhook mode, the bot registers webhook via Telegram API on startup;
+- incoming requests are accepted only for configured webhook path, only for `POST`, and only with a valid `X-Telegram-Bot-Api-Secret-Token` header;
+- avoid exposing webhook URL/secret values in logs and deployment outputs.
 
 ---
 
@@ -725,9 +743,8 @@ docs/legal/personal-data-consent.md
 Foundation, database, backend booking, web booking/admin UI, and core test tasks are already implemented. The next practical work should focus on closing MVP 1 operational gaps:
 
 1. Finish backend endpoints used by current admin/owner UI fallbacks: audit-log listing, emergency phone reveal with audit log, and user block/unblock.
-2. Add webhook runtime wiring for staging/production bot processing.
-3. Add production Dockerfiles, deployment guide, reverse proxy/HTTPS config, backups, and uptime monitoring instructions.
-4. Add Playwright web smoke tests and extend bot test coverage.
+2. Add production Dockerfiles, deployment guide, reverse proxy/HTTPS config, backups, and uptime monitoring instructions.
+3. Add Playwright web smoke tests and extend bot test coverage.
 
 Full roadmap: [ROADMAP.md](./ROADMAP.md).  
 Full backlog: [TASKS.md](./TASKS.md).

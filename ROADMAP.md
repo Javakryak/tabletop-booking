@@ -170,7 +170,7 @@
 - [x] Test foundation, booking domain tests, API integration tests, and CI for lint/typecheck/tests.
 - [~] Admin/privacy backend integration is partial: admin booking queue backend API (list pending + move/reschedule) is implemented, while audit-log listing, emergency full-phone reveal, and user block/unblock APIs remain to finish full web integration.
 - [~] Notification events are represented by audit/log signals, but real notification delivery is not implemented.
-- [~] Telegram bot runtime scaffold, `/start` account linking, and baseline user commands are implemented; admin commands, webhook server wiring, and Telegram notifications remain pending.
+- [~] Telegram bot runtime scaffold, `/start` account linking, baseline user/admin commands, and webhook runtime wiring are implemented; broader Telegram notification coverage and deployment hardening remain pending.
 - [ ] Production deployment, Dockerfiles, reverse proxy/HTTPS, backups, uptime monitoring, and runbooks.
 - [ ] MVP 2 game catalog and meetups.
 - [ ] Portfolio demo mode, prompt log, dev diary, diagrams, and media assets.
