@@ -2,7 +2,8 @@
 
 > Roadmap проекта приложения бронирования игровых столов для клуба настольных игр и варгеймов.
 >
-> Проект создаётся для реального использования клубом и как портфолио-кейс AI-assisted development с публичной демонстрацией процесса работы через Codex.
+> Проект создаётся для реального использования клубом и как портфолио-кейс AI-assisted development с
+> публичной демонстрацией процесса работы через Codex.
 
 ---
 
@@ -37,31 +38,31 @@
 
 ## 2. Принятые ключевые решения
 
-| Область | Решение |
-|---|---|
-| Тип продукта | Приложение для одного клуба, не SaaS |
-| Основной стек | TypeScript monorepo |
-| Frontend | Next.js |
-| Backend | NestJS |
-| Telegram bot | grammY |
-| База данных | PostgreSQL |
-| ORM | Prisma |
-| Очереди / напоминания | Redis + BullMQ |
-| UI | Tailwind CSS + shadcn/ui |
-| API | REST API |
-| Документация API | OpenAPI / Swagger |
-| Версионирование API | `/api/v1` |
-| Auth | Telegram-first |
-| Email | Опционально, для альтернативного входа и восстановления доступа |
-| Телефон | Обязателен для экстренной связи |
-| Telegram Mini App | Нужен, но не в первой итерации; архитектуру готовить сразу |
-| Бронь встречи | Стол резервируется только после набора участников |
-| Чат | Простая лента сообщений в MVP, без realtime |
-| Оплаты | Нет |
-| Деплой | Российский VPS / Selectel / Timeweb / Яндекс Cloud |
-| Окружения | staging и production |
-| Мониторинг MVP | structured logs, healthcheck, uptime monitoring, backups |
-| Privacy | Минимизация данных, согласия, удаление/выгрузка данных |
+| Область               | Решение                                                         |
+| --------------------- | --------------------------------------------------------------- |
+| Тип продукта          | Приложение для одного клуба, не SaaS                            |
+| Основной стек         | TypeScript monorepo                                             |
+| Frontend              | Next.js                                                         |
+| Backend               | NestJS                                                          |
+| Telegram bot          | grammY                                                          |
+| База данных           | PostgreSQL                                                      |
+| ORM                   | Prisma                                                          |
+| Очереди / напоминания | Redis + BullMQ                                                  |
+| UI                    | Tailwind CSS + shadcn/ui                                        |
+| API                   | REST API                                                        |
+| Документация API      | OpenAPI / Swagger                                               |
+| Версионирование API   | `/api/v1`                                                       |
+| Auth                  | Telegram-first                                                  |
+| Email                 | Опционально, для альтернативного входа и восстановления доступа |
+| Телефон               | Обязателен для экстренной связи                                 |
+| Telegram Mini App     | Нужен, но не в первой итерации; архитектуру готовить сразу      |
+| Бронь встречи         | Стол резервируется только после набора участников               |
+| Чат                   | Простая лента сообщений в MVP, без realtime                     |
+| Оплаты                | Нет                                                             |
+| Деплой                | Российский VPS / Selectel / Timeweb / Яндекс Cloud              |
+| Окружения             | staging и production                                            |
+| Мониторинг MVP        | structured logs, healthcheck, uptime monitoring, backups        |
+| Privacy               | Минимизация данных, согласия, удаление/выгрузка данных          |
 
 ---
 
@@ -163,15 +164,28 @@
 - [x] Foundation, monorepo, workspace scripts, env examples, lint/format/typecheck setup.
 - [x] Local PostgreSQL/Redis Docker Compose.
 - [x] Prisma schema, migrations, database package, seed demo-data.
-- [x] NestJS API foundation: `/api/v1`, Swagger, validation, error handling, structured logs, request/correlation id, healthcheck.
-- [x] Auth/user/legal backend: Telegram web login verification, Telegram Mini App init data verification, JWT sessions, roles/guards, profile/privacy endpoints, legal consent acceptance, account deletion request.
-- [x] Core resources and booking backend: rooms, tables, working hours, schedule exceptions, closures, booking availability, create request, cancellation rules, active booking limits, admin confirmation/cancellation, status history, audit events, concurrency protection.
-- [x] Web MVP foundation: public pages, auth/profile flow, dashboard, booking creation/history UI, admin layout, admin booking queue, owner resource screens, user blocking UI, audit-log UI foundation.
+- [x] NestJS API foundation: `/api/v1`, Swagger, validation, error handling, structured logs,
+      request/correlation id, healthcheck.
+- [x] Auth/user/legal backend: Telegram web login verification, Telegram Mini App init data
+      verification, JWT sessions, roles/guards, profile/privacy endpoints, legal consent acceptance,
+      account deletion request.
+- [x] Core resources and booking backend: rooms, tables, working hours, schedule exceptions,
+      closures, booking availability, create request, cancellation rules, active booking limits,
+      admin confirmation/cancellation, status history, audit events, concurrency protection.
+- [x] Web MVP foundation: public pages, auth/profile flow, dashboard, booking creation/history UI,
+      admin layout, admin booking queue with emergency phone reveal, owner resource screens, user
+      blocking UI, and audit-log UI/API integration.
 - [x] Test foundation, booking domain tests, API integration tests, and CI for lint/typecheck/tests.
-- [~] Admin/privacy backend integration is partial: admin booking queue backend API (list pending + move/reschedule) is implemented, while audit-log listing, emergency full-phone reveal, and user block/unblock APIs remain to finish full web integration.
-- [~] Notification events are represented by audit/log signals, but real notification delivery is not implemented.
-- [~] Telegram bot runtime scaffold, `/start` account linking, baseline user/admin commands, and webhook runtime wiring are implemented; broader Telegram notification coverage and deployment hardening remain pending.
-- [ ] Production deployment, Dockerfiles, reverse proxy/HTTPS, backups, uptime monitoring, and runbooks.
+- [x] Admin/privacy backend integration covers admin booking queue listing, move/reschedule,
+      emergency full-phone reveal with audit logging, and owner audit-log listing.
+- [x] Notification events are created by booking flows and delivered through internal bot endpoints
+      plus the Telegram bot delivery worker.
+- [x] Telegram bot runtime scaffold, `/start` account linking, baseline user/admin commands, booking
+      notifications, and webhook/polling runtime wiring are implemented.
+- [~] Owner user block/unblock backend behavior remains partial behind the current owner UI
+  fallback.
+- [ ] Production deployment, Dockerfiles, reverse proxy/HTTPS, backups, uptime monitoring, and
+      runbooks.
 - [ ] MVP 2 game catalog and meetups.
 - [ ] Portfolio demo mode, prompt log, dev diary, diagrams, and media assets.
 
@@ -235,7 +249,8 @@ docker/
 
 - [x] Создать Next.js приложение `apps/web`.
 - [x] Создать NestJS приложение `apps/api`.
-- [x] Создать Telegram bot приложение `apps/bot` — grammY runtime scaffold, env-based config, and local polling startup are implemented.
+- [x] Создать Telegram bot приложение `apps/bot` — grammY runtime scaffold, env-based config, and
+      local polling startup are implemented.
 - [x] Настроить TypeScript config.
 - [x] Настроить ESLint.
 - [x] Настроить Prettier.
@@ -247,7 +262,8 @@ docker/
 
 - [x] Рабочий monorepo.
 - [x] Локально поднимаются PostgreSQL и Redis.
-- [x] Все приложения стартуют в dev-режиме — web/API implemented; bot has local polling runtime scaffold.
+- [x] Все приложения стартуют в dev-режиме — web/API implemented; bot has local polling runtime
+      scaffold.
 - [x] CI проходит для реализованных workspace checks.
 
 ### Acceptance Criteria
@@ -330,7 +346,8 @@ pnpm dev
 - [x] Добавить request id / correlation id.
 - [x] Добавить healthcheck endpoint.
 - [x] Подключить Prisma/database package.
-- [~] Подключить Redis service — healthcheck verifies Redis connectivity; queue/service layer is pending.
+- [~] Подключить Redis service — healthcheck verifies Redis connectivity; queue/service layer is
+  pending.
 
 ### Modules
 
@@ -371,20 +388,21 @@ pnpm dev
 - [x] Добавить телефон для экстренной связи.
 - [x] Добавить опциональный email.
 - [x] Добавить настройки приватности.
-- [~] Добавить блокировку пользователя владельцем — UI exists; backend endpoint still needs completion.
+- [~] Добавить блокировку пользователя владельцем — UI exists; backend endpoint still needs
+  completion.
 - [x] Добавить acceptance of legal documents.
 
 ### Role Matrix
 
-| Действие | Гость | Пользователь | Админ | Владелец |
-|---|---:|---:|---:|---:|
-| Смотреть публичные страницы | Да | Да | Да | Да |
-| Создать бронь | Нет | Да | Да | Да |
-| Подтвердить бронь | Нет | Нет | Да | Да |
-| Управлять столами | Нет | Нет | Нет | Да |
-| Управлять расписанием | Нет | Нет | Да | Да |
-| Блокировать пользователей | Нет | Нет | Нет | Да |
-| Смотреть audit log | Нет | Нет | Нет | Да |
+| Действие                    | Гость | Пользователь | Админ | Владелец |
+| --------------------------- | ----: | -----------: | ----: | -------: |
+| Смотреть публичные страницы |    Да |           Да |    Да |       Да |
+| Создать бронь               |   Нет |           Да |    Да |       Да |
+| Подтвердить бронь           |   Нет |          Нет |    Да |       Да |
+| Управлять столами           |   Нет |          Нет |   Нет |       Да |
+| Управлять расписанием       |   Нет |          Нет |    Да |       Да |
+| Блокировать пользователей   |   Нет |          Нет |   Нет |       Да |
+| Смотреть audit log          |   Нет |          Нет |   Нет |       Да |
 
 ### Acceptance Criteria
 
@@ -496,7 +514,7 @@ existing.end_at > requested.start_at
 - [x] Управление правилами бронирования.
 - [~] Управление пользователями — UI foundation exists; backend user-management actions are partial.
 - [~] Блокировка пользователей — UI foundation exists; backend endpoint still needs completion.
-- [~] Просмотр audit log — UI foundation exists; owner audit-log API still needs completion.
+- [x] Просмотр audit log — UI and owner audit-log API are implemented.
 
 ### Owner Panel Tasks — Portfolio Polish / MVP 3
 
@@ -506,7 +524,8 @@ existing.end_at > requested.start_at
 ### Acceptance Criteria
 
 - Админ может обработать заявку без доступа к лишним персональным данным.
-- Полный телефон доступен администратору только через явное break-glass действие для экстренной связи.
+- Полный телефон доступен администратору только через явное break-glass действие для экстренной
+  связи.
 - Просмотр полного телефона пишется в audit log.
 - Владелец может настроить клуб без изменения кода.
 - Все административные действия пишутся в audit log.
@@ -580,7 +599,8 @@ existing.end_at > requested.start_at
 - [ ] Настроить grammY.
 - [x] Реализовать `/start`.
 - [x] Реализовать связку Telegram-аккаунта.
-- [x] Реализовать базовые пользовательские команды (`/help`, `/book`, `/my_bookings`, `/my_meetups`, `/find_game`, `/cancel`, `/settings`).
+- [x] Реализовать базовые пользовательские команды (`/help`, `/book`, `/my_bookings`, `/my_meetups`,
+      `/find_game`, `/cancel`, `/settings`).
 - [ ] Реализовать уведомления о создании заявки.
 - [ ] Реализовать уведомления о подтверждении брони.
 - [ ] Реализовать уведомления об отмене.
@@ -591,10 +611,10 @@ existing.end_at > requested.start_at
 
 ### Runtime Modes
 
-| Среда | Mode |
-|---|---|
-| local | polling |
-| staging | webhook |
+| Среда      | Mode    |
+| ---------- | ------- |
+| local      | polling |
+| staging    | webhook |
 | production | webhook |
 
 ### Acceptance Criteria
@@ -744,7 +764,8 @@ completed
 - [x] Admin confirms booking.
 - [x] User cancels booking.
 - [x] Owner blocks table.
-- [~] Blocked user cannot book — backend rejects inactive/blocked user state, owner block endpoint still needs completion.
+- [~] Blocked user cannot book — backend rejects inactive/blocked user state, owner block endpoint
+  still needs completion.
 
 ### UI E2E Tests
 
@@ -758,8 +779,8 @@ completed
 
 - [x] `/start`.
 - [ ] `/my_bookings`.
-- [ ] booking notification.
-- [ ] admin notification.
+- [x] booking notification.
+- [x] admin notification.
 - [ ] callback buttons.
 
 ### Critical Test
@@ -985,16 +1006,16 @@ MVP 1 готов, если:
 
 # 7. Риски и способы снижения
 
-| Риск | Вероятность | Влияние | Что сделать |
-|---|---:|---:|---|
-| Слишком широкий MVP | Высокая | Высокое | Жёстко разделять MVP 1, MVP 2, Portfolio polish |
-| Сложная auth-интеграция с Telegram | Средняя | Высокое | Сначала реализовать один Telegram flow, Mini App позже |
-| Двойное бронирование | Средняя | Высокое | Транзакции, constraint, concurrency test |
-| Privacy-проблемы из-за телефона и Telegram | Средняя | Высокое | Минимизация данных, маскирование, запрет логирования ПДн |
-| Чат разрастётся в отдельный продукт | Высокая | Среднее | В MVP только простая лента сообщений |
-| Деплой станет слишком сложным | Средняя | Среднее | Docker Compose на VPS, без Kubernetes |
-| Codex будет делать слишком крупные изменения | Высокая | Среднее | Маленькие issues, AGENTS.md, PR checklist |
-| README не покажет ценность проекта | Средняя | Высокое | Делать portfolio docs параллельно, не в самом конце |
+| Риск                                         | Вероятность | Влияние | Что сделать                                              |
+| -------------------------------------------- | ----------: | ------: | -------------------------------------------------------- |
+| Слишком широкий MVP                          |     Высокая | Высокое | Жёстко разделять MVP 1, MVP 2, Portfolio polish          |
+| Сложная auth-интеграция с Telegram           |     Средняя | Высокое | Сначала реализовать один Telegram flow, Mini App позже   |
+| Двойное бронирование                         |     Средняя | Высокое | Транзакции, constraint, concurrency test                 |
+| Privacy-проблемы из-за телефона и Telegram   |     Средняя | Высокое | Минимизация данных, маскирование, запрет логирования ПДн |
+| Чат разрастётся в отдельный продукт          |     Высокая | Среднее | В MVP только простая лента сообщений                     |
+| Деплой станет слишком сложным                |     Средняя | Среднее | Docker Compose на VPS, без Kubernetes                    |
+| Codex будет делать слишком крупные изменения |     Высокая | Среднее | Маленькие issues, AGENTS.md, PR checklist                |
+| README не покажет ценность проекта           |     Средняя | Высокое | Делать portfolio docs параллельно, не в самом конце      |
 
 ---
 
@@ -1022,16 +1043,16 @@ MVP 1 готов, если:
 
 # 9. Suggested Next Issues
 
-1. `feat(api): add owner audit log listing endpoint`
-2. `feat(api): add emergency contact reveal with audit log`
-3. `feat(api): add owner user block and unblock endpoint`
-4. `feat(bot): create grammY runtime`
-5. `feat(bot): implement start command and account linking`
-6. `feat(notifications): add notification service`
-7. `feat(bot): send booking status notifications`
-8. `test(web): add Playwright booking smoke tests`
-9. `chore(infra): add production Dockerfiles`
-10. `docs(infra): add deployment and backup guide`
+1. `feat(api): add owner user block and unblock endpoint`
+2. `chore(infra): add production Dockerfiles`
+3. `docs(infra): add deployment and backup guide`
+4. `feat(infra): add Redis/BullMQ notification queue`
+5. `feat(bot): add booking reminders`
+6. `test(bot): extend callback button coverage`
+7. `test(api): add privacy and security tests`
+8. `feat(api): add games schema and API`
+9. `feat(web): add games admin UI`
+10. `feat(web): add public game catalog UI`
 
 ---
 

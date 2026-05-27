@@ -2,36 +2,54 @@
 
 > AI-assisted fullstack booking system for a real board game and wargame club.
 >
-> Приложение для бронирования игровых столов, организации встреч по настольным играм и варгеймам, Telegram-уведомлений и администрирования клуба.
+> Приложение для бронирования игровых столов, организации встреч по настольным играм и варгеймам,
+> Telegram-уведомлений и администрирования клуба.
 
 ---
 
 ## Project status
 
-**Status:** core booking backend and web MVP foundation are implemented; Telegram bot runtime, `/start` account linking, baseline user/admin commands, booking notification delivery worker, and webhook/polling runtime modes are available, while production deployment and MVP 2 meetups remain open.
+**Status:** core booking backend and web MVP foundation are implemented; Telegram bot runtime,
+`/start` account linking, baseline user/admin commands, booking notification delivery worker, and
+webhook/polling runtime modes are available, while production deployment and MVP 2 meetups remain
+open.
 
 Implemented as of the current `main` branch:
 
-- monorepo foundation with pnpm workspaces, shared TypeScript config, ESLint, Prettier, and env examples;
+- monorepo foundation with pnpm workspaces, shared TypeScript config, ESLint, Prettier, and env
+  examples;
 - local PostgreSQL/Redis Docker Compose;
 - Prisma schema, migrations, database package, and deterministic demo seed data;
-- NestJS REST API under `/api/v1` with Swagger, validation, unified errors, structured logging, and healthcheck;
-- Telegram web and Mini App auth payload verification, JWT session issuing, roles/guards, profile, privacy, legal consent, and account deletion request flows;
-- room/table CRUD, working hours, schedule exceptions, room/table closures, booking rules, booking availability, booking creation, cancellation, admin confirmation, status history, audit-log writes, and double-booking protection;
-- Next.js public pages, auth/profile UI, user dashboard, booking creation/history UI, admin layout, admin booking queue, owner resources UI, user blocking UI, and audit-log UI foundation;
-- unit and integration-oriented test setup with API booking/domain/auth/resource coverage and GitHub Actions CI for lint, typecheck, unit tests, and API integration tests.
+- NestJS REST API under `/api/v1` with Swagger, validation, unified errors, structured logging, and
+  healthcheck;
+- Telegram web and Mini App auth payload verification, JWT session issuing, roles/guards, profile,
+  privacy, legal consent, and account deletion request flows;
+- room/table CRUD, working hours, schedule exceptions, room/table closures, booking rules, booking
+  availability, booking creation, cancellation, admin confirmation, status history, audit-log
+  writes, and double-booking protection;
+- Next.js public pages, auth/profile UI, user dashboard, booking creation/history UI, admin layout,
+  admin booking queue with emergency phone reveal, owner resources UI, user blocking UI, and
+  audit-log UI/API integration;
+- unit, integration-oriented, and Playwright smoke test setup with API booking/domain/auth/resource
+  coverage and GitHub Actions CI for lint, typecheck, unit tests, and API integration tests.
 
 Known gaps before MVP 1 can be considered production-ready:
 
-- `apps/bot` now has a grammY runtime scaffold with `/start` account linking, baseline user/admin commands, env-based config, local polling startup, staging/production webhook handling with secret validation, and a notification delivery worker;
-- booking notification handling now uses internal bot endpoints and retry-by-redelivery semantics over notification request signals; dedicated queue infrastructure is still a follow-up task;
-- some admin/owner web screens include demo/fallback behavior until matching backend endpoints are completed, especially emergency full-phone reveal, owner audit-log API, and user block/unblock API;
-- deployment, Dockerfiles, backups, reverse proxy/HTTPS, uptime monitoring, and production runbooks are still pending.
+- `apps/bot` has a grammY runtime scaffold with `/start` account linking, baseline user/admin
+  commands, env-based config, local polling startup, staging/production webhook handling with secret
+  validation, and a notification delivery worker;
+- booking notification handling uses internal bot endpoints and retry-by-redelivery semantics over
+  notification request signals; dedicated queue infrastructure is still a follow-up task;
+- owner user block/unblock remains the main admin/owner web fallback until the matching backend
+  endpoint and audit behavior are completed;
+- deployment, Dockerfiles, backups, reverse proxy/HTTPS, uptime monitoring, and production runbooks
+  are still pending.
 
 This project is designed for two goals:
 
 1. **Real product goal:** provide a working booking system for one board game and wargame club.
-2. **Portfolio goal:** demonstrate a complete AI-assisted development workflow using Codex, small PRs, tests, documentation, architecture decisions, and deployment.
+2. **Portfolio goal:** demonstrate a complete AI-assisted development workflow using Codex, small
+   PRs, tests, documentation, architecture decisions, and deployment.
 
 The project is not intended to be a generic SaaS platform in MVP. It is built for one real club.
 
@@ -72,7 +90,8 @@ Board Club Booking helps a club manage:
 - owner and administrator workflows;
 - audit logs and privacy-related records.
 
-The application is built for Russian-speaking users and for real club operations, but the repository and documentation are structured as a portfolio-grade engineering project.
+The application is built for Russian-speaking users and for real club operations, but the repository
+and documentation are structured as a portfolio-grade engineering project.
 
 ---
 
@@ -143,7 +162,8 @@ The club owner can:
 - review audit logs;
 - manage operational settings.
 
-Statistics and CSV/Excel exports are planned for portfolio polish / MVP 3 unless the club explicitly requires them earlier.
+Statistics and CSV/Excel exports are planned for portfolio polish / MVP 3 unless the club explicitly
+requires them earlier.
 
 ### Game meetups
 
@@ -235,24 +255,25 @@ Includes:
 
 ## Tech stack
 
-| Area | Technology |
-|---|---|
-| Monorepo | pnpm workspaces or Turborepo |
-| Frontend | Next.js |
-| Backend | NestJS |
-| Telegram bot | grammY |
-| Database | PostgreSQL |
-| ORM | Prisma |
-| Queues / jobs | Redis + BullMQ |
-| UI | Tailwind CSS + shadcn/ui |
-| API style | REST |
-| API docs | OpenAPI / Swagger |
-| Tests | Vitest or Jest, Supertest, Playwright |
-| Deployment | Docker Compose on VPS |
-| Reverse proxy | Caddy or nginx |
-| CI/CD | GitHub Actions |
+| Area          | Technology                            |
+| ------------- | ------------------------------------- |
+| Monorepo      | pnpm workspaces or Turborepo          |
+| Frontend      | Next.js                               |
+| Backend       | NestJS                                |
+| Telegram bot  | grammY                                |
+| Database      | PostgreSQL                            |
+| ORM           | Prisma                                |
+| Queues / jobs | Redis + BullMQ                        |
+| UI            | Tailwind CSS + shadcn/ui              |
+| API style     | REST                                  |
+| API docs      | OpenAPI / Swagger                     |
+| Tests         | Vitest or Jest, Supertest, Playwright |
+| Deployment    | Docker Compose on VPS                 |
+| Reverse proxy | Caddy or nginx                        |
+| CI/CD         | GitHub Actions                        |
 
-The project uses a TypeScript-first architecture so that frontend, backend, bot, and shared packages can use one language and shared contracts.
+The project uses a TypeScript-first architecture so that frontend, backend, bot, and shared packages
+can use one language and shared contracts.
 
 ---
 
@@ -299,7 +320,8 @@ Target architecture:
 
 The backend API owns the business logic. The web frontend and Telegram bot are clients of the API.
 
-The system is a modular monolith, not a microservice system. This keeps the project practical for one club and easier to maintain.
+The system is a modular monolith, not a microservice system. This keeps the project practical for
+one club and easier to maintain.
 
 More details: [ARCHITECTURE.md](./ARCHITECTURE.md).
 
@@ -350,10 +372,14 @@ board-club-booking/
 
 ## Local development
 
-> These commands describe the intended local workflow. Exact scripts should be implemented during repository foundation tasks.
-> The pnpm workspace is configured, the initial NestJS API shell exists, and `apps/web` provides a minimal Next.js app shell. `apps/bot` now includes a basic grammY runtime scaffold, but business bot flows are still under active development.
-> Shared strict TypeScript settings live in `packages/config/tsconfig/base.json`; workspace projects extend this config through their local `tsconfig.json` files.
-> ESLint and Prettier are configured at the repository root. `pnpm lint` checks the repository, while `pnpm format` checks root config files plus `apps/*` and `packages/*` sources.
+> These commands describe the intended local workflow. Exact scripts should be implemented during
+> repository foundation tasks. The pnpm workspace is configured, the NestJS API and Next.js web app
+> implement the core booking/admin flows, and `apps/bot` includes the grammY runtime, baseline
+> commands, webhook/polling modes, and booking notification delivery worker. Shared strict
+> TypeScript settings live in `packages/config/tsconfig/base.json`; workspace projects extend this
+> config through their local `tsconfig.json` files. ESLint and Prettier are configured at the
+> repository root. `pnpm lint` checks the repository, while `pnpm format` checks root config files
+> plus `apps/*` and `packages/*` sources.
 
 ### Prerequisites
 
@@ -403,9 +429,8 @@ Build the workspace:
 pnpm build
 ```
 
-On macOS arm64 Node runtimes that cannot load Next.js native SWC because of
-local code-signature restrictions, the web build automatically uses the pinned
-Next.js SWC WASM package with webpack.
+On macOS arm64 Node runtimes that cannot load Next.js native SWC because of local code-signature
+restrictions, the web build automatically uses the pinned Next.js SWC WASM package with webpack.
 
 Expected local services:
 
@@ -560,20 +585,22 @@ The project should prioritize correctness over raw test coverage percentage.
 
 Required test layers:
 
-| Level | Purpose |
-|---|---|
-| Unit tests | Booking rules, permissions, status transitions |
-| Integration tests | API + database flows |
-| API e2e tests | User/admin/owner scenarios |
-| UI smoke tests | Critical web flows through Playwright |
-| Bot tests | Commands, callbacks, notifications |
-| Concurrency test | Prevent double booking of the same table |
+| Level             | Purpose                                        |
+| ----------------- | ---------------------------------------------- |
+| Unit tests        | Booking rules, permissions, status transitions |
+| Integration tests | API + database flows                           |
+| API e2e tests     | User/admin/owner scenarios                     |
+| UI smoke tests    | Critical web flows through Playwright          |
+| Bot tests         | Commands, callbacks, notifications             |
+| Concurrency test  | Prevent double booking of the same table       |
 
 Critical scenario:
 
-> Two users attempt to book the same table for overlapping time intervals at the same time. The system must allow only one valid booking.
+> Two users attempt to book the same table for overlapping time intervals at the same time. The
+> system must allow only one valid booking.
 
-Reference coverage: `apps/api/test/bookings.service.test.ts` (`concurrent overlapping requests keep only one valid booking`).
+Reference coverage: `apps/api/test/bookings.service.test.ts`
+(`concurrent overlapping requests keep only one valid booking`).
 
 Suggested commands after implementation:
 
@@ -588,15 +615,19 @@ pnpm build
 API integration/e2e test setup notes:
 
 - `apps/api` exposes `test:integration` and `test:e2e` scripts.
-- `TEST_DATABASE_URL` must point to an isolated PostgreSQL database (the script refuses to reset non-test DB names).
-- `pnpm test:e2e` runs database reset+migrations against `TEST_DATABASE_URL` before running API integration tests.
+- `TEST_DATABASE_URL` must point to an isolated PostgreSQL database (the script refuses to reset
+  non-test DB names).
+- `pnpm test:e2e` runs database reset+migrations against `TEST_DATABASE_URL` before running API
+  integration tests.
 
 UI smoke test notes:
 
 - `apps/web` exposes `test:smoke` script for Playwright critical-flow checks.
-- install browser once locally: `pnpm --filter @tabletop-booking/web exec playwright install chromium`.
+- install browser once locally:
+  `pnpm --filter @tabletop-booking/web exec playwright install chromium`.
 - run smoke suite: `pnpm --filter @tabletop-booking/web test:smoke`.
-- current mode: manual/local run; GitHub Actions flow is focused on lint/typecheck/unit/API integration checks.
+- current mode: manual/local run; GitHub Actions flow is focused on lint/typecheck/unit/API
+  integration checks.
 
 ---
 
@@ -605,21 +636,25 @@ UI smoke test notes:
 Telegram is used for:
 
 - primary authentication, implemented for web login and Mini App init data verification in the API;
-- account linking through `/start`, implemented as a baseline flow with idempotent Telegram-to-app linking;
-- user notifications for booking confirmed/cancelled/moved and reminder events, implemented via bot delivery worker;
+- account linking through `/start`, implemented as a baseline flow with idempotent Telegram-to-app
+  linking;
+- user notifications for booking confirmed/cancelled/moved and reminder events, implemented via bot
+  delivery worker;
 - admin notifications for new booking requests, implemented via bot delivery worker;
-- baseline quick actions are implemented through lightweight user commands; deeper flows remain planned;
+- baseline quick actions are implemented through lightweight user commands; deeper flows remain
+  planned;
 - future Telegram Mini App entrypoint.
 
 Development modes:
 
 | Environment | Telegram update mode |
-|---|---|
-| local | polling |
-| staging | webhook |
-| production | webhook |
+| ----------- | -------------------- |
+| local       | polling              |
+| staging     | webhook              |
+| production  | webhook              |
 
-The Telegram Mini App should be prepared architecturally from the beginning, but implemented after the core web booking flow.
+The Telegram Mini App should be prepared architecturally from the beginning, but implemented after
+the core web booking flow.
 
 Webhook setup (staging/production):
 
@@ -627,13 +662,15 @@ Webhook setup (staging/production):
 2. Set `TELEGRAM_WEBHOOK_URL` to the public HTTPS endpoint that Telegram can reach.
 3. Set `TELEGRAM_WEBHOOK_SECRET` to a long random token and keep it private.
 4. Ensure `TELEGRAM_WEBHOOK_PATH` matches the pathname part of `TELEGRAM_WEBHOOK_URL`.
-5. Start bot service (`pnpm --filter @tabletop-booking/bot dev` for local verification, or `pnpm --filter @tabletop-booking/bot start` in deployment).
+5. Start bot service (`pnpm --filter @tabletop-booking/bot dev` for local verification, or
+   `pnpm --filter @tabletop-booking/bot start` in deployment).
 
 Webhook runtime behavior:
 
 - local development should keep `TELEGRAM_UPDATE_MODE=polling`;
 - in webhook mode, the bot registers webhook via Telegram API on startup;
-- incoming requests are accepted only for configured webhook path, only for `POST`, and only with a valid `X-Telegram-Bot-Api-Secret-Token` header;
+- incoming requests are accepted only for configured webhook path, only for `POST`, and only with a
+  valid `X-Telegram-Bot-Api-Secret-Token` header;
 - avoid exposing webhook URL/secret values in logs and deployment outputs.
 
 ---
@@ -711,16 +748,16 @@ More details: [AGENTS.md](./AGENTS.md).
 
 Core documents:
 
-| Document | Purpose |
-|---|---|
-| [ROADMAP.md](./ROADMAP.md) | Project phases, milestones, and delivery order |
-| [AGENTS.md](./AGENTS.md) | Instructions for Codex and other coding agents |
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Target technical architecture |
-| [DATABASE.md](./DATABASE.md) | Database design and domain model |
-| [API_SPEC.md](./API_SPEC.md) | Draft REST API contract |
-| [TASKS.md](./TASKS.md) | Backlog for GitHub Issues and Codex tasks |
-| [MVP_CHECKLIST.md](./MVP_CHECKLIST.md) | MVP readiness checklist |
-| [itogovye_trebovaniya_booking_app.md](./itogovye_trebovaniya_booking_app.md) | Final product requirements |
+| Document                                                                     | Purpose                                        |
+| ---------------------------------------------------------------------------- | ---------------------------------------------- |
+| [ROADMAP.md](./ROADMAP.md)                                                   | Project phases, milestones, and delivery order |
+| [AGENTS.md](./AGENTS.md)                                                     | Instructions for Codex and other coding agents |
+| [ARCHITECTURE.md](./ARCHITECTURE.md)                                         | Target technical architecture                  |
+| [DATABASE.md](./DATABASE.md)                                                 | Database design and domain model               |
+| [API_SPEC.md](./API_SPEC.md)                                                 | Draft REST API contract                        |
+| [TASKS.md](./TASKS.md)                                                       | Backlog for GitHub Issues and Codex tasks      |
+| [MVP_CHECKLIST.md](./MVP_CHECKLIST.md)                                       | MVP readiness checklist                        |
+| [itogovye_trebovaniya_booking_app.md](./itogovye_trebovaniya_booking_app.md) | Final product requirements                     |
 
 Recommended future documentation:
 
@@ -740,11 +777,14 @@ docs/legal/personal-data-consent.md
 
 ## Roadmap
 
-Foundation, database, backend booking, web booking/admin UI, and core test tasks are already implemented. The next practical work should focus on closing MVP 1 operational gaps:
+Foundation, database, backend booking, web booking/admin UI, and core test tasks are already
+implemented. The next practical work should focus on closing MVP 1 operational gaps:
 
-1. Finish backend endpoints used by current admin/owner UI fallbacks: audit-log listing, emergency phone reveal with audit log, and user block/unblock.
-2. Add production Dockerfiles, deployment guide, reverse proxy/HTTPS config, backups, and uptime monitoring instructions.
-3. Add Playwright web smoke tests and extend bot test coverage.
+1. Finish the owner user block/unblock backend endpoint and audit behavior used by `/admin/users`.
+2. Add production Dockerfiles, deployment guide, reverse proxy/HTTPS config, backups, and uptime
+   monitoring instructions.
+3. Add Redis/BullMQ queue support for durable notification/reminder jobs and extend bot test
+   coverage.
 
 Full roadmap: [ROADMAP.md](./ROADMAP.md).  
 Full backlog: [TASKS.md](./TASKS.md).
