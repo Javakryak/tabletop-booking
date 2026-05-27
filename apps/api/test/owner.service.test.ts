@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { ConflictException, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, NotFoundException } from "@nestjs/common";
 
 import { OwnerService } from "../src/owner/owner.service.js";
 
@@ -161,5 +161,202 @@ test("revealEmergencyContact rejects missing users and users without phone", asy
         targetUserId: "user-1"
       }),
     ConflictException
+  );
+});
+
+test("listAdminUsers returns minimal moderation fields without contact data", async () => {
+  const repository = {
+    async listAdminUsers() {
+      return [
+        {
+          blockedReason: null,
+          displayName: "Demo User",
+          email: "hidden@example.com",
+          phone: "+79990000000",
+          status: "active",
+          telegramUsername: "demo-user",
+          userId: "user-1"
+        }
+      ];
+    }
+  };
+  const service = new OwnerService(repository as never);
+
+  const result = await service.listAdminUsers();
+
+  assert.deepEqual(result.data, [
+    {
+      blockedReason: null,
+      displayName: "Demo User",
+      id: "user-1",
+      status: "active",
+      telegramUsername: "demo-user"
+    }
+  ]);
+});
+
+test("blockUser trims reason, updates status, and writes audit event", async () => {
+  const calls: unknown[] = [];
+  const repository = {
+    async blockUser(input: unknown) {
+      calls.push(["blockUser", input]);
+      return {
+        blockedReason: "Repeated no-shows",
+        displayName: "Demo User",
+        status: "blocked",
+        telegramUsername: "demo-user",
+        userId: "user-1"
+      };
+    },
+    async writeUserModerationAudit(input: unknown) {
+      calls.push(["audit", input]);
+      return {
+        createdAt: new Date("2026-05-12T10:00:00.000Z"),
+        id: "audit-1"
+      };
+    }
+  };
+  const service = new OwnerService(repository as never);
+
+  const result = await service.blockUser({
+    actorUserId: "owner-1",
+    reason: "  Repeated no-shows  ",
+    targetUserId: "user-1"
+  });
+
+  assert.deepEqual(result.data, {
+    auditLogId: "audit-1",
+    blockedReason: "Repeated no-shows",
+    displayName: "Demo User",
+    id: "user-1",
+    status: "blocked",
+    telegramUsername: "demo-user",
+    updatedAt: "2026-05-12T10:00:00.000Z"
+  });
+  assert.deepEqual(calls, [
+    [
+      "blockUser",
+      {
+        reason: "Repeated no-shows",
+        targetUserId: "user-1"
+      }
+    ],
+    [
+      "audit",
+      {
+        action: "user.block",
+        actorUserId: "owner-1",
+        metadata: {
+          reason: "Repeated no-shows",
+          targetUserId: "user-1"
+        },
+        targetUserId: "user-1"
+      }
+    ]
+  ]);
+});
+
+test("blockUser rejects short reason and missing users", async () => {
+  const shortReasonService = new OwnerService({} as never);
+
+  await assert.rejects(
+    () =>
+      shortReasonService.blockUser({
+        actorUserId: "owner-1",
+        reason: "no",
+        targetUserId: "user-1"
+      }),
+    BadRequestException
+  );
+
+  const missingUserService = new OwnerService({
+    async blockUser() {
+      return null;
+    }
+  } as never);
+
+  await assert.rejects(
+    () =>
+      missingUserService.blockUser({
+        actorUserId: "owner-1",
+        reason: "Repeated no-shows",
+        targetUserId: "missing-user"
+      }),
+    NotFoundException
+  );
+});
+
+test("unblockUser activates user, clears reason, and writes audit event", async () => {
+  const calls: unknown[] = [];
+  const repository = {
+    async unblockUser(input: unknown) {
+      calls.push(["unblockUser", input]);
+      return {
+        blockedReason: null,
+        displayName: "Demo User",
+        status: "active",
+        telegramUsername: "demo-user",
+        userId: "user-1"
+      };
+    },
+    async writeUserModerationAudit(input: unknown) {
+      calls.push(["audit", input]);
+      return {
+        createdAt: new Date("2026-05-12T10:05:00.000Z"),
+        id: "audit-2"
+      };
+    }
+  };
+  const service = new OwnerService(repository as never);
+
+  const result = await service.unblockUser({
+    actorUserId: "owner-1",
+    targetUserId: "user-1"
+  });
+
+  assert.deepEqual(result.data, {
+    auditLogId: "audit-2",
+    blockedReason: null,
+    displayName: "Demo User",
+    id: "user-1",
+    status: "active",
+    telegramUsername: "demo-user",
+    updatedAt: "2026-05-12T10:05:00.000Z"
+  });
+  assert.deepEqual(calls, [
+    [
+      "unblockUser",
+      {
+        targetUserId: "user-1"
+      }
+    ],
+    [
+      "audit",
+      {
+        action: "user.unblock",
+        actorUserId: "owner-1",
+        metadata: {
+          targetUserId: "user-1"
+        },
+        targetUserId: "user-1"
+      }
+    ]
+  ]);
+});
+
+test("unblockUser rejects missing users", async () => {
+  const service = new OwnerService({
+    async unblockUser() {
+      return null;
+    }
+  } as never);
+
+  await assert.rejects(
+    () =>
+      service.unblockUser({
+        actorUserId: "owner-1",
+        targetUserId: "missing-user"
+      }),
+    NotFoundException
   );
 });

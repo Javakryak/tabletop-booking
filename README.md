@@ -40,8 +40,6 @@ Known gaps before MVP 1 can be considered production-ready:
   validation, and a notification delivery worker;
 - booking notification handling uses internal bot endpoints and retry-by-redelivery semantics over
   notification request signals; dedicated queue infrastructure is still a follow-up task;
-- owner user block/unblock remains the main admin/owner web fallback until the matching backend
-  endpoint and audit behavior are completed;
 - deployment, Dockerfiles, backups, reverse proxy/HTTPS, uptime monitoring, and production runbooks
   are still pending.
 
@@ -514,10 +512,12 @@ Owner user-blocking UI currently includes:
 
 ```text
 owner-only moderation screen for user block/unblock actions
+admin/owner user listing with minimal moderation fields
+owner block/unblock API calls
 blocked status badges and action-result feedback
 clear statement that blocked users cannot create bookings or meetups
 explicit blocking reason input and confirmation flow
-audit-sensitive action note for block/unblock operations
+audit records for block/unblock operations
 ```
 
 Owner audit-log UI currently includes:
@@ -780,11 +780,11 @@ docs/legal/personal-data-consent.md
 Foundation, database, backend booking, web booking/admin UI, and core test tasks are already
 implemented. The next practical work should focus on closing MVP 1 operational gaps:
 
-1. Finish the owner user block/unblock backend endpoint and audit behavior used by `/admin/users`.
-2. Add production Dockerfiles, deployment guide, reverse proxy/HTTPS config, backups, and uptime
+1. Add production Dockerfiles, deployment guide, reverse proxy/HTTPS config, backups, and uptime
    monitoring instructions.
-3. Add Redis/BullMQ queue support for durable notification/reminder jobs and extend bot test
+2. Add Redis/BullMQ queue support for durable notification/reminder jobs and extend bot test
    coverage.
+3. Extend security/privacy tests around admin and owner workflows.
 
 Full roadmap: [ROADMAP.md](./ROADMAP.md).  
 Full backlog: [TASKS.md](./TASKS.md).

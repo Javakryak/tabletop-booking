@@ -31,8 +31,8 @@ Completed or effectively completed task groups:
   test.
 - `TASK-0601`–`TASK-0703`: Next.js web app, public pages, auth UI, dashboard, booking components,
   booking creation/history UI.
-- `TASK-0801`–`TASK-0803` and `TASK-0805`: admin route shell, booking queue with emergency reveal,
-  owner resources UI, and owner audit-log UI/API.
+- `TASK-0801`–`TASK-0805`: admin route shell, booking queue with emergency reveal, owner resources
+  UI, user block/unblock UI/API, and owner audit-log UI/API.
 - `TASK-0901`–`TASK-0906`: bot runtime scaffold, `/start` account linking, baseline user/admin
   commands, booking notifications, and webhook/polling runtime modes.
 - `TASK-1101`: booking notification service with API-created events, internal bot delivery
@@ -42,22 +42,19 @@ Completed or effectively completed task groups:
 
 Partial task groups needing follow-up:
 
-- `TASK-0804`: user blocking UI exists; owner block/unblock backend endpoint and audit behavior
-  still need completion.
 - `TASK-1301`: GitHub Actions CI exists for lint/typecheck/unit/API integration tests; production
   build checks are not yet included.
 - `TASK-1402`: audit events are written for several booking/resource/privacy actions, including
-  emergency phone reveal; remaining audit coverage follows the user block/unblock backend task.
+  emergency phone reveal and user block/unblock; future role-management coverage remains open.
 - `TASK-1404`: structured log redaction exists and UI masking is present in places; shared
   masking/redaction utilities and API-wide masked contact DTOs need hardening.
 
 Highest-priority open work:
 
-1. Complete the remaining owner user block/unblock backend endpoint and audit behavior used by
-   `/admin/users`.
-2. Add production Dockerfiles, deployment guide, backups, reverse proxy/HTTPS, and uptime
+1. Add production Dockerfiles, deployment guide, backups, reverse proxy/HTTPS, and uptime
    monitoring.
-3. Extend bot test coverage for callback buttons and future meetup flows.
+2. Extend bot test coverage for callback buttons and future meetup flows.
+3. Add Redis/BullMQ queue support for durable notification and reminder jobs.
 
 ---
 
@@ -1280,14 +1277,14 @@ admin queue API and emergency full-phone reveal endpoint with audit logging.
 ### TASK-0804 — Build user blocking UI
 
 **Priority:** P2  
-**Labels:** `area:web`, `area:admin`, `area:auth`, `type:feature` **Status:** Partial — UI exists;
-owner block/unblock API and audit behavior still need completion.
+**Labels:** `area:web`, `area:admin`, `area:auth`, `type:feature` **Status:** Done — UI is backed by
+admin user listing plus owner block/unblock endpoints with audit logging.
 
 #### Acceptance criteria
 
-- [ ] Owner can block user.
-- [ ] Blocked user cannot create bookings or meetups.
-- [ ] Block action is written to audit log.
+- [x] Owner can block user.
+- [x] Blocked user cannot create bookings or meetups.
+- [x] Block action is written to audit log.
 
 ---
 
@@ -1881,8 +1878,8 @@ dedicated legal document pages are open.
 
 **Priority:** P1  
 **Labels:** `area:api`, `area:admin`, `area:legal`, `type:feature` **Status:** Partial — audit
-events exist for several critical actions, emergency full-phone reveal, and owner audit-log viewing;
-remaining coverage follows user block/unblock backend work.
+events exist for several critical actions, emergency full-phone reveal, user block/unblock, and
+owner audit-log viewing; future role-management audit coverage remains open.
 
 #### Events
 
@@ -1897,8 +1894,8 @@ remaining coverage follows user block/unblock backend work.
 
 #### Acceptance criteria
 
-- [~] Audit events are written for critical admin/owner actions; user block/unblock audit coverage
-  remains tied to `TASK-0804`.
+- [~] Audit events are written for critical admin/owner actions; future role-management audit
+  coverage remains open.
 - [x] Emergency full-phone reveal is audit-logged.
 - [x] Audit log does not store sensitive values unnecessarily.
 - [x] Owner can view audit log via UI/API.
@@ -2231,16 +2228,16 @@ Tasks:
 
 Рекомендуемый следующий набор задач после текущего состояния `main`:
 
-1. Finish owner user block/unblock endpoint and audit behavior used by `/admin/users`.
-2. TASK-1302 — Add Dockerfiles and production compose.
-3. TASK-1305 — Add production deployment guide, including Telegram webhook setup.
-4. TASK-1102 — Add Redis/BullMQ queue for durable notification and reminder jobs.
-5. TASK-1103 — Add booking reminders.
-6. TASK-1205 — Extend bot tests for callback buttons and future bot flows.
-7. TASK-1206 — Add security and privacy tests.
-8. TASK-1001 — Add games schema and API.
-9. TASK-1002 — Add games admin UI.
-10. TASK-1003 — Add public game catalog UI.
+1. TASK-1302 — Add Dockerfiles and production compose.
+2. TASK-1305 — Add production deployment guide, including Telegram webhook setup.
+3. TASK-1102 — Add Redis/BullMQ queue for durable notification and reminder jobs.
+4. TASK-1103 — Add booking reminders.
+5. TASK-1205 — Extend bot tests for callback buttons and future bot flows.
+6. TASK-1206 — Add security and privacy tests.
+7. TASK-1001 — Add games schema and API.
+8. TASK-1002 — Add games admin UI.
+9. TASK-1003 — Add public game catalog UI.
+10. TASK-1004 — Add meetup schema and API.
 
 ---
 

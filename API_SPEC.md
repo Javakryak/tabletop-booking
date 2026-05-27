@@ -1472,6 +1472,22 @@ Important privacy rule:
 - admins must receive only minimum contact data;
 - owners may receive more fields if required.
 
+Implemented MVP response uses only moderation fields and does not include phone or email:
+
+```json
+{
+  "data": [
+    {
+      "id": "user-id",
+      "displayName": "Demo User",
+      "telegramUsername": "demo_user",
+      "status": "active",
+      "blockedReason": null
+    }
+  ]
+}
+```
+
 ### 18.3. Admin get user summary
 
 #### `GET /admin/users/:userId`
@@ -1494,11 +1510,49 @@ Request:
 }
 ```
 
+Response returns the moderated user summary and the audit event id:
+
+```json
+{
+  "data": {
+    "id": "user-id",
+    "displayName": "Demo User",
+    "telegramUsername": "demo_user",
+    "status": "blocked",
+    "blockedReason": "Repeated no-shows",
+    "auditLogId": "audit-id",
+    "updatedAt": "2026-05-27T12:00:00.000Z"
+  }
+}
+```
+
 ### 18.5. Unblock user
 
 #### `POST /owner/users/:userId/unblock`
 
 Access: owner.
+
+Response returns the moderated user summary and the audit event id:
+
+```json
+{
+  "data": {
+    "id": "user-id",
+    "displayName": "Demo User",
+    "telegramUsername": "demo_user",
+    "status": "active",
+    "blockedReason": null,
+    "auditLogId": "audit-id",
+    "updatedAt": "2026-05-27T12:05:00.000Z"
+  }
+}
+```
+
+Audit behavior:
+
+- block writes `user.block`;
+- unblock writes `user.unblock`;
+- audit metadata stores internal user ids and the block reason, but no phone or email.
 
 ---
 

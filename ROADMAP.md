@@ -178,12 +178,12 @@
 - [x] Test foundation, booking domain tests, API integration tests, and CI for lint/typecheck/tests.
 - [x] Admin/privacy backend integration covers admin booking queue listing, move/reschedule,
       emergency full-phone reveal with audit logging, and owner audit-log listing.
+- [x] Owner user moderation covers admin/owner user listing plus owner block/unblock endpoints with
+      audit logging.
 - [x] Notification events are created by booking flows and delivered through internal bot endpoints
       plus the Telegram bot delivery worker.
 - [x] Telegram bot runtime scaffold, `/start` account linking, baseline user/admin commands, booking
       notifications, and webhook/polling runtime wiring are implemented.
-- [~] Owner user block/unblock backend behavior remains partial behind the current owner UI
-  fallback.
 - [ ] Production deployment, Dockerfiles, reverse proxy/HTTPS, backups, uptime monitoring, and
       runbooks.
 - [ ] MVP 2 game catalog and meetups.
@@ -512,8 +512,8 @@ existing.end_at > requested.start_at
 - [x] Управление помещениями.
 - [x] Управление столами.
 - [x] Управление правилами бронирования.
-- [~] Управление пользователями — UI foundation exists; backend user-management actions are partial.
-- [~] Блокировка пользователей — UI foundation exists; backend endpoint still needs completion.
+- [x] Управление пользователями — admin/owner listing and owner block/unblock flow are implemented.
+- [x] Блокировка пользователей — owner endpoint updates status and writes audit log.
 - [x] Просмотр audit log — UI and owner audit-log API are implemented.
 
 ### Owner Panel Tasks — Portfolio Polish / MVP 3
@@ -1043,16 +1043,16 @@ MVP 1 готов, если:
 
 # 9. Suggested Next Issues
 
-1. `feat(api): add owner user block and unblock endpoint`
-2. `chore(infra): add production Dockerfiles`
-3. `docs(infra): add deployment and backup guide`
-4. `feat(infra): add Redis/BullMQ notification queue`
-5. `feat(bot): add booking reminders`
-6. `test(bot): extend callback button coverage`
-7. `test(api): add privacy and security tests`
-8. `feat(api): add games schema and API`
-9. `feat(web): add games admin UI`
-10. `feat(web): add public game catalog UI`
+1. `chore(infra): add production Dockerfiles`
+2. `docs(infra): add deployment and backup guide`
+3. `feat(infra): add Redis/BullMQ notification queue`
+4. `feat(bot): add booking reminders`
+5. `test(bot): extend callback button coverage`
+6. `test(api): add privacy and security tests`
+7. `feat(api): add games schema and API`
+8. `feat(web): add games admin UI`
+9. `feat(web): add public game catalog UI`
+10. `feat(api): add meetup schema and API`
 
 ---
 

@@ -39,6 +39,34 @@ type AuditLogsResponse = {
   }>;
 };
 
+type AdminUsersResponse = {
+  data: Array<{
+    blockedReason: string | null;
+    displayName: string;
+    id: string;
+    status: string;
+    telegramUsername: string | null;
+  }>;
+};
+
+type UserModerationInput = {
+  actorUserId: string;
+  reason?: string;
+  targetUserId: string;
+};
+
+type UserModerationResponse = {
+  data: {
+    auditLogId: string;
+    blockedReason: string | null;
+    displayName: string;
+    id: string;
+    status: string;
+    telegramUsername: string | null;
+    updatedAt: string;
+  };
+};
+
 type RevealEmergencyContactInput = {
   actorUserId: string;
   reason: string;
@@ -60,6 +88,20 @@ type EmergencyContactAccessResponse = {
 @Injectable()
 export class OwnerService {
   constructor(private readonly ownerRepository: OwnerRepository) {}
+
+  async listAdminUsers(): Promise<AdminUsersResponse> {
+    const users = await this.ownerRepository.listAdminUsers();
+
+    return {
+      data: users.map((user) => ({
+        blockedReason: user.blockedReason,
+        displayName: user.displayName,
+        id: user.userId,
+        status: user.status,
+        telegramUsername: user.telegramUsername
+      }))
+    };
+  }
 
   async getPendingDeletionRequests(): Promise<PendingDeletionRequestsResponse> {
     const requests = await this.ownerRepository.listPendingDeletionRequests();
@@ -136,6 +178,77 @@ export class OwnerService {
       }
     };
   }
+
+  async blockUser(input: UserModerationInput): Promise<UserModerationResponse> {
+    const reason = input.reason?.trim() ?? "";
+    if (reason.length < 3) {
+      throw new BadRequestException("A block reason is required");
+    }
+
+    const user = await this.ownerRepository.blockUser({
+      reason,
+      targetUserId: input.targetUserId
+    });
+    if (!user) {
+      throw new NotFoundException("User was not found");
+    }
+
+    const auditLog = await this.ownerRepository.writeUserModerationAudit({
+      action: "user.block",
+      actorUserId: input.actorUserId,
+      metadata: {
+        reason,
+        targetUserId: input.targetUserId
+      },
+      targetUserId: input.targetUserId
+    });
+
+    return formatUserModerationResponse(user, auditLog.id, auditLog.createdAt);
+  }
+
+  async unblockUser(input: UserModerationInput): Promise<UserModerationResponse> {
+    const user = await this.ownerRepository.unblockUser({
+      targetUserId: input.targetUserId
+    });
+    if (!user) {
+      throw new NotFoundException("User was not found");
+    }
+
+    const auditLog = await this.ownerRepository.writeUserModerationAudit({
+      action: "user.unblock",
+      actorUserId: input.actorUserId,
+      metadata: {
+        targetUserId: input.targetUserId
+      },
+      targetUserId: input.targetUserId
+    });
+
+    return formatUserModerationResponse(user, auditLog.id, auditLog.createdAt);
+  }
+}
+
+function formatUserModerationResponse(
+  user: {
+    blockedReason: string | null;
+    displayName: string;
+    status: string;
+    telegramUsername: string | null;
+    userId: string;
+  },
+  auditLogId: string,
+  updatedAt: Date
+): UserModerationResponse {
+  return {
+    data: {
+      auditLogId,
+      blockedReason: user.blockedReason,
+      displayName: user.displayName,
+      id: user.userId,
+      status: user.status,
+      telegramUsername: user.telegramUsername,
+      updatedAt: updatedAt.toISOString()
+    }
+  };
 }
 
 function parseAuditLogFilters(query: AuditLogQueryInput): AuditLogListFilters {

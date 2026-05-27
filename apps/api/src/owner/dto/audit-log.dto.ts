@@ -128,3 +128,47 @@ export class EmergencyContactAccessEnvelopeDto {
   @ApiProperty({ type: EmergencyContactAccessResponseDto })
   data!: EmergencyContactAccessResponseDto;
 }
+
+export class AdminUserSummaryDto {
+  @ApiProperty()
+  id!: string;
+
+  @ApiProperty()
+  displayName!: string;
+
+  @ApiProperty({ nullable: true })
+  telegramUsername!: string | null;
+
+  @ApiProperty()
+  status!: string;
+
+  @ApiProperty({ nullable: true })
+  blockedReason!: string | null;
+}
+
+export class AdminUsersEnvelopeDto {
+  @ApiProperty({ type: AdminUserSummaryDto, isArray: true })
+  data!: AdminUserSummaryDto[];
+}
+
+export class UserBlockDto {
+  @ApiProperty({ minLength: 3, maxLength: 500 })
+  @Transform(({ value }) => normalizeOptionalString(value))
+  @IsString()
+  @MinLength(3)
+  @MaxLength(500)
+  reason!: string;
+}
+
+export class UserModerationResponseDto extends AdminUserSummaryDto {
+  @ApiProperty()
+  auditLogId!: string;
+
+  @ApiProperty()
+  updatedAt!: string;
+}
+
+export class UserModerationEnvelopeDto {
+  @ApiProperty({ type: UserModerationResponseDto })
+  data!: UserModerationResponseDto;
+}
