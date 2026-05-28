@@ -8,7 +8,7 @@ on:
 
 jobs:
   verify:
-    name: Lint, typecheck, and tests
+    name: Lint, typecheck, tests, and build
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -54,3 +54,6 @@ jobs:
         env:
           TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/tabletop_booking_test
         run: pnpm test:e2e
+
+      - name: Build
+        run: pnpm build

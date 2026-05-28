@@ -24,10 +24,14 @@ function runNodeProbe(source) {
 }
 
 export function canLoadNativeSwc() {
-  const nextRequire = createRequire(projectRequire.resolve("next/package.json"));
-  const nativeSwcPath = nextRequire.resolve("@next/swc-darwin-arm64");
+  try {
+    const nextRequire = createRequire(projectRequire.resolve("next/package.json"));
+    const nativeSwcPath = nextRequire.resolve("@next/swc-darwin-arm64");
 
-  return runNodeProbe(`require(${JSON.stringify(nativeSwcPath)});`);
+    return runNodeProbe(`require(${JSON.stringify(nativeSwcPath)});`);
+  } catch {
+    return false;
+  }
 }
 
 export function resolveWasmDirectory() {
@@ -37,14 +41,17 @@ export function resolveWasmDirectory() {
 export function createNextBuildPlan({
   arch = process.arch,
   args = [],
-  nativeSwcLoadable = canLoadNativeSwc(),
+  nativeSwcLoadable,
   platform = process.platform,
   resolveWasmDirectory: resolveWasm = resolveWasmDirectory
 } = {}) {
   const buildArgs = ["build", ...args];
   const env = {};
 
-  const shouldUseWasmFallback = platform === "darwin" && arch === "arm64" && !nativeSwcLoadable;
+  const shouldUseWasmFallback =
+    platform === "darwin" &&
+    arch === "arm64" &&
+    !(nativeSwcLoadable ?? canLoadNativeSwc());
 
   if (shouldUseWasmFallback) {
     env.NEXT_TEST_WASM_DIR = resolveWasm();

@@ -30,3 +30,18 @@ test("keeps the default Next.js build when native SWC is loadable", () => {
   assert.deepEqual(plan.args, ["build"]);
   assert.equal(plan.usingWasmFallback, false);
 });
+
+test("does not enable SWC WASM fallback outside macOS arm64", () => {
+  const plan = createNextBuildPlan({
+    arch: "x64",
+    nativeSwcLoadable: false,
+    platform: "linux",
+    resolveWasmDirectory: () => {
+      throw new Error("WASM directory should not be resolved");
+    }
+  });
+
+  assert.deepEqual(plan.env, {});
+  assert.deepEqual(plan.args, ["build"]);
+  assert.equal(plan.usingWasmFallback, false);
+});
