@@ -1820,7 +1820,7 @@ Use Caddy or nginx.
 ### TASK-1305 — Add production deployment guide
 
 **Priority:** P1  
-**Labels:** `area:docs`, `area:infra`, `type:docs` **Status:** Open
+**Labels:** `area:docs`, `area:infra`, `type:docs` **Status:** Done
 
 #### Acceptance criteria
 
@@ -2228,7 +2228,7 @@ Tasks:
 Рекомендуемый следующий набор задач после текущего состояния `main`:
 
 1. TASK-1302 — Add Dockerfiles and production compose.
-2. TASK-1305 — Add production deployment guide, including Telegram webhook setup.
+2. TASK-1303 — Add reverse proxy and HTTPS config.
 3. TASK-1102 — Add Redis/BullMQ queue for durable notification and reminder jobs.
 4. TASK-1103 — Add booking reminders.
 5. TASK-1205 — Extend bot tests for callback buttons and future bot flows.

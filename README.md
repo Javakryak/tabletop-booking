@@ -43,7 +43,9 @@ Known gaps before MVP 1 can be considered production-ready:
   validation, and a notification delivery worker;
 - booking notification handling uses internal bot endpoints and retry-by-redelivery semantics over
   notification request signals; dedicated queue infrastructure is still a follow-up task;
-- deployment guide/runbooks, backups, reverse proxy/HTTPS, and uptime monitoring are still pending.
+- reverse proxy/HTTPS config, backup automation/runbooks, and uptime monitoring are still pending;
+- manual deployment instructions are documented in
+  [`docs/deployment-guide.md`](./docs/deployment-guide.md).
 
 This project is designed for two goals:
 
@@ -770,6 +772,7 @@ Core documents:
 | [API_SPEC.md](./API_SPEC.md)                                                 | Draft REST API contract                        |
 | [TASKS.md](./TASKS.md)                                                       | Backlog for GitHub Issues and Codex tasks      |
 | [MVP_CHECKLIST.md](./MVP_CHECKLIST.md)                                       | MVP readiness checklist                        |
+| [docs/deployment-guide.md](./docs/deployment-guide.md)                       | Staging/production deployment and recovery guide |
 | [itogovye_trebovaniya_booking_app.md](./itogovye_trebovaniya_booking_app.md) | Final product requirements                     |
 
 Recommended future documentation:
@@ -793,8 +796,7 @@ docs/legal/personal-data-consent.md
 Foundation, database, backend booking, web booking/admin UI, and core test tasks are already
 implemented. The next practical work should focus on closing MVP 1 operational gaps:
 
-1. Add production deployment guide, reverse proxy/HTTPS config, backups, and uptime monitoring
-   instructions.
+1. Complete reverse proxy/HTTPS config, backup automation, and uptime monitoring instructions.
 2. Add Redis/BullMQ queue support for durable notification/reminder jobs and extend bot test
    coverage.
 3. Extend security/privacy tests around admin and owner workflows.
