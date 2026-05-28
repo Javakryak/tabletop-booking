@@ -175,7 +175,8 @@
 - [x] Web MVP foundation: public pages, auth/profile flow, dashboard, booking creation/history UI,
       admin layout, admin booking queue with emergency phone reveal, owner resource screens, user
       blocking UI, and audit-log UI/API integration.
-- [x] Test foundation, booking domain tests, API integration tests, and CI for lint/typecheck/tests.
+- [x] Test foundation, booking domain tests, API integration tests, and CI for
+      lint/typecheck/tests/build.
 - [x] Admin/privacy backend integration covers admin booking queue listing, move/reschedule,
       emergency full-phone reveal with audit logging, and owner audit-log listing.
 - [x] Owner user moderation covers admin/owner user listing plus owner block/unblock endpoints with

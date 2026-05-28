@@ -31,7 +31,8 @@ Implemented as of the current `main` branch:
   admin booking queue with emergency phone reveal, owner resources UI, user blocking UI, and
   audit-log UI/API integration;
 - unit, integration-oriented, and Playwright smoke test setup with API booking/domain/auth/resource
-  coverage and GitHub Actions CI for lint, typecheck, unit tests, and API integration tests.
+  coverage and GitHub Actions CI for lint, typecheck, unit tests, API integration tests, and
+  production builds.
 
 Known gaps before MVP 1 can be considered production-ready:
 
@@ -627,7 +628,7 @@ UI smoke test notes:
   `pnpm --filter @tabletop-booking/web exec playwright install chromium`.
 - run smoke suite: `pnpm --filter @tabletop-booking/web test:smoke`.
 - current mode: manual/local run; GitHub Actions flow is focused on lint/typecheck/unit/API
-  integration checks.
+  integration checks plus production build verification.
 
 ---
 

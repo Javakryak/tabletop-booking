@@ -39,11 +39,11 @@ Completed or effectively completed task groups:
   endpoints, Telegram delivery worker, and delivery status audit records.
 - `TASK-1201`–`TASK-1204`: test framework, booking domain tests, API integration tests, and
   Playwright smoke tests.
+- `TASK-1301`: GitHub Actions CI for install/lint/typecheck/unit/API integration tests and build
+  verification on PR.
 
 Partial task groups needing follow-up:
 
-- `TASK-1301`: GitHub Actions CI exists for lint/typecheck/unit/API integration tests; production
-  build checks are not yet included.
 - `TASK-1402`: audit events are written for several booking/resource/privacy actions, including
   emergency phone reveal and user block/unblock; future role-management coverage remains open.
 - `TASK-1404`: structured log redaction exists and UI masking is present in places; shared
@@ -1743,8 +1743,7 @@ booking privacy tests exist; focused privacy/security suite still needs hardenin
 ### TASK-1301 — Add GitHub Actions CI
 
 **Priority:** P1  
-**Labels:** `area:infra`, `type:chore` **Status:** Partial — GitHub Actions runs lint, typecheck,
-unit tests, and API integration tests; build job is still open.
+**Labels:** `area:infra`, `type:chore` **Status:** Done
 
 #### Pipeline
 
@@ -1756,9 +1755,9 @@ unit tests, and API integration tests; build job is still open.
 
 #### Acceptance criteria
 
-- [ ] CI запускается на PR.
-- [ ] CI блокирует merge при ошибках.
-- [ ] Cache настроен для pnpm.
+- [x] CI запускается на PR.
+- [x] CI блокирует merge при ошибках.
+- [x] Cache настроен для pnpm.
 
 ---
 
