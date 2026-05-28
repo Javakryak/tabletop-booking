@@ -1,0 +1,115 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - redis_data:/data
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      API_HOST: 0.0.0.0
+      API_PORT: 3001
+      API_DOCS_ENABLED: ${API_DOCS_ENABLED:-false}
+      APP_BASE_URL: ${APP_BASE_URL:?APP_BASE_URL is required}
+      API_BASE_URL: ${API_BASE_URL:-http://api:3001/api/v1}
+      CORS_ORIGIN: ${CORS_ORIGIN:?CORS_ORIGIN is required}
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      REDIS_URL: ${REDIS_URL:?REDIS_URL is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      TELEGRAM_AUTH_MAX_AGE_SECONDS: ${TELEGRAM_AUTH_MAX_AGE_SECONDS:-86400}
+      LEGAL_REQUIRED_DOCUMENT_TYPES: ${LEGAL_REQUIRED_DOCUMENT_TYPES:-privacy_policy,personal_data_consent}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?TELEGRAM_BOT_TOKEN is required}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:?TELEGRAM_WEBHOOK_SECRET is required}
+      BOT_REMINDER_LEAD_MINUTES: ${BOT_REMINDER_LEAD_MINUTES:-180}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3001/api/v1/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_BASE_URL: ${APP_BASE_URL:?APP_BASE_URL is required}
+      API_BASE_URL: ${API_BASE_URL:?API_BASE_URL is required}
+      NEXT_PUBLIC_APP_BASE_URL: ${NEXT_PUBLIC_APP_BASE_URL:?NEXT_PUBLIC_APP_BASE_URL is required}
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:?NEXT_PUBLIC_API_BASE_URL is required}
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  bot:
+    build:
+      context: .
+      dockerfile: apps/bot/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      API_BASE_URL: ${BOT_API_BASE_URL:-http://api:3001/api/v1}
+      APP_BASE_URL: ${APP_BASE_URL:?APP_BASE_URL is required}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?TELEGRAM_BOT_TOKEN is required}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:?TELEGRAM_WEBHOOK_SECRET is required}
+      TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL:?TELEGRAM_WEBHOOK_URL is required}
+      TELEGRAM_WEBHOOK_HOST: ${TELEGRAM_WEBHOOK_HOST:-0.0.0.0}
+      TELEGRAM_WEBHOOK_PORT: ${TELEGRAM_WEBHOOK_PORT:-8081}
+      TELEGRAM_WEBHOOK_PATH: ${TELEGRAM_WEBHOOK_PATH:-/telegram/webhook}
+      TELEGRAM_UPDATE_MODE: ${TELEGRAM_UPDATE_MODE:-webhook}
+      BOT_ADMIN_TELEGRAM_IDS: ${BOT_ADMIN_TELEGRAM_IDS:-}
+      BOT_ADMIN_API_TOKEN: ${BOT_ADMIN_API_TOKEN:-}
+      BOT_SCHEDULE_TIMEZONE: ${BOT_SCHEDULE_TIMEZONE:-Europe/Moscow}
+      BOT_NOTIFICATION_BATCH_SIZE: ${BOT_NOTIFICATION_BATCH_SIZE:-20}
+      BOT_NOTIFICATION_POLL_INTERVAL_MS: ${BOT_NOTIFICATION_POLL_INTERVAL_MS:-30000}
+
+volumes:
+  postgres_data:
+  redis_data:
