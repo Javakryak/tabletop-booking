@@ -92,7 +92,10 @@ export function AdminRouteGate({ children }: { children: ReactNode }) {
   if (state === "loading") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Админ-панель</h1>
+        <p className="page-eyebrow">Операционная зона</p>
+        <h1 className="text-2xl font-semibold uppercase tracking-[0.05em]">
+          Админ-панель
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Проверяем права доступа...
         </p>
@@ -103,12 +106,14 @@ export function AdminRouteGate({ children }: { children: ReactNode }) {
   if (state === "unauthenticated") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Доступ ограничен</h1>
+        <h1 className="text-2xl font-semibold uppercase tracking-[0.05em]">
+          Доступ ограничен
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Для входа в админ-панель требуется активная сессия.
         </p>
         <Link
-          className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium uppercase tracking-[0.08em] text-primary-foreground transition-colors hover:bg-[#5e1414]"
           href="/auth/login"
         >
           Перейти ко входу
@@ -120,7 +125,9 @@ export function AdminRouteGate({ children }: { children: ReactNode }) {
   if (state === "forbidden") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Недостаточно прав</h1>
+        <h1 className="text-2xl font-semibold uppercase tracking-[0.05em]">
+          Недостаточно прав
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Этот раздел доступен только администраторам и владельцу клуба.
         </p>
@@ -131,7 +138,9 @@ export function AdminRouteGate({ children }: { children: ReactNode }) {
   if (state === "error") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Ошибка проверки доступа</h1>
+        <h1 className="text-2xl font-semibold uppercase tracking-[0.05em]">
+          Ошибка проверки доступа
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {errorMessage || "Повторите попытку позже."}
         </p>

@@ -68,7 +68,10 @@ export function ProfileCompletionForm() {
       onSubmit={handleSubmit}
     >
       <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Завершите профиль</h1>
+        <p className="page-eyebrow">Профиль участника</p>
+        <h1 className="text-2xl font-semibold uppercase tracking-[0.05em]">
+          Завершите профиль
+        </h1>
         <p className="text-sm text-muted-foreground">
           Для завершения регистрации нужны контактные данные и обязательные
           согласия.
@@ -117,7 +120,7 @@ export function ProfileCompletionForm() {
         </label>
       </div>
 
-      <fieldset className="space-y-3 rounded-lg border border-border/80 p-4">
+      <fieldset className="space-y-3 rounded-lg border border-border p-4">
         <legend className="px-1 text-sm font-medium">Обязательные согласия</legend>
         {requiredConsentDocuments.map((document) => (
           <label className="flex items-start gap-3 text-sm" key={document.id}>
@@ -150,7 +153,7 @@ export function ProfileCompletionForm() {
       ) : null}
 
       <button
-        className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium uppercase tracking-[0.08em] text-primary-foreground transition-colors hover:bg-[#5e1414] disabled:cursor-not-allowed disabled:opacity-50"
         disabled={!canSubmit}
         type="submit"
       >

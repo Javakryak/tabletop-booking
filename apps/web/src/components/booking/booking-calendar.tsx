@@ -64,7 +64,10 @@ export function BookingCalendar({
   return (
     <section className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-6">
       <header className="space-y-2">
-        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Бронирование стола</h1>
+        <p className="page-eyebrow">Форма бронирования</p>
+        <h1 className="text-xl font-semibold uppercase tracking-[0.05em] sm:text-2xl">
+          Бронирование стола
+        </h1>
         <p className="text-sm text-muted-foreground">
           Выберите дату, комнату, стол и слоты. Проверка доступности и создание
           заявки выполняются через API.

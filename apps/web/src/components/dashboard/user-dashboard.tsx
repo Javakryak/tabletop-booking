@@ -85,37 +85,37 @@ function getBookingStatusInfo(status: string): BookingStatusInfo {
   switch (normalizedStatus) {
     case "pending":
       return {
-        badgeClassName: "border border-amber-600/30 bg-amber-900/20 text-amber-200",
+        badgeClassName: "status-chip status-chip--pending",
         label: "Ожидает подтверждения"
       };
     case "confirmed":
       return {
-        badgeClassName: "border border-emerald-600/30 bg-emerald-900/20 text-emerald-200",
+        badgeClassName: "status-chip status-chip--confirmed",
         label: "Подтверждена"
       };
     case "cancelled_by_user":
       return {
-        badgeClassName: "border border-border bg-muted text-muted-foreground",
+        badgeClassName: "status-chip status-chip--neutral",
         label: "Отменена вами"
       };
     case "cancelled_by_admin":
       return {
-        badgeClassName: "border border-border bg-muted text-muted-foreground",
+        badgeClassName: "status-chip status-chip--neutral",
         label: "Отменена администратором"
       };
     case "completed":
       return {
-        badgeClassName: "border border-border bg-muted text-muted-foreground",
+        badgeClassName: "status-chip status-chip--neutral",
         label: "Завершена"
       };
     case "expired":
       return {
-        badgeClassName: "border border-border bg-muted text-muted-foreground",
+        badgeClassName: "status-chip status-chip--neutral",
         label: "Истекла"
       };
     default:
       return {
-        badgeClassName: "border border-border bg-muted text-muted-foreground",
+        badgeClassName: "status-chip status-chip--neutral",
         label: status
       };
   }
@@ -340,7 +340,9 @@ export function UserDashboard() {
   if (dashboardState === "loading") {
     return (
       <section className="mx-auto max-w-5xl rounded-xl border border-border bg-card p-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Личный кабинет</h1>
+        <h1 className="text-2xl font-semibold uppercase tracking-[0.05em]">
+          Личный кабинет
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">Загрузка данных профиля...</p>
       </section>
     );
@@ -349,7 +351,9 @@ export function UserDashboard() {
   if (dashboardState === "unauthorized") {
     return (
       <section className="mx-auto max-w-5xl rounded-xl border border-border bg-card p-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Личный кабинет</h1>
+        <h1 className="text-2xl font-semibold uppercase tracking-[0.05em]">
+          Личный кабинет
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Сессия недействительна. Выполните вход заново через Telegram.
         </p>
@@ -360,7 +364,9 @@ export function UserDashboard() {
   if (dashboardState === "error") {
     return (
       <section className="mx-auto max-w-5xl rounded-xl border border-border bg-card p-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Личный кабинет</h1>
+        <h1 className="text-2xl font-semibold uppercase tracking-[0.05em]">
+          Личный кабинет
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Ошибка загрузки данных: {errorMessage || "неизвестная ошибка"}
         </p>
@@ -378,7 +384,10 @@ export function UserDashboard() {
   return (
     <section className="mx-auto max-w-5xl space-y-6">
       <header className="rounded-xl border border-border bg-card p-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Личный кабинет</h1>
+        <p className="page-eyebrow">Профиль участника</p>
+        <h1 className="text-2xl font-semibold uppercase tracking-[0.05em]">
+          Личный кабинет
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           @{profile?.telegramUsername ?? "telegram_user"}
         </p>
@@ -395,7 +404,7 @@ export function UserDashboard() {
                 <li className="rounded-md border border-border/70 p-3" key={booking.id}>
                   <div className="flex flex-wrap items-center gap-2">
                     <span
-                      className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getBookingStatusInfo(booking.status).badgeClassName}`}
+                      className={getBookingStatusInfo(booking.status).badgeClassName}
                     >
                       {getBookingStatusInfo(booking.status).label}
                     </span>
@@ -417,7 +426,7 @@ export function UserDashboard() {
                         {cancelBookingId === booking.id ? "Отменяем..." : "Отменить бронь"}
                       </button>
                       {bookingErrorById[booking.id] ? (
-                        <p className="text-xs text-amber-200">{bookingErrorById[booking.id]}</p>
+                        <p className="text-xs text-[#7a4a00]">{bookingErrorById[booking.id]}</p>
                       ) : null}
                     </div>
                   ) : null}
@@ -426,7 +435,7 @@ export function UserDashboard() {
             </ul>
           )}
           {bookingNotice ? (
-            <p className="mt-3 text-sm text-emerald-200">{bookingNotice}</p>
+            <p className="mt-3 text-sm text-[#134926]">{bookingNotice}</p>
           ) : null}
         </article>
 
@@ -440,7 +449,7 @@ export function UserDashboard() {
                 <li className="rounded-md border border-border/70 p-3" key={booking.id}>
                   <div className="flex flex-wrap items-center gap-2">
                     <span
-                      className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getBookingStatusInfo(booking.status).badgeClassName}`}
+                      className={getBookingStatusInfo(booking.status).badgeClassName}
                     >
                       {getBookingStatusInfo(booking.status).label}
                     </span>

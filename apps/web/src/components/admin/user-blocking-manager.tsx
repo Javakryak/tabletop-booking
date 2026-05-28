@@ -106,19 +106,19 @@ function statusView(status: string): { badgeClassName: string; label: string } {
   const normalized = status.trim().toLowerCase();
   if (normalized === "blocked") {
     return {
-      badgeClassName: "border border-rose-600/30 bg-rose-900/20 text-rose-200",
+      badgeClassName: "status-chip status-chip--blocked",
       label: "Заблокирован"
     };
   }
   if (normalized === "deleted") {
     return {
-      badgeClassName: "border border-border bg-muted text-muted-foreground",
+      badgeClassName: "status-chip status-chip--neutral",
       label: "Удален"
     };
   }
 
   return {
-    badgeClassName: "border border-emerald-600/30 bg-emerald-900/20 text-emerald-200",
+    badgeClassName: "status-chip status-chip--confirmed",
     label: "Активен"
   };
 }
@@ -357,7 +357,9 @@ export function UserBlockingManager() {
   if (viewState === "loading") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Блокировка пользователей</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Блокировка пользователей
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">Загрузка данных модерации...</p>
       </section>
     );
@@ -366,7 +368,9 @@ export function UserBlockingManager() {
   if (viewState === "unauthorized") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Блокировка пользователей</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Блокировка пользователей
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Сессия недействительна. Выполните вход повторно.
         </p>
@@ -377,7 +381,9 @@ export function UserBlockingManager() {
   if (viewState === "forbidden") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Блокировка пользователей</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Блокировка пользователей
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Раздел доступен только владельцу клуба (роль owner).
         </p>
@@ -388,7 +394,9 @@ export function UserBlockingManager() {
   if (viewState === "error") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Блокировка пользователей</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Блокировка пользователей
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Ошибка загрузки: {errorMessage || "неизвестная ошибка"}
         </p>
@@ -406,15 +414,18 @@ export function UserBlockingManager() {
   return (
     <section className="space-y-4">
       <header className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Блокировка пользователей</h2>
+        <p className="page-eyebrow">Зона владельца</p>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Блокировка пользователей
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Owner-действие: блокировка ограничивает создание бронирований и встреч пользователем.
         </p>
         <p className="mt-2 text-xs text-muted-foreground">
           Важно: блокировка/разблокировка относится к audit-чувствительным операциям и должна фиксироваться на стороне API.
         </p>
-        {notice ? <p className="mt-3 text-sm text-emerald-200">{notice}</p> : null}
-        {errorMessage ? <p className="mt-3 text-sm text-amber-200">{errorMessage}</p> : null}
+        {notice ? <p className="mt-3 text-sm text-[#134926]">{notice}</p> : null}
+        {errorMessage ? <p className="mt-3 text-sm text-[#7a4a00]">{errorMessage}</p> : null}
       </header>
 
       {sortedUsers.length === 0 ? (
@@ -435,7 +446,7 @@ export function UserBlockingManager() {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="font-medium">{user.displayName}</p>
                     <span
-                      className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${status.badgeClassName}`}
+                      className={status.badgeClassName}
                     >
                       {status.label}
                     </span>
@@ -447,7 +458,7 @@ export function UserBlockingManager() {
                   <p className="mt-1 text-xs text-muted-foreground">ID: {user.id}</p>
 
                   {isBlocked ? (
-                    <p className="mt-2 text-sm text-amber-200">
+                    <p className="mt-2 text-sm text-[#7a4a00]">
                       Статус blocked: пользователь не может создавать бронирования и встречи.
                       {user.blockedReason ? ` Причина: ${user.blockedReason}.` : ""}
                     </p>

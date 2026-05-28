@@ -90,7 +90,7 @@ export function SlotPicker({
                     {slot.startAt} - {slot.endAt}
                   </span>
                   {isDisabled && slot.unavailableReason ? (
-                    <span className="mt-1 inline-flex items-center gap-1 text-xs font-normal text-amber-200">
+                    <span className="mt-1 inline-flex items-center gap-1 text-xs font-normal text-[#7a4a00]">
                       <TriangleAlert aria-hidden className="h-3.5 w-3.5" />
                       {slot.unavailableReason}
                     </span>
@@ -103,7 +103,7 @@ export function SlotPicker({
       </ul>
 
       {validationMessage ? (
-        <p className="inline-flex items-start gap-2 rounded-lg border border-amber-600/30 bg-amber-900/20 px-3 py-2 text-sm text-amber-200">
+        <p className="admin-alert admin-alert--warning inline-flex items-start gap-2">
           <TriangleAlert aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{validationMessage}</span>
         </p>

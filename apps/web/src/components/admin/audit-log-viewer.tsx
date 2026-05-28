@@ -386,7 +386,7 @@ export function AuditLogViewer() {
   if (viewState === "loading") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Audit log</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">Audit log</h2>
         <p className="mt-2 text-sm text-muted-foreground">Загрузка событий...</p>
       </section>
     );
@@ -395,7 +395,7 @@ export function AuditLogViewer() {
   if (viewState === "unauthorized") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Audit log</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">Audit log</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Сессия недействительна. Выполните вход повторно.
         </p>
@@ -406,7 +406,7 @@ export function AuditLogViewer() {
   if (viewState === "forbidden") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Audit log</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">Audit log</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Раздел доступен только владельцу клуба (роль owner).
         </p>
@@ -417,7 +417,7 @@ export function AuditLogViewer() {
   if (viewState === "error") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Audit log</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">Audit log</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Ошибка загрузки: {errorMessage || "неизвестная ошибка"}
         </p>
@@ -435,12 +435,13 @@ export function AuditLogViewer() {
   return (
     <section className="space-y-4">
       <header className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Audit log</h2>
+        <p className="page-eyebrow">Зона владельца</p>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">Audit log</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Просмотр чувствительных операционных действий. Значения персональных полей
           скрываются в metadata автоматически.
         </p>
-        {notice ? <p className="mt-3 text-sm text-emerald-200">{notice}</p> : null}
+        {notice ? <p className="mt-3 text-sm text-[#134926]">{notice}</p> : null}
       </header>
 
       <article className="rounded-xl border border-border bg-card p-6">
@@ -559,11 +560,11 @@ export function AuditLogViewer() {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="font-medium">{event.action}</p>
                     <span
-                      className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+                      className={
                         isEmergency
-                          ? "border border-rose-600/30 bg-rose-900/20 text-rose-200"
-                          : "border border-border bg-muted text-muted-foreground"
-                      }`}
+                          ? "status-chip status-chip--blocked"
+                          : "status-chip status-chip--neutral"
+                      }
                     >
                       {isEmergency ? "Emergency Full-Phone Reveal" : "Operational Event"}
                     </span>
