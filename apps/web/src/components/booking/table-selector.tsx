@@ -90,7 +90,7 @@ export function TableSelector({
                     </span>
                   ) : null}
                   {isDisabled && table.unavailableReason ? (
-                    <span className="mt-1 inline-flex items-center gap-1 text-xs font-normal text-amber-200">
+                    <span className="mt-1 inline-flex items-center gap-1 text-xs font-normal text-[#7a4a00]">
                       <TriangleAlert aria-hidden className="h-3.5 w-3.5" />
                       {table.unavailableReason}
                     </span>

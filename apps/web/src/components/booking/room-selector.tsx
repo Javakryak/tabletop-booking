@@ -85,7 +85,7 @@ export function RoomSelector({
                       `Доступно столов: ${room.tableCount?.toString() ?? "—"}`}
                   </span>
                   {isDisabled && room.unavailableReason ? (
-                    <span className="mt-1 inline-flex items-center gap-1 text-xs font-normal text-amber-200">
+                    <span className="mt-1 inline-flex items-center gap-1 text-xs font-normal text-[#7a4a00]">
                       <TriangleAlert aria-hidden className="h-3.5 w-3.5" />
                       {room.unavailableReason}
                     </span>

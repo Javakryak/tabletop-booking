@@ -16,11 +16,17 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html className="dark" lang="ru">
-      <body className="min-h-screen bg-background">
-        <div className="relative min-h-screen">
+    <html lang="ru">
+      <body className="min-h-screen bg-background text-foreground">
+        <div className="relative flex min-h-screen flex-col">
           <SiteHeader />
-          <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">{children}</main>
+          <main className="page-shell flex-1">{children}</main>
+          <footer className="mt-12 border-t border-border bg-card/80">
+            <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-xs uppercase tracking-[0.12em] text-muted-foreground sm:px-6">
+              <span>Штандарт · клуб настольных игр</span>
+              <span>Tabletop Booking</span>
+            </div>
+          </footer>
         </div>
       </body>
     </html>

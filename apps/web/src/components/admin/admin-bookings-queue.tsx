@@ -82,25 +82,25 @@ function getStatusView(status: string): { badgeClassName: string; label: string 
   const normalized = normalizeBookingStatus(status);
   if (normalized === "pending") {
     return {
-      badgeClassName: "border border-amber-600/30 bg-amber-900/20 text-amber-200",
+      badgeClassName: "status-chip status-chip--pending",
       label: "Ожидает подтверждения"
     };
   }
   if (normalized === "confirmed") {
     return {
-      badgeClassName: "border border-emerald-600/30 bg-emerald-900/20 text-emerald-200",
+      badgeClassName: "status-chip status-chip--confirmed",
       label: "Подтверждена"
     };
   }
   if (normalized === "cancelled_by_admin") {
     return {
-      badgeClassName: "border border-border bg-muted text-muted-foreground",
+      badgeClassName: "status-chip status-chip--neutral",
       label: "Отменена администратором"
     };
   }
 
   return {
-    badgeClassName: "border border-border bg-muted text-muted-foreground",
+    badgeClassName: "status-chip status-chip--neutral",
     label: status
   };
 }
@@ -457,7 +457,9 @@ export function AdminBookingsQueue() {
   if (viewState === "loading") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Очередь броней</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Очередь броней
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">Загрузка заявок...</p>
       </section>
     );
@@ -466,7 +468,9 @@ export function AdminBookingsQueue() {
   if (viewState === "unauthorized") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Очередь броней</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Очередь броней
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Сессия недействительна. Выполните вход заново.
         </p>
@@ -477,7 +481,9 @@ export function AdminBookingsQueue() {
   if (viewState === "forbidden") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Очередь броней</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Очередь броней
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Раздел доступен только ролям admin и owner.
         </p>
@@ -488,7 +494,9 @@ export function AdminBookingsQueue() {
   if (viewState === "error") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Очередь броней</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Очередь броней
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Ошибка загрузки: {errorMessage || "неизвестная ошибка"}
         </p>
@@ -506,11 +514,14 @@ export function AdminBookingsQueue() {
   return (
     <section className="space-y-4">
       <header className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Очередь броней</h2>
+        <p className="page-eyebrow">Операционная зона</p>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Очередь броней
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Подтверждайте или отменяйте заявки. Контакты по умолчанию показаны в маскированном виде.
         </p>
-        {notice ? <p className="mt-3 text-sm text-emerald-200">{notice}</p> : null}
+        {notice ? <p className="mt-3 text-sm text-[#134926]">{notice}</p> : null}
       </header>
 
       {pendingBookings.length === 0 ? (
@@ -530,7 +541,7 @@ export function AdminBookingsQueue() {
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="text-base font-medium">{booking.userDisplayName}</p>
                     <span
-                      className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${currentStatus.badgeClassName}`}
+                      className={currentStatus.badgeClassName}
                     >
                       {currentStatus.label}
                     </span>
@@ -630,7 +641,7 @@ export function AdminBookingsQueue() {
                   </label>
 
                   {actionErrorByBookingId[booking.id] ? (
-                    <p className="mt-2 text-sm text-amber-200">{actionErrorByBookingId[booking.id]}</p>
+                    <p className="mt-2 text-sm text-[#7a4a00]">{actionErrorByBookingId[booking.id]}</p>
                   ) : null}
                 </li>
               );
@@ -650,7 +661,7 @@ export function AdminBookingsQueue() {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="font-medium">{booking.userDisplayName}</p>
                     <span
-                      className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${status.badgeClassName}`}
+                      className={status.badgeClassName}
                     >
                       {status.label}
                     </span>

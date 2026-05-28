@@ -658,7 +658,9 @@ export function OwnerResourcesManager() {
   if (viewState === "loading") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Управление ресурсами клуба</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Управление ресурсами клуба
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">Загружаем данные owner-панели...</p>
       </section>
     );
@@ -667,7 +669,9 @@ export function OwnerResourcesManager() {
   if (viewState === "unauthorized") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Управление ресурсами клуба</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Управление ресурсами клуба
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Сессия недействительна. Выполните вход повторно.
         </p>
@@ -678,7 +682,9 @@ export function OwnerResourcesManager() {
   if (viewState === "forbidden") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Управление ресурсами клуба</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Управление ресурсами клуба
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Раздел доступен только владельцу клуба (роль owner).
         </p>
@@ -689,7 +695,9 @@ export function OwnerResourcesManager() {
   if (viewState === "error") {
     return (
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Управление ресурсами клуба</h2>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Управление ресурсами клуба
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Ошибка загрузки: {errorMessage || "неизвестная ошибка"}
         </p>
@@ -707,12 +715,15 @@ export function OwnerResourcesManager() {
   return (
     <section className="space-y-6">
       <header className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Управление ресурсами клуба</h2>
+        <p className="page-eyebrow">Зона владельца</p>
+        <h2 className="text-xl font-semibold uppercase tracking-[0.05em]">
+          Управление ресурсами клуба
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Owner-раздел: комнаты, столы, недельный график и исключения расписания.
         </p>
-        {notice ? <p className="mt-3 text-sm text-emerald-200">{notice}</p> : null}
-        {errorMessage ? <p className="mt-3 text-sm text-amber-200">{errorMessage}</p> : null}
+        {notice ? <p className="mt-3 text-sm text-[#134926]">{notice}</p> : null}
+        {errorMessage ? <p className="mt-3 text-sm text-[#7a4a00]">{errorMessage}</p> : null}
       </header>
 
       <article className="rounded-xl border border-border bg-card p-6">

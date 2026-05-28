@@ -79,7 +79,7 @@ export function BookingSummary({
       ) : null}
 
       {status === "invalid" && validationMessage ? (
-        <p className="inline-flex items-start gap-2 rounded-lg border border-amber-600/30 bg-amber-900/20 px-3 py-2 text-sm text-amber-200">
+        <p className="admin-alert admin-alert--warning inline-flex items-start gap-2">
           <TriangleAlert aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{validationMessage}</span>
         </p>
@@ -93,7 +93,7 @@ export function BookingSummary({
       ) : null}
 
       {status === "ready" ? (
-        <p className="inline-flex items-start gap-2 rounded-lg border border-emerald-500/30 bg-emerald-950/30 px-3 py-2 text-sm text-emerald-200">
+        <p className="admin-alert admin-alert--success inline-flex items-start gap-2">
           <CheckCircle2 aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
           <span>Выбор заполнен. На следующем шаге можно отправлять заявку.</span>
         </p>

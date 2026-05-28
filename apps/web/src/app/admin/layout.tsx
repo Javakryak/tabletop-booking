@@ -12,7 +12,10 @@ export default function AdminLayout({
     <Suspense
       fallback={
         <section className="rounded-xl border border-border bg-card p-6">
-          <h1 className="text-2xl font-semibold tracking-tight">Админ-панель</h1>
+          <p className="page-eyebrow">Операционная зона</p>
+          <h1 className="text-2xl font-semibold uppercase tracking-[0.05em]">
+            Админ-панель
+          </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Проверяем права доступа...
           </p>

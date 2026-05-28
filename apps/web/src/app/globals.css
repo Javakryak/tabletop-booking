@@ -4,40 +4,133 @@
 
 @layer base {
   :root {
-    --background: 222 84% 5%;
-    --foreground: 210 40% 98%;
-    --card: 222 84% 6%;
-    --card-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222 47% 11%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 70%;
-    --border: 217 33% 20%;
-    --input: 217 33% 20%;
-    --ring: 212 27% 84%;
-    --radius: 0.75rem;
-  }
+    --background: 34 24% 95%;
+    --foreground: 0 44% 7%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 44% 7%;
+    --primary: 0 63% 30%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 30 18% 89%;
+    --muted-foreground: 24 6% 40%;
+    --border: 30 16% 86%;
+    --input: 30 16% 86%;
+    --ring: 43 80% 46%;
+    --radius: 0.5rem;
 
-  .dark {
-    --background: 222 84% 5%;
-    --foreground: 210 40% 98%;
-    --card: 222 84% 6%;
-    --card-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222 47% 11%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 70%;
-    --border: 217 33% 20%;
-    --input: 217 33% 20%;
-    --ring: 212 27% 84%;
+    --brand-black: #1a0a0a;
+    --brand-crimson: #7b1c1c;
+    --brand-crimson-deep: #4a0e0e;
+    --brand-gold: #d4a017;
+    --brand-surface-warm: #faf8f4;
   }
 
   * {
     @apply border-border;
   }
 
+  html,
+  body {
+    min-height: 100%;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+    background-image: radial-gradient(
+      circle at top right,
+      rgba(123, 28, 28, 0.05),
+      transparent 45%
+    );
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: "Oswald", "Arial Narrow", sans-serif;
+    letter-spacing: 0.01em;
+  }
+
+  code {
+    font-family: "IBM Plex Mono", "SFMono-Regular", "Menlo", monospace;
+  }
+}
+
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-6xl px-4 py-8 sm:px-6;
+  }
+
+  .page-head {
+    @apply space-y-3;
+  }
+
+  .page-eyebrow {
+    @apply text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground;
+  }
+
+  .page-title {
+    @apply text-3xl font-semibold uppercase tracking-[0.03em] sm:text-4xl;
+  }
+
+  .page-lede {
+    @apply max-w-3xl text-sm text-muted-foreground sm:text-base;
+  }
+
+  .panel {
+    @apply rounded-xl border border-border bg-card p-6;
+    box-shadow: 0 1px 2px rgba(26, 10, 10, 0.05);
+  }
+
+  .panel-soft {
+    @apply rounded-xl border border-border p-4;
+    background: var(--brand-surface-warm);
+  }
+
+  .status-chip {
+    @apply inline-flex rounded-full border px-2 py-1 text-xs font-medium;
+  }
+
+  .status-chip--pending {
+    border-color: rgba(196, 125, 0, 0.35);
+    background: rgba(196, 125, 0, 0.12);
+    color: #7a4a00;
+  }
+
+  .status-chip--confirmed {
+    border-color: rgba(26, 107, 58, 0.35);
+    background: rgba(26, 107, 58, 0.12);
+    color: #134926;
+  }
+
+  .status-chip--neutral {
+    @apply border-border bg-muted text-muted-foreground;
+  }
+
+  .status-chip--blocked {
+    border-color: rgba(185, 28, 28, 0.35);
+    background: rgba(185, 28, 28, 0.12);
+    color: #7a1313;
+  }
+
+  .admin-alert {
+    @apply rounded-lg border px-3 py-2 text-sm;
+  }
+
+  .admin-alert--warning {
+    border-color: rgba(196, 125, 0, 0.35);
+    background: rgba(196, 125, 0, 0.12);
+    color: #7a4a00;
+  }
+
+  .admin-alert--success {
+    border-color: rgba(26, 107, 58, 0.35);
+    background: rgba(26, 107, 58, 0.12);
+    color: #134926;
+  }
+
+  .admin-alert--danger {
+    border-color: rgba(185, 28, 28, 0.35);
+    background: rgba(185, 28, 28, 0.12);
+    color: #7a1313;
   }
 }

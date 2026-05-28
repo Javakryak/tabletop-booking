@@ -388,7 +388,9 @@ export function BookingCreationFlow() {
   if (viewState === "unauthenticated") {
     return (
       <section className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-6">
-        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Бронирование стола</h1>
+        <h1 className="text-xl font-semibold uppercase tracking-[0.05em] sm:text-2xl">
+          Бронирование стола
+        </h1>
         <p className="text-sm text-muted-foreground">
           Чтобы отправлять заявки на бронь, выполните вход через Telegram.
         </p>
@@ -407,7 +409,9 @@ export function BookingCreationFlow() {
   if (viewState === "error") {
     return (
       <section className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-6">
-        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Бронирование стола</h1>
+        <h1 className="text-xl font-semibold uppercase tracking-[0.05em] sm:text-2xl">
+          Бронирование стола
+        </h1>
         <p className="text-sm text-muted-foreground">
           {availabilityError || "Не удалось загрузить данные бронирования."}
         </p>
@@ -495,10 +499,10 @@ export function BookingCreationFlow() {
         ) : null}
 
         {submissionState === "success" && submissionMessage ? (
-          <div className="space-y-2 rounded-md border border-emerald-600/30 bg-emerald-900/20 px-3 py-3 text-sm text-emerald-100">
+          <div className="admin-alert admin-alert--success space-y-2 px-3 py-3 text-sm">
             <p>{submissionMessage}</p>
             {createdBooking ? (
-              <p className="text-emerald-200/90">
+              <p className="text-[#1a6b3a]">
                 Бронь #{createdBooking.id}: {formatDateTime(createdBooking.startAt)} -{" "}
                 {formatDateTime(createdBooking.endAt)}.
               </p>
