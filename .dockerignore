@@ -1,0 +1,40 @@
+# VCS and editor state
+.git
+.github
+.worktrees
+.vscode
+.idea
+.DS_Store
+
+# Dependency and build artifacts
+node_modules
+.pnpm-store
+**/node_modules
+**/.next
+**/dist
+coverage
+playwright-report
+test-results
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!apps/**/.env.example
+
+# Logs and local artifacts
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Docs and local-only files not required for image builds
+docs
+README.md
+ROADMAP.md
+TASKS.md
+ARCHITECTURE.md
+DATABASE.md
+API_SPEC.md
+MVP_CHECKLIST.md
+CONTRIBUTING.md
+itogovye_trebovaniya_booking_app.md

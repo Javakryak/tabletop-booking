@@ -19,6 +19,8 @@ Implemented as of the current `main` branch:
 - monorepo foundation with pnpm workspaces, shared TypeScript config, ESLint, Prettier, and env
   examples;
 - local PostgreSQL/Redis Docker Compose;
+- production Dockerfiles for API, Web, and Bot plus production Compose baseline
+  (`docker-compose.prod.yml`);
 - Prisma schema, migrations, database package, and deterministic demo seed data;
 - NestJS REST API under `/api/v1` with Swagger, validation, unified errors, structured logging, and
   healthcheck;
@@ -41,8 +43,7 @@ Known gaps before MVP 1 can be considered production-ready:
   validation, and a notification delivery worker;
 - booking notification handling uses internal bot endpoints and retry-by-redelivery semantics over
   notification request signals; dedicated queue infrastructure is still a follow-up task;
-- deployment, Dockerfiles, backups, reverse proxy/HTTPS, uptime monitoring, and production runbooks
-  are still pending.
+- deployment guide/runbooks, backups, reverse proxy/HTTPS, and uptime monitoring are still pending.
 
 This project is designed for two goals:
 
@@ -407,6 +408,17 @@ Start local infrastructure:
 ```bash
 docker compose -f docker-compose.dev.yml up -d postgres redis
 ```
+
+Production container baseline:
+
+```bash
+docker compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml up -d
+```
+
+`docker-compose.prod.yml` expects required values via environment variables (for example
+`DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `TELEGRAM_BOT_TOKEN`, and webhook values). Keep real
+production secrets outside git-tracked files.
 
 Run migrations and seed demo data:
 
@@ -781,8 +793,8 @@ docs/legal/personal-data-consent.md
 Foundation, database, backend booking, web booking/admin UI, and core test tasks are already
 implemented. The next practical work should focus on closing MVP 1 operational gaps:
 
-1. Add production Dockerfiles, deployment guide, reverse proxy/HTTPS config, backups, and uptime
-   monitoring instructions.
+1. Add production deployment guide, reverse proxy/HTTPS config, backups, and uptime monitoring
+   instructions.
 2. Add Redis/BullMQ queue support for durable notification/reminder jobs and extend bot test
    coverage.
 3. Extend security/privacy tests around admin and owner workflows.
